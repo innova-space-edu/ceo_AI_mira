@@ -4,7 +4,6 @@
     --bg-card: rgba(19, 24, 51, 0.9);
     --accent: #35e2ff;
     --accent-secondary: #ff4bff;
-    --accent-third: #ffe66d;
     --text-main: #f2f4ff;
     --text-muted: #9ea4d4;
     --border-soft: rgba(255, 255, 255, 0.06);
@@ -29,21 +28,21 @@ html {
 
 body {
     font-family: "Poppins", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-    background: #000;
+    background: #02030a;
     color: var(--text-main);
     min-height: 100vh;
     position: relative;
+    overflow-x: hidden;
 }
 
-/* CANVAS DE ESTRELLAS */
+/* CANVAS DE ESTRELLAS + NEBULOSA */
 
-#starfield {
+#starsCanvas {
     position: fixed;
     inset: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 0;
-    pointer-events: none;
+    width: 100vw;
+    height: 100vh;
+    z-index: -3;
 }
 
 /* GLOBAL LOADER */
@@ -100,18 +99,21 @@ body {
     height: 100vh;
     overflow: hidden;
     color: #fff;
-    z-index: 1;
 }
 
 .hero-overlay {
     position: absolute;
     inset: 0;
     background:
-        radial-gradient(circle at 15% 0%, rgba(56, 108, 255, 0.32), transparent 55%),
-        radial-gradient(circle at 85% 80%, rgba(255, 75, 255, 0.35), transparent 60%),
-        radial-gradient(circle at 60% 40%, rgba(255, 230, 109, 0.22), transparent 65%),
-        linear-gradient(to bottom, rgba(0, 0, 0, 0.4), #050814 70%);
-    z-index: -1;
+        radial-gradient(circle at 20% 10%, rgba(90, 140, 255, 0.45), transparent 55%),
+        radial-gradient(circle at 80% 80%, rgba(208, 90, 255, 0.45), transparent 55%),
+        linear-gradient(to bottom, rgba(0, 0, 20, 0.6), #050814 80%);
+    z-index: 1;
+}
+
+/* Ocultamos la galaxia antigua (estructura queda por si la quieres reusar) */
+.galaxy-container {
+    display: none;
 }
 
 /* NAVBAR */
@@ -129,46 +131,40 @@ body {
     display: flex;
     align-items: center;
     gap: 10px;
-}
-
-.nav-logo img {
-    width: 44px;
-    height: 44px;
-    object-fit: contain;
-    filter: drop-shadow(0 0 10px rgba(53, 226, 255, 0.8));
-}
-
-/* Texto dinámico bajo el logo */
-
-.nav-logo-text {
     font-family: "Orbitron", sans-serif;
     font-size: 0.78rem;
     letter-spacing: 0.16em;
     text-transform: uppercase;
-    background: linear-gradient(
-        90deg,
-        #35e2ff,
-        #ff4bff,
-        #ffe66d,
-        #35e2ff
-    );
-    background-size: 300% 100%;
+    color: var(--text-muted);
+}
+
+.nav-logo picture,
+.nav-logo img {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    filter: drop-shadow(0 0 10px rgba(53, 226, 255, 0.9));
+}
+
+/* Texto de logo con gradiente animado */
+.logo-text-animated {
+    background: linear-gradient(120deg,
+        #4ae4ff,
+        #7b5cff,
+        #ff63d8,
+        #ffae58,
+        #4ae4ff);
+    background-size: 400% 400%;
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
-    animation: gradient-move 12s linear infinite;
+    animation: logo-gradient 8s ease infinite;
 }
 
-@keyframes gradient-move {
-    0% {
-        background-position: 0% 50%;
-    }
-    50% {
-        background-position: 100% 50%;
-    }
-    100% {
-        background-position: 0% 50%;
-    }
+@keyframes logo-gradient {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
 }
 
 .nav-links {
@@ -234,7 +230,6 @@ body {
     margin-bottom: 14px;
     text-transform: uppercase;
     letter-spacing: 0.12em;
-    text-shadow: 0 0 16px rgba(0, 0, 0, 0.8);
 }
 
 .hero-text p {
@@ -251,7 +246,7 @@ body {
     margin-bottom: 18px;
 }
 
-/* BOTONES ANIMADOS */
+/* BOTONES GALAXIA DINÁMICOS */
 
 .btn-primary,
 .btn-secondary {
@@ -264,34 +259,44 @@ body {
     font-size: 0.9rem;
     cursor: pointer;
     text-decoration: none;
-    transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.2s ease, border-color 0.2s ease;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.2s ease, border-color 0.2s ease;
 }
 
 .btn-primary {
-    background: linear-gradient(120deg, var(--accent), var(--accent-secondary), var(--accent-third), var(--accent));
-    background-size: 250% 250%;
+    background: linear-gradient(120deg,
+        #4ae4ff,
+        #7b5cff,
+        #ff63d8,
+        #ffae58,
+        #4ae4ff);
+    background-size: 300% 300%;
+    animation: galaxy-gradient 6s ease infinite;
     color: #050814;
-    box-shadow: 0 0 20px rgba(53, 226, 255, 0.7);
-    animation: gradient-move 6s ease infinite;
+    border: none;
+    box-shadow: 0 0 22px rgba(130, 90, 255, 0.8);
 }
 
 .btn-primary:hover {
-    transform: translateY(-1px) scale(1.02);
-    box-shadow: 0 0 30px rgba(53, 226, 255, 0.9);
+    transform: translateY(-2px) scale(1.01);
+    box-shadow: 0 0 30px rgba(180, 120, 255, 1);
 }
 
 .btn-secondary {
-    background: radial-gradient(circle at 0 0, rgba(255, 255, 255, 0.09), transparent 55%);
+    background: rgba(0, 0, 0, 0.55);
     color: var(--text-main);
     border-color: rgba(255, 255, 255, 0.18);
 }
 
 .btn-secondary:hover {
-    background: radial-gradient(circle at 0 0, rgba(255, 255, 255, 0.18), transparent 65%);
+    background: rgba(0, 0, 0, 0.8);
     transform: translateY(-1px);
 }
 
-/* INFO HERO */
+@keyframes galaxy-gradient {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
 
 .hero-info {
     display: flex;
@@ -313,7 +318,8 @@ body {
     gap: 16px;
 }
 
-.hero-logo-img {
+.hero-logos picture,
+.hero-logos img {
     height: 40px;
     object-fit: contain;
     filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.7));
@@ -328,8 +334,7 @@ body {
 }
 
 .section-dark {
-    background:
-        radial-gradient(circle at 0% 0%, rgba(23, 32, 65, 0.8) 0, rgba(5, 8, 20, 0.9) 45%, rgba(2, 3, 10, 0.98) 100%);
+    background: radial-gradient(circle at 0% 0%, #172041 0, #050814 45%, #02030a 100%);
 }
 
 .section-header {
@@ -408,7 +413,6 @@ body {
 
 .sobre-panel ul {
     list-style: none;
-    margin-bottom: 8px;
 }
 
 .sobre-panel li {
@@ -420,12 +424,6 @@ body {
 .sobre-panel li span {
     color: var(--text-main);
     font-weight: 500;
-}
-
-.sobre-extra {
-    font-size: 0.86rem;
-    color: var(--text-muted);
-    margin-top: 8px;
 }
 
 /* SERVICIOS */
@@ -444,6 +442,7 @@ body {
     border: 1px solid var(--border-soft);
     position: relative;
     overflow: hidden;
+    cursor: default;
 }
 
 .service-card::before {
@@ -652,8 +651,8 @@ body {
 /* Botón flotante */
 
 #mira-toggle {
-    width: 56px;
-    height: 56px;
+    width: 60px;
+    height: 60px;
     border-radius: 999px;
     border: none;
     background: radial-gradient(circle at 30% 0, #ffffff 0, #ffe6ff 18%, #ff4bff 40%, #28104a 70%);
@@ -667,10 +666,12 @@ body {
     overflow: hidden;
 }
 
+#mira-toggle picture,
 #mira-toggle img {
     width: 70%;
     height: 70%;
     object-fit: contain;
+    filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.9));
 }
 
 #mira-toggle:hover {
@@ -717,6 +718,7 @@ body {
     gap: 8px;
 }
 
+.mira-header-info picture,
 .mira-header-info img {
     width: 32px;
     height: 32px;
