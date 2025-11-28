@@ -32,11 +32,18 @@ if (navToggle && navLinks) {
     });
 }
 
-// 4. Chatbot MIRA (lógica básica con voz femenina)
+// 4. Chatbot MIRA (lógica con voz femenina + backend OpenRouter vía Render)
 
 // Estado de MIRA
 let miraVoiceEnabled = true;
 let miraVoice = null;
+
+// Historial de conversación para contexto
+const miraHistory = [];
+
+// URL del backend (Render)
+// Cambia ESTA línea cuando tengas la URL real de tu servicio en Render.
+const MIRA_API_URL = "https://TU-SERVICIO-MIRA.onrender.com/api/mira";
 
 // Elementos
 const miraToggleBtn = document.getElementById("mira-toggle");
@@ -74,13 +81,13 @@ if (miraToggleBtn && miraChat && miraCloseBtn) {
 
 // Enviar mensaje
 if (miraForm && miraInput) {
-    miraForm.addEventListener("submit", (e) => {
+    miraForm.addEventListener("submit", async (e) => {
         e.preventDefault();
         const text = miraInput.value.trim();
         if (!text) return;
         addUserMessage(text);
         miraInput.value = "";
-        handleMiraResponse(text);
+        await handleMiraResponse(text);
     });
 }
 
@@ -110,52 +117,60 @@ function scrollMiraToBottom() {
     miraMessages.scrollTop = miraMessages.scrollHeight;
 }
 
-// "Pensar" y responder (simulación IA simple)
-function handleMiraResponse(userText) {
+// Manejar respuesta llamando al backend
+async function handleMiraResponse(userText) {
     if (!miraLoading) return;
     miraLoading.classList.add("active");
 
-    setTimeout(() => {
+    try {
+        const responseText = await callMiraAPI(userText);
+        addMiraMessage(responseText);
+    } catch (err) {
+        console.error("Error al llamar a MIRA backend:", err);
+        addMiraMessage(
+            "Hubo un problema al conectar con el modelo IA 🔧. " +
+            "Aun así, recuerda que Innova Space Education SPA integra educación, IA y desarrollo web futurista. " +
+            "Intenta de nuevo en unos minutos."
+        );
+    } finally {
         miraLoading.classList.remove("active");
-        const response = generateMiraResponse(userText);
-        addMiraMessage(response);
-    }, 800 + Math.random() * 600);
+    }
 }
 
-// Respuestas básicas según texto del usuario
-function generateMiraResponse(text) {
-    const t = text.toLowerCase();
-
-    if (t.includes("hola") || t.includes("buenas") || t.includes("hi")) {
-        return "¡Hola! ✨ Soy *MIRA*, la asistente de Innova Space Education SPA. ¿Te cuento qué hacemos o quieres saber sobre algún servicio en específico?";
+// Llamada al backend (Render) que a su vez llama a OpenRouter
+async function callMiraAPI(userText) {
+    if (!MIRA_API_URL || MIRA_API_URL.includes("TU-SERVICIO-MIRA")) {
+        console.warn("MIRA_API_URL no está configurada con la URL real de Render.");
+        throw new Error("MIRA_API_URL no configurada");
     }
 
-    if (t.includes("empresa") || t.includes("innova")) {
-        return "Innova Space Education SPA integra educación, inteligencia artificial y desarrollo web para crear proyectos futuristas. Trabajamos con colegios, instituciones y emprendimientos en Chile.";
+    const payload = {
+        message: userText,
+        history: miraHistory
+    };
+
+    const res = await fetch(MIRA_API_URL, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) {
+        const text = await res.text();
+        console.error("Respuesta no OK del backend:", res.status, text);
+        throw new Error("Backend error " + res.status);
     }
 
-    if (t.includes("ia") || t.includes("inteligencia artificial")) {
-        return "Nuestro trabajo con IA incluye asistentes virtuales, análisis de datos, apoyo a clases y automatización de procesos educativos y administrativos. También podemos adaptar la IA a tus proyectos específicos.";
-    }
+    const data = await res.json();
+    const reply = (data.reply || "").trim() || "No pude generar una respuesta en este momento.";
 
-    if (t.includes("web") || t.includes("página") || t.includes("sitio")) {
-        return "Desarrollamos páginas web futuristas, responsivas y conectadas a bases de datos o APIs. Podemos crear un sitio para tu colegio, emprendimiento o empresa, con panel de administración y herramientas personalizadas.";
-    }
+    // Actualizar historial local
+    miraHistory.push({ role: "user", content: userText });
+    miraHistory.push({ role: "assistant", content: reply });
 
-    if (t.includes("redes") || t.includes("instagram") || t.includes("facebook") || t.includes("youtube") || t.includes("x ")) {
-        return "Gestionamos redes sociales como Instagram, Facebook, X y YouTube: desde la identidad visual hasta la creación de contenido (posts, reels, videos) y planificación de publicaciones.";
-    }
-
-    if (t.includes("contacto") || t.includes("reunión") || t.includes("cotización")) {
-        return "Puedes escribir directamente a <b>contacto@innova-space-edu.cl</b> o usar el formulario de contacto de esta web. Coordinamos reuniones para revisar tu proyecto y armar una propuesta a medida.";
-    }
-
-    if (t.includes("ubicación") || t.includes("dónde están") || t.includes("donde están")) {
-        return "Innova Space Education SPA se proyecta desde la zona norte de Chile, con base en Vallenar – Antofagasta, y trabajo remoto con instituciones de todo el país.";
-    }
-
-    // Respuesta genérica
-    return "Me encanta tu pregunta 💫. Soy una versión de MIRA integrada solo en esta web, pero puedo orientarte sobre los servicios de Innova Space Education SPA, nuestros proyectos con IA, desarrollo web y soluciones educativas. ¿Sobre qué quieres profundizar?";
+    return reply;
 }
 
 // Utilidad para quitar etiquetas HTML antes de hablar
@@ -183,7 +198,7 @@ function initMiraVoice() {
     // Buscar voz femenina en español primero, luego en otros idiomas
     let femaleSpanish = voices.find(v =>
         v.lang.toLowerCase().startsWith("es") &&
-        /female|mujer/i.test(v.name)
+        /female|mujer|helen|lucia|soledad|paula|camila/i.test(v.name)
     );
 
     let anySpanish = voices.find(v => v.lang.toLowerCase().startsWith("es"));
