@@ -1,18 +1,19 @@
 // MAIN JS PARA INNOVA SPACE EDUCATION SPA
 
-// ----------------------------------------------
+// URL del backend de MIRA en Render (NO expone la API key de OpenRouter)
+const MIRA_API_URL = "https://ceo-ai-mira.onrender.com/api/mira";
+
 // 1. Loader global (se oculta después de unos segundos)
-// ----------------------------------------------
 window.addEventListener("load", () => {
     const loader = document.getElementById("global-loader");
     setTimeout(() => {
         if (loader) loader.classList.add("hidden");
     }, 1500);
+
+    initStarfield();
 });
 
-// ----------------------------------------------
 // 2. Año en footer
-// ----------------------------------------------
 document.addEventListener("DOMContentLoaded", () => {
     const yearSpan = document.getElementById("year");
     if (yearSpan) {
@@ -20,9 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 
-// ----------------------------------------------
 // 3. Navbar mobile
-// ----------------------------------------------
 const navToggle = document.getElementById("navToggle");
 const navLinks = document.getElementById("navLinks");
 
@@ -38,28 +37,27 @@ if (navToggle && navLinks) {
     });
 }
 
-// ----------------------------------------------
-// 4. Fondo espacial: estrellas + nebulosas + estrellas fugaces
-// ----------------------------------------------
-(function initStarfield() {
-    const canvas = document.getElementById("starfield");
+/* ------------------------------------------------------------------
+   4. FONDO ANIMADO: ESTRELLAS + NEBULOSA AZUL-VIOLETA + ESTRELLAS FUGACES
+------------------------------------------------------------------ */
+
+function initStarfield() {
+    const canvas = document.getElementById("starsCanvas");
     if (!canvas) return;
 
     const ctx = canvas.getContext("2d");
-    let width = window.innerWidth;
-    let height = window.innerHeight;
+    let width, height;
     let stars = [];
     let shootingStars = [];
-    const STAR_COUNT = 220;
+
+    const STAR_COUNT = 200;
+    const STAR_SPEED_MIN = 0.02;
+    const STAR_SPEED_MAX = 0.18;
 
     function resize() {
-        width = window.innerWidth;
-        height = window.innerHeight;
-        canvas.width = width;
-        canvas.height = height;
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
     }
-    resize();
-    window.addEventListener("resize", resize);
 
     function createStars() {
         stars = [];
@@ -67,138 +65,136 @@ if (navToggle && navLinks) {
             stars.push({
                 x: Math.random() * width,
                 y: Math.random() * height,
-                size: Math.random() * 1.3 + 0.3,
-                speed: Math.random() * 0.25 + 0.05,
-                alpha: Math.random() * 0.8 + 0.2
+                size: Math.random() * 1.6 + 0.3,
+                speed: STAR_SPEED_MIN + Math.random() * (STAR_SPEED_MAX - STAR_SPEED_MIN),
+                alpha: 0.3 + Math.random() * 0.7,
+                twinkleOffset: Math.random() * Math.PI * 2
             });
         }
     }
-    createStars();
 
-    function createShootingStar() {
-        // Se crea de forma aleatoria en la parte superior o lateral
-        const fromTop = Math.random() > 0.5;
+    function addShootingStar() {
+        const fromTop = Math.random() < 0.5;
+        const startX = fromTop ? Math.random() * width * 0.6 + width * 0.2 : -50;
+        const startY = fromTop ? -40 : Math.random() * height * 0.4 + height * 0.2;
+        const angle = fromTop ? Math.random() * 0.5 + 0.4 : Math.random() * 0.4 + 0.2;
+
         shootingStars.push({
-            x: fromTop ? Math.random() * width : width + 50,
-            y: fromTop ? -20 : Math.random() * (height * 0.5),
-            vx: fromTop ? (Math.random() * -2 - 1) : (Math.random() * -4 - 2),
-            vy: fromTop ? (Math.random() * 3 + 2) : (Math.random() * 1 + 0.5),
-            length: Math.random() * 180 + 80,
-            alpha: 1,
-            life: 0
+            x: startX,
+            y: startY,
+            vx: Math.cos(angle) * 15,
+            vy: Math.sin(angle) * 10,
+            life: 0,
+            maxLife: 40 + Math.random() * 20
         });
     }
 
-    let lastShootTime = 0;
+    function scheduleShootingStar() {
+        // Frecuentes: entre 3 y 6 segundos
+        const delay = 3000 + Math.random() * 3000;
+        setTimeout(() => {
+            addShootingStar();
+            scheduleShootingStar();
+        }, delay);
+    }
 
-    function drawNebulaBackground() {
-        // Fondo suave de nebulosa (A + B)
-        const gradient = ctx.createRadialGradient(
-            width * 0.2, height * 0.1, 0,
-            width * 0.4, height * 0.6, width * 0.9
+    function drawNebula() {
+        const gradient1 = ctx.createRadialGradient(
+            width * 0.3, height * 0.25, 0,
+            width * 0.3, height * 0.25, width * 0.7
         );
-        gradient.addColorStop(0, "#151c3f");
-        gradient.addColorStop(0.35, "#060716");
-        gradient.addColorStop(0.7, "#120222");
-        gradient.addColorStop(1, "#000000");
-        ctx.fillStyle = gradient;
+        gradient1.addColorStop(0, "rgba(120, 180, 255, 0.95)");
+        gradient1.addColorStop(0.3, "rgba(80, 130, 255, 0.7)");
+        gradient1.addColorStop(0.7, "rgba(15, 20, 50, 0.0)");
+
+        const gradient2 = ctx.createRadialGradient(
+            width * 0.85, height * 0.8, 0,
+            width * 0.85, height * 0.8, width * 0.6
+        );
+        gradient2.addColorStop(0, "rgba(210, 110, 255, 0.9)");
+        gradient2.addColorStop(0.3, "rgba(140, 70, 230, 0.6)");
+        gradient2.addColorStop(0.8, "rgba(10, 5, 30, 0.0)");
+
+        ctx.fillStyle = gradient1;
         ctx.fillRect(0, 0, width, height);
 
-        // Nebulosas extra
-        const nebula1 = ctx.createRadialGradient(
-            width * 0.75, height * 0.2, 0,
-            width * 0.75, height * 0.2, height * 0.6
-        );
-        nebula1.addColorStop(0, "rgba(255, 75, 255, 0.6)");
-        nebula1.addColorStop(0.4, "rgba(255, 75, 255, 0.0)");
-        ctx.fillStyle = nebula1;
-        ctx.fillRect(0, 0, width, height);
-
-        const nebula2 = ctx.createRadialGradient(
-            width * 0.1, height * 0.8, 0,
-            width * 0.1, height * 0.8, height * 0.7
-        );
-        nebula2.addColorStop(0, "rgba(53, 226, 255, 0.45)");
-        nebula2.addColorStop(0.5, "rgba(53, 226, 255, 0.0)");
-        ctx.fillStyle = nebula2;
+        ctx.fillStyle = gradient2;
         ctx.fillRect(0, 0, width, height);
     }
 
-    function drawStars() {
+    function update() {
+        ctx.clearRect(0, 0, width, height);
+
+        // Fondo base
+        ctx.fillStyle = "#02030a";
+        ctx.fillRect(0, 0, width, height);
+
+        // Nebulosa azul-violeta
+        drawNebula();
+
+        // Estrellas
+        const time = Date.now() * 0.0015;
         for (const star of stars) {
-            ctx.beginPath();
-            ctx.fillStyle = `rgba(255,255,255,${star.alpha})`;
-            ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
-            ctx.fill();
-            star.x -= star.speed;
-            if (star.x < 0) {
-                star.x = width;
+            star.x += star.speed;
+            if (star.x > width + 5) {
+                star.x = -5;
                 star.y = Math.random() * height;
             }
+
+            const twinkle = (Math.sin(time + star.twinkleOffset) + 1) / 2; // 0..1
+            const alpha = star.alpha * (0.4 + 0.6 * twinkle);
+
+            ctx.beginPath();
+            ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+            ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+            ctx.fill();
         }
-    }
 
-    function drawShootingStars(deltaTime) {
-        if (performance.now() - lastShootTime > 2000 + Math.random() * 4000) {
-            createShootingStar();
-            lastShootTime = performance.now();
-        }
-
-        shootingStars = shootingStars.filter(s => s.alpha > 0 && s.life < 1.5);
-
-        for (const s of shootingStars) {
+        // Estrellas fugaces
+        for (let i = shootingStars.length - 1; i >= 0; i--) {
+            const s = shootingStars[i];
             s.x += s.vx;
             s.y += s.vy;
-            s.life += deltaTime * 0.001;
-            s.alpha = Math.max(0, 1 - s.life);
+            s.life++;
 
-            ctx.save();
-            ctx.globalAlpha = s.alpha;
+            const lifeRatio = 1 - s.life / s.maxLife;
+            const length = 120 * lifeRatio;
+
+            ctx.strokeStyle = `rgba(255, 255, 255, ${lifeRatio})`;
+            ctx.lineWidth = 2;
             ctx.beginPath();
-            const trailX = s.x - s.vx * (s.length / 10);
-            const trailY = s.y - s.vy * (s.length / 10);
-            const grad = ctx.createLinearGradient(s.x, s.y, trailX, trailY);
-            grad.addColorStop(0, "rgba(255,255,255,1)");
-            grad.addColorStop(1, "rgba(255,255,255,0)");
-            ctx.strokeStyle = grad;
-            ctx.lineWidth = 2.2;
             ctx.moveTo(s.x, s.y);
-            ctx.lineTo(trailX, trailY);
+            ctx.lineTo(s.x - s.vx * 0.8 - length * 0.4, s.y - s.vy * 0.8 - length * 0.4);
             ctx.stroke();
-            ctx.restore();
+
+            if (s.life > s.maxLife) {
+                shootingStars.splice(i, 1);
+            }
         }
+
+        requestAnimationFrame(update);
     }
 
-    let lastTime = performance.now();
+    window.addEventListener("resize", () => {
+        resize();
+        createStars();
+    });
 
-    function animate(time) {
-        const delta = time - lastTime;
-        lastTime = time;
+    resize();
+    createStars();
+    scheduleShootingStar();
+    update();
+}
 
-        drawNebulaBackground();
-        drawStars();
-        drawShootingStars(delta);
+/* ------------------------------------------------------------------
+   5. Chatbot MIRA (lógica básica con voz femenina)
+------------------------------------------------------------------ */
 
-        requestAnimationFrame(animate);
-    }
-
-    requestAnimationFrame(animate);
-})();
-
-// ----------------------------------------------
-// 5. Chatbot MIRA (voz femenina + backend OpenRouter vía Render)
-// ----------------------------------------------
-
+// Estado de MIRA
 let miraVoiceEnabled = true;
 let miraVoice = null;
 
-// Historial de conversación para contexto
-const miraHistory = [];
-
-// URL del backend (Render)
-const MIRA_API_URL = "https://ceo-ai-mira.onrender.com/api/mira";
-
-// Elementos del widget
+// Elementos
 const miraToggleBtn = document.getElementById("mira-toggle");
 const miraChat = document.getElementById("mira-chat");
 const miraCloseBtn = document.getElementById("mira-close");
@@ -208,24 +204,30 @@ const miraInput = document.getElementById("miraInput");
 const miraLoading = document.getElementById("miraLoading");
 const miraVoiceToggle = document.getElementById("mira-voice-toggle");
 
-// Control para no repetir demasiados mensajes de ayuda
-const miraHintsShown = new Set();
-let miraIntroSpoken = false;
+// Mensaje de bienvenida estándar de MIRA
+const MIRA_WELCOME_TEXT =
+    "Bienvenido a Innova Space Education. Soy MIRA, una inteligencia asistencial diseñada para acompañarle en este entorno futurista. Estoy lista para ayudarle en lo que necesite.";
 
-// Mensaje inicial en el chat
+// Inicializar mensaje de bienvenida del chat
 function initMiraWelcome() {
     if (!miraMessages) return;
     miraMessages.innerHTML = "";
     addMiraMessage(
-        "Bienvenido a Innova Space Education. Soy MIRA, su asistente virtual 🤖✨<br>" +
-        "Puedo explicarte qué hace la empresa, nuestros servicios de inteligencia artificial, desarrollo web, " +
-        "innovación en espacios educativos y cómo podemos apoyar tu proyecto."
+        "Bienvenido a Innova Space Education.<br>" +
+        "Soy <strong>MIRA</strong>, una inteligencia asistencial diseñada para acompañarle en este entorno futurista.<br>" +
+        "Puedo explicarle qué hace la empresa, nuestros servicios y cómo podemos apoyar su proyecto."
     );
 }
 
 document.addEventListener("DOMContentLoaded", () => {
     initMiraWelcome();
-    setupMiraGuidedHints();
+    setupMiraHints();
+    setupMiraSectionObserver();
+
+    // Intentamos saludo de voz general (algunos navegadores requieren interacción previa)
+    setTimeout(() => {
+        speakWithMiraVoice(MIRA_WELCOME_TEXT);
+    }, 1600);
 });
 
 // Abrir / cerrar chat
@@ -245,17 +247,18 @@ if (miraToggleBtn && miraChat && miraCloseBtn) {
 
 // Enviar mensaje
 if (miraForm && miraInput) {
-    miraForm.addEventListener("submit", async (e) => {
+    miraForm.addEventListener("submit", (e) => {
         e.preventDefault();
         const text = miraInput.value.trim();
         if (!text) return;
         addUserMessage(text);
         miraInput.value = "";
-        await handleMiraResponse(text);
+        handleMiraResponse(text);
     });
 }
 
-// Agregar mensajes al panel
+// Agregar mensajes
+
 function addUserMessage(text) {
     if (!miraMessages) return;
     const div = document.createElement("div");
@@ -272,7 +275,9 @@ function addMiraMessage(htmlText) {
     div.innerHTML = htmlText;
     miraMessages.appendChild(div);
     scrollMiraToBottom();
-    speakWithMiraVoice(stripHtml(htmlText));
+
+    const spoken = sanitizeForSpeech(stripHtml(htmlText));
+    speakWithMiraVoice(spoken);
 }
 
 function scrollMiraToBottom() {
@@ -280,60 +285,74 @@ function scrollMiraToBottom() {
     miraMessages.scrollTop = miraMessages.scrollHeight;
 }
 
-// Llamar al backend para obtener la respuesta de MIRA
+// 6. "Pensar" y responder usando backend + fallback local
 async function handleMiraResponse(userText) {
     if (!miraLoading) return;
     miraLoading.classList.add("active");
 
+    let reply = "";
+
     try {
-        const responseText = await callMiraAPI(userText);
-        addMiraMessage(responseText);
-    } catch (err) {
-        console.error("Error al llamar a MIRA backend:", err);
-        addMiraMessage(
-            "Hubo un problema al conectar con el modelo de inteligencia artificial 🔧.<br>" +
-            "Aun así, recuerda que Innova Space Education integra educación, IA y desarrollo web futurista. " +
-            "Puedes volver a intentar en unos minutos y seguiremos mejorando esta experiencia."
-        );
+        const res = await fetch(MIRA_API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ message: userText })
+        });
+
+        if (!res.ok) {
+            throw new Error("Respuesta HTTP no OK");
+        }
+
+        const data = await res.json();
+        reply = data.reply || generateMiraResponse(userText);
+    } catch (error) {
+        console.warn("Fallo llamada a backend de MIRA, usando respuesta local:", error);
+        reply = generateMiraResponse(userText);
     } finally {
         miraLoading.classList.remove("active");
     }
+
+    addMiraMessage(reply);
 }
 
-// Petición al backend (Render) que usa OpenRouter
-async function callMiraAPI(userText) {
-    if (!MIRA_API_URL) {
-        console.warn("MIRA_API_URL no está configurada.");
-        throw new Error("MIRA_API_URL no configurada");
+// 7. Respuestas básicas según texto del usuario (fallback local)
+function generateMiraResponse(text) {
+    const t = text.toLowerCase();
+
+    if (t.includes("hola") || t.includes("buenas") || t.includes("hi")) {
+        return "Hola, es un gusto saludarle. Soy MIRA, la asistente virtual de Innova Space Education. ¿Desea saber sobre la empresa, los servicios o algún proyecto en particular?";
     }
 
-    const payload = {
-        message: userText,
-        history: miraHistory
-    };
-
-    const res = await fetch(MIRA_API_URL, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(payload)
-    });
-
-    if (!res.ok) {
-        const text = await res.text();
-        console.error("Respuesta no OK del backend:", res.status, text);
-        throw new Error("Backend error " + res.status);
+    if (t.includes("empresa") || t.includes("innova")) {
+        return "Innova Space Education SPA integra educación, inteligencia artificial y desarrollo web para crear proyectos futuristas. Trabajamos con colegios, instituciones y emprendimientos en Chile, desarrollando plataformas, asistentes virtuales y soluciones a la medida.";
     }
 
-    const data = await res.json();
-    const reply = (data.reply || "").trim() || "No pude generar una respuesta en este momento.";
+    if (t.includes("mira") && (t.includes("quien") || t.includes("quién") || t.includes("creó") || t.includes("creo"))) {
+        return "Fui diseñada dentro del ecosistema de Innova Space Education SPA como una inteligencia asistencial para acompañar procesos educativos y de gestión. Formo parte de una línea de proyectos que conectan IA, desarrollo web y espacios educativos innovadores.";
+    }
 
-    // Actualizar historial local
-    miraHistory.push({ role: "user", content: userText });
-    miraHistory.push({ role: "assistant", content: reply });
+    if (t.includes("ia") || t.includes("inteligencia artificial")) {
+        return "Nuestro trabajo con IA incluye asistentes virtuales como MIRA, análisis de datos, apoyo a clases, automatización de procesos administrativos y diseño de soluciones que se conectan con plataformas web y sistemas existentes.";
+    }
 
-    return reply;
+    if (t.includes("web") || t.includes("página") || t.includes("sitio")) {
+        return "Desarrollamos páginas web futuristas, responsivas y conectadas a bases de datos o APIs. Podemos crear un sitio para su colegio, emprendimiento o empresa, incluyendo panel de administración y módulos personalizados.";
+    }
+
+    if (t.includes("redes") || t.includes("instagram") || t.includes("facebook") || t.includes("youtube") || t.includes("x ")) {
+        return "Gestionamos redes sociales como Instagram, Facebook, X y YouTube: identidad visual, diseño de posts, reels y videos, además de planificación de contenidos para que su proyecto tenga una presencia digital coherente.";
+    }
+
+    if (t.includes("contacto") || t.includes("reunión") || t.includes("cotización")) {
+        return "Puede escribir directamente a <b>contacto@innova-space-edu.cl</b> o usar el formulario de contacto de esta web. Coordinamos reuniones para revisar su proyecto y armar una propuesta a medida.";
+    }
+
+    if (t.includes("ubicación") || t.includes("dónde están") || t.includes("donde están") || t.includes("donde estan")) {
+        return "Innova Space Education SPA proyecta su trabajo desde la zona norte de Chile, con base en Vallenar – Antofagasta, y atención remota a instituciones de todo el país.";
+    }
+
+    // Respuesta genérica
+    return "He registrado su consulta. Soy una versión de MIRA integrada en esta página para explicar los servicios de Innova Space Education SPA, la forma en que trabajamos con IA, desarrollo web y proyectos educativos. ¿Sobre qué área le gustaría profundizar?";
 }
 
 // Utilidad para quitar etiquetas HTML antes de hablar
@@ -343,9 +362,33 @@ function stripHtml(html) {
     return temp.textContent || temp.innerText || "";
 }
 
-// ----------------------------------------------
-// 6. Voz femenina con SpeechSynthesis (toda la página)
-// ----------------------------------------------
+// Eliminar emojis y caracteres que provocan que lea "cara de robot", "destellos", etc.
+function sanitizeForSpeech(text) {
+    if (!text) return "";
+
+    let clean = text;
+
+    // Eliminar emojis (rango Unicode general)
+    try {
+        clean = clean.replace(/[\u{1F300}-\u{1FAFF}]/gu, "");
+        clean = clean.replace(/[\u2600-\u27BF]/g, ""); // símbolos varios
+    } catch (e) {
+        // Si el navegador no soporta unicode escapes, ignoramos este paso
+    }
+
+    // Eliminar algunos símbolos de marcado (*, _, ~, `) que no aportan al habla
+    clean = clean.replace(/[*_`~]+/g, "");
+
+    // Colapsar espacios
+    clean = clean.replace(/\s{2,}/g, " ").trim();
+
+    return clean;
+}
+
+/* ------------------------------------------------------------------
+   8. Voz femenina con SpeechSynthesis
+------------------------------------------------------------------ */
+
 function initMiraVoice() {
     if (!("speechSynthesis" in window)) {
         console.warn("SpeechSynthesis no disponible en este navegador.");
@@ -359,31 +402,21 @@ function initMiraVoice() {
     const voices = window.speechSynthesis.getVoices();
     if (!voices || voices.length === 0) return;
 
-    // Buscar voz femenina en español primero, luego alternativas
+    // Buscar voz femenina en español primero, luego en otros idiomas
     let femaleSpanish = voices.find(v =>
         v.lang.toLowerCase().startsWith("es") &&
-        /female|mujer|helena|lucia|soledad|paula|camila|espanol/i.test(v.name)
+        /female|mujer|español/i.test(v.name)
     );
 
     let anySpanish = voices.find(v => v.lang.toLowerCase().startsWith("es"));
     let anyFemale = voices.find(v => /female|mujer/i.test(v.name));
 
     miraVoice = femaleSpanish || anySpanish || anyFemale || voices[0];
-
-    // Mensaje de bienvenida global en toda la página
-    if (!miraIntroSpoken) {
-        miraIntroSpoken = true;
-        speakWithMiraVoice(
-            "Bienvenido a Innova Space Education. Soy MIRA, su asistente virtual. " +
-            "Estoy aquí para guiarle por la página, explicar nuestros servicios y ayudarle con sus ideas o proyectos."
-        );
-    }
 }
 
 if ("speechSynthesis" in window) {
     window.speechSynthesis.onvoiceschanged = initMiraVoice;
-    // También intentamos inicializar por si las voces ya están cargadas
-    setTimeout(initMiraVoice, 400);
+    initMiraVoice();
 }
 
 function speakWithMiraVoice(text) {
@@ -412,95 +445,51 @@ if (miraVoiceToggle) {
     });
 }
 
-// ----------------------------------------------
-// 7. Guía hablada según interacción del usuario
-// ----------------------------------------------
-function setupMiraGuidedHints() {
-    // Enlaces de navegación con data-mira-hint
+/* ------------------------------------------------------------------
+   9. MIRA reacciona a elementos importantes (hover / secciones)
+------------------------------------------------------------------ */
+
+// Voz cuando el usuario pasa el mouse por elementos con data-mira-hint
+function setupMiraHints() {
     const hintElements = document.querySelectorAll("[data-mira-hint]");
     hintElements.forEach(el => {
-        const hint = el.getAttribute("data-mira-hint");
-        if (!hint) return;
-
-        el.addEventListener("click", () => {
-            const key = hint.slice(0, 60);
-            if (!miraHintsShown.has(key)) {
-                miraHintsShown.add(key);
-                speakWithMiraVoice(hint);
-            }
+        el.addEventListener("mouseenter", () => {
+            const hint = el.getAttribute("data-mira-hint");
+            const spoken = sanitizeForSpeech(hint || "");
+            speakWithMiraVoice(spoken);
         });
     });
-
-    // También pequeños hints al hacer scroll a secciones clave (solo la primera vez)
-    const sections = document.querySelectorAll("section");
-    const observer = new IntersectionObserver(
-        entries => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const id = entry.target.id;
-                    if (!id || miraHintsShown.has("section-" + id)) return;
-
-                    let msg = "";
-                    if (id === "sobre") {
-                        msg = "Estás viendo información sobre Innova Space Education: nuestra misión, visión y áreas de trabajo.";
-                    } else if (id === "servicios") {
-                        msg = "Aquí puedes revisar los servicios de inteligencia artificial, desarrollo web, redes sociales y proyectos educativos interactivos.";
-                    } else if (id === "portafolio") {
-                        msg = "En el portafolio verás algunos proyectos ya desarrollados que podemos adaptar o ampliar para tu institución o emprendimiento.";
-                    } else if (id === "redes") {
-                        msg = "Si deseas seguir nuestras novedades, puedes visitar nuestras redes sociales desde esta sección.";
-                    } else if (id === "contacto") {
-                        msg = "Si quieres un proyecto a medida, puedes utilizar el formulario de contacto o escribir directamente al correo institucional.";
-                    }
-
-                    if (msg) {
-                        miraHintsShown.add("section-" + id);
-                        speakWithMiraVoice(msg);
-                    }
-                }
-            });
-        },
-        { threshold: 0.55 }
-    );
-
-    sections.forEach(sec => observer.observe(sec));
 }
 
-// ----------------------------------------------
-// 8. Respuestas locales básicas (fallback por si se necesita)
-//    *No se usa normalmente porque ahora se llama al backend*
-// ----------------------------------------------
-function generateMiraResponse(text) {
-    const t = text.toLowerCase();
+// Voz al entrar en secciones clave (se dice solo una vez por sección)
+function setupMiraSectionObserver() {
+    const sections = document.querySelectorAll(".section[data-mira-section]");
+    if (!("IntersectionObserver" in window) || sections.length === 0) return;
 
-    if (t.includes("hola") || t.includes("buenas") || t.includes("hi")) {
-        return "¡Hola! ✨ Soy MIRA, la asistente virtual de Innova Space Education SPA. ¿Te cuento qué hacemos o quieres saber sobre algún servicio en específico?";
-    }
+    const spokenSections = new Set();
 
-    if (t.includes("empresa") || t.includes("innova")) {
-        return "Innova Space Education SPA integra educación, inteligencia artificial y desarrollo web para crear proyectos futuristas. Trabajamos con colegios, instituciones y emprendimientos en Chile.";
-    }
+    const messages = {
+        "sobre": "En la sección Sobre la empresa puede conocer el enfoque de Innova Space Education y las áreas en las que trabajamos.",
+        "servicios": "En la sección de Servicios encontrará un resumen de las soluciones en inteligencia artificial, desarrollo web, redes sociales y proyectos educativos.",
+        "portafolio": "En el Portafolio se muestran proyectos y plataformas que podemos adaptar a su institución o emprendimiento.",
+        "redes": "En la sección de Redes sociales puede conectar con nuestro ecosistema digital para seguir novedades y contenidos.",
+        "contacto": "En la sección de Contacto puede enviarnos sus datos para coordinar una reunión o solicitar una propuesta."
+    };
 
-    if (t.includes("ia") || t.includes("inteligencia artificial")) {
-        return "Nuestro trabajo con IA incluye asistentes virtuales, análisis de datos, apoyo a clases y automatización de procesos educativos y administrativos. También podemos adaptar la IA a tus proyectos específicos.";
-    }
+    const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const id = entry.target.getAttribute("data-mira-section");
+                if (!id || spokenSections.has(id)) return;
+                spokenSections.add(id);
 
-    if (t.includes("web") || t.includes("página") || t.includes("sitio")) {
-        return "Desarrollamos páginas web futuristas, responsivas y conectadas a bases de datos o APIs. Podemos crear un sitio para tu colegio, emprendimiento o empresa, con panel de administración y herramientas personalizadas.";
-    }
+                const msg = messages[id];
+                if (msg) {
+                    speakWithMiraVoice(msg);
+                }
+            }
+        });
+    }, { threshold: 0.4 });
 
-    if (t.includes("redes") || t.includes("instagram") || t.includes("facebook") || t.includes("youtube") || t.includes("x ")) {
-        return "Gestionamos redes sociales como Instagram, Facebook, X y YouTube: desde la identidad visual hasta la creación de contenido y planificación de publicaciones.";
-    }
-
-    if (t.includes("contacto") || t.includes("reunión") || t.includes("cotización")) {
-        return "Puedes escribir directamente a contacto@innova-space-edu.cl o usar el formulario de contacto de esta web. Coordinamos reuniones para revisar tu proyecto y armar una propuesta a medida.";
-    }
-
-    if (t.includes("ubicación") || t.includes("dónde están") || t.includes("donde están")) {
-        return "Innova Space Education SPA se proyecta desde la zona norte de Chile, con base en Vallenar – Antofagasta, y trabajo remoto con instituciones de todo el país.";
-    }
-
-    // Respuesta genérica
-    return "Me encanta tu pregunta 💫. Soy MIRA, una asistente creada dentro del ecosistema de Innova Space Education SPA para acompañarte en soluciones de IA, desarrollo web y proyectos educativos. ¿Sobre qué quieres profundizar?";
+    sections.forEach(sec => observer.observe(sec));
 }
