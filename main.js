@@ -43,7 +43,7 @@ const miraHistory = [];
 
 // URL del backend (Render)
 // Cambia ESTA línea cuando tengas la URL real de tu servicio en Render.
-const MIRA_API_URL = "https://TU-SERVICIO-MIRA.onrender.com/api/mira";
+const MIRA_API_URL = "https://ceo-ai-mira.onrender.com/api/mira";
 
 // Elementos
 const miraToggleBtn = document.getElementById("mira-toggle");
