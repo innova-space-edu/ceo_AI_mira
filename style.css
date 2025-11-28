@@ -758,8 +758,7 @@ body {
     height: 56px;
     border-radius: 999px;
     border: none;
-    background: radial-gradient(circle at 30% 0, #ffffff 0, #ffe6ff 18%, #ff4bff 40%, #28104a 70%);
-    box-shadow: 0 0 25px rgba(255, 75, 255, 0.9);
+    background: transparent;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -767,14 +766,44 @@ body {
     padding: 0;
     transition: transform 0.15s ease, box-shadow 0.15s ease;
     overflow: hidden;
+    box-shadow: 0 0 25px rgba(255, 75, 255, 0.9);
 }
 
+/* por si usas imagen PNG/JPG en algún momento */
 #mira-toggle img {
     width: 70%;
     height: 70%;
     object-fit: contain;
 }
 
+/* LOGO SVG DE MIRA */
+
+.mira-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mira-logo svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+/* Tamaño del logo dentro del botón flotante */
+#mira-toggle .mira-logo {
+    width: 70%;
+    height: 70%;
+}
+
+/* Tamaño del logo dentro del header del chat */
+.mira-logo-header {
+    width: 32px;
+    height: 32px;
+    border-radius: 999px;
+}
+
+/* Hover del botón */
 #mira-toggle:hover {
     transform: translateY(-2px) scale(1.02);
     box-shadow: 0 0 35px rgba(255, 75, 255, 1);
@@ -819,6 +848,7 @@ body {
     gap: 8px;
 }
 
+/* por si en algún momento usas imagen en vez de svg */
 .mira-header-info img {
     width: 32px;
     height: 32px;
