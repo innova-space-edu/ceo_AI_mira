@@ -9,12 +9,15 @@
     <!-- Fuentes -->
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 
-    <!-- Iconos (remixicon) -->
+    <!-- Iconos -->
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet">
 
     <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+    <!-- Canvas de estrellas + nebulosa -->
+    <canvas id="starsCanvas"></canvas>
+
     <!-- Loader global -->
     <div id="global-loader">
         <div class="loader-content">
@@ -23,29 +26,41 @@
         </div>
     </div>
 
-    <!-- Fondo de estrellas + nebulosas -->
-    <canvas id="starfield"></canvas>
-
-    <!-- Hero con fondo espacial -->
+    <!-- Hero -->
     <header id="hero">
         <div class="hero-overlay"></div>
 
+        <!-- (Dejamos la estructura antigua de galaxia por si la quieres reutilizar, pero oculta en CSS) -->
+        <div class="galaxy-container">
+            <div class="galaxy-core"></div>
+            <div class="galaxy-arm arm1"></div>
+            <div class="galaxy-arm arm2"></div>
+            <div class="galaxy-arm arm3"></div>
+            <div class="galaxy-dust dust1"></div>
+            <div class="galaxy-dust dust2"></div>
+            <div class="galaxy-dust dust3"></div>
+        </div>
+
         <nav class="navbar">
             <div class="nav-logo">
-                <!-- Cualquier formato: PNG, JPG, JPEG, SVG, WEBP -->
-                <img src="assets/logo-innova.jpg" alt="Logo Innova Space Education" id="logoInnova">
-                <span class="nav-logo-text">INNOVA SPACE EDUCATION SPA</span>
+                <!-- Puedes usar PNG, JPG, SVG, WebP dentro de assets -->
+                <picture>
+                    <source srcset="assets/logo-innova.svg" type="image/svg+xml">
+                    <source srcset="assets/logo-innova.webp" type="image/webp">
+                    <img src="assets/logo-innova.png" alt="Innova Space Education Logo">
+                </picture>
+                <span class="logo-text-animated">INNOVA SPACE EDUCATION SPA</span>
             </div>
-            <button class="nav-toggle" id="navToggle" aria-label="Abrir menú">
+            <button class="nav-toggle" id="navToggle">
                 <i class="ri-menu-3-line"></i>
             </button>
             <ul class="nav-links" id="navLinks">
-                <li><a href="#hero" data-mira-hint="Estás en la sección de inicio. Aquí puedes conocer la esencia de Innova Space Education.">Inicio</a></li>
-                <li><a href="#sobre" data-mira-hint="Te cuento sobre la empresa, su misión, visión y áreas de trabajo.">Sobre la empresa</a></li>
-                <li><a href="#servicios" data-mira-hint="En esta sección verás los servicios que ofrecemos en inteligencia artificial, desarrollo web y redes sociales.">Servicios</a></li>
-                <li><a href="#portafolio" data-mira-hint="Aquí puedes explorar algunos de los proyectos y plataformas desarrolladas por Innova Space Education.">Portafolio</a></li>
-                <li><a href="#redes" data-mira-hint="Desde aquí podrás conectar con nuestras redes sociales y contenido en línea.">Redes sociales</a></li>
-                <li><a href="#contacto" data-mira-hint="Si quieres un proyecto a medida, aquí puedes ver nuestros datos de contacto.">Contacto</a></li>
+                <li><a href="#hero">Inicio</a></li>
+                <li><a href="#sobre">Sobre la empresa</a></li>
+                <li><a href="#servicios">Servicios</a></li>
+                <li><a href="#portafolio">Portafolio</a></li>
+                <li><a href="#redes">Redes sociales</a></li>
+                <li><a href="#contacto">Contacto</a></li>
             </ul>
         </nav>
 
@@ -57,10 +72,12 @@
                     colegios, instituciones y proyectos en todo Chile.
                 </p>
                 <div class="hero-buttons">
-                    <a href="#portafolio" class="btn-primary" data-mira-hint="Puedo explicarte cada proyecto del portafolio si lo deseas.">
+                    <a href="#portafolio" class="btn-primary"
+                       data-mira-hint="Puede explorar el portafolio con algunos proyectos y plataformas que hemos desarrollado.">
                         <i class="ri-rocket-2-fill"></i> Ver portafolio
                     </a>
-                    <a href="#contacto" class="btn-secondary" data-mira-hint="Si quieres una reunión, te puedo guiar sobre qué información enviar.">
+                    <a href="#contacto" class="btn-secondary"
+                       data-mira-hint="Si desea una propuesta para su institución o proyecto, puede agendar una reunión o escribirnos desde aquí.">
                         <i class="ri-calendar-event-fill"></i> Agenda una reunión
                     </a>
                 </div>
@@ -69,9 +86,16 @@
                     <span><i class="ri-mail-fill"></i> contacto@innova-space-edu.cl</span>
                 </div>
                 <div class="hero-logos">
-                    <!-- Soporta PNG / JPG / JPEG / SVG / WEBP -->
-                    <img src="assets/logo-innova.jpg" alt="Logo Innova Space Education" class="hero-logo-img">
-                    <img src="assets/logo-mercado-publico.png" alt="Logo Mercado Público" class="hero-logo-img">
+                    <picture>
+                        <source srcset="assets/logo-innova.svg" type="image/svg+xml">
+                        <source srcset="assets/logo-innova.webp" type="image/webp">
+                        <img src="assets/logo-innova.png" alt="Logo Innova Space Education">
+                    </picture>
+                    <picture>
+                        <source srcset="assets/logo-mercado-publico.svg" type="image/svg+xml">
+                        <source srcset="assets/logo-mercado-publico.webp" type="image/webp">
+                        <img src="assets/logo-mercado-publico.png" alt="Logo Mercado Público">
+                    </picture>
                 </div>
             </div>
         </div>
@@ -79,7 +103,7 @@
 
     <main>
         <!-- SOBRE LA EMPRESA -->
-        <section id="sobre" class="section">
+        <section id="sobre" class="section" data-mira-section="sobre">
             <div class="section-header">
                 <h2>Sobre la empresa</h2>
                 <p>Quiénes somos y qué hacemos</p>
@@ -92,25 +116,28 @@
                         y desarrollo web para crear experiencias futuristas y funcionales.
                     </p>
                     <p>
-                        Nos dedicamos al desarrollo de tecnología, creación de asistentes virtuales, páginas web,
-                        plataformas educativas y la innovación de espacios educativos y de instituciones, siempre con una
-                        mirada moderna y centrada en las necesidades reales de colegios y proyectos.
+                        La empresa impulsa el desarrollo de herramientas para colegios, instituciones y emprendimientos:
+                        asistentes virtuales, sistemas de inventario, plataformas web interactivas y entornos de aprendizaje
+                        con IA que se adaptan a las necesidades de cada comunidad.
                     </p>
                     <p>
-                        MIRA, nuestro asistente virtual, fue creada dentro del ecosistema de Innova Space Education
-                        para acompañar a docentes, instituciones y emprendimientos en la transición hacia soluciones
-                        inteligentes y automatizadas.
+                        Uno de sus proyectos centrales es <strong>MIRA</strong>, una inteligencia asistencial diseñada para
+                        acompañar a docentes, estudiantes y gestores en entornos digitales modernos.
                     </p>
                     <div class="sobre-cards">
                         <div class="sobre-card">
                             <h4>Misión</h4>
-                            <p>Transformar la educación y la gestión institucional mediante tecnología accesible, visualmente
-                            atractiva y fácil de usar, integrando IA y desarrollo web de alto nivel.</p>
+                            <p>
+                                Transformar la educación y la gestión institucional mediante tecnología accesible,
+                                visualmente atractiva y fácil de usar, conectando innovación con necesidades reales.
+                            </p>
                         </div>
                         <div class="sobre-card">
                             <h4>Visión</h4>
-                            <p>Ser un referente en soluciones educativas inteligentes en Latinoamérica, posicionando a Chile
-                            como un punto de innovación tecnológica en el ámbito educativo.</p>
+                            <p>
+                                Ser un referente en soluciones educativas inteligentes en Latinoamérica, con foco en
+                                Chile y en el desarrollo de ecosistemas digitales que integren IA, web y espacios físicos.
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -120,24 +147,24 @@
                         <li><span>Nombre:</span> Innova Space Education SPA</li>
                         <li><span>Ubicación:</span> Vallenar – Antofagasta, Chile</li>
                         <li><span>Correo:</span> contacto@innova-space-edu.cl</li>
-                        <li><span>Áreas:</span> Educación, IA, Desarrollo Web, Redes Sociales, Innovación de espacios educativos</li>
+                        <li><span>Áreas:</span> Educación, IA, Desarrollo Web, Redes Sociales</li>
+                        <li>
+                            <span>Enfoque:</span> Desarrollo de tecnología, asistentes de inteligencia artificial
+                            y diseño de espacios educativos e institucionales innovadores.
+                        </li>
                     </ul>
-                    <p class="sobre-extra">
-                        Desarrollamos soluciones para colegios, instituciones, emprendimientos y proyectos que buscan dar
-                        un salto hacia la automatización, la inteligencia artificial y la presencia digital profesional.
-                    </p>
                 </div>
             </div>
         </section>
 
         <!-- SERVICIOS -->
-        <section id="servicios" class="section section-dark">
+        <section id="servicios" class="section section-dark" data-mira-section="servicios">
             <div class="section-header">
                 <h2>Servicios</h2>
                 <p>Soluciones integrales con diseño futurista</p>
             </div>
             <div class="services-grid">
-                <article class="service-card">
+                <article class="service-card" data-mira-hint="Este servicio integra asistentes virtuales y modelos de IA para apoyar clases y procesos administrativos.">
                     <i class="ri-robot-2-fill service-icon"></i>
                     <h3>Inteligencia Artificial</h3>
                     <p>
@@ -145,7 +172,7 @@
                         automatización de tareas y análisis de datos educativos o administrativos.
                     </p>
                 </article>
-                <article class="service-card">
+                <article class="service-card" data-mira-hint="Aquí desarrollamos sitios futuristas y responsivos para instituciones y emprendimientos.">
                     <i class="ri-macbook-fill service-icon"></i>
                     <h3>Creación de páginas web</h3>
                     <p>
@@ -153,7 +180,7 @@
                         integrados con bases de datos, paneles y APIs externas.
                     </p>
                 </article>
-                <article class="service-card">
+                <article class="service-card" data-mira-hint="Podemos unificar la presencia digital de su proyecto en Instagram, Facebook, X y YouTube.">
                     <i class="ri-share-fill service-icon"></i>
                     <h3>Gestión de redes sociales</h3>
                     <p>
@@ -161,7 +188,7 @@
                         reels, banners, campañas y presencia digital unificada.
                     </p>
                 </article>
-                <article class="service-card">
+                <article class="service-card" data-mira-hint="Este servicio combina proyectos educativos, ferias científicas y experiencias interactivas.">
                     <i class="ri-flask-fill service-icon"></i>
                     <h3>Proyectos educativos interactivos</h3>
                     <p>
@@ -173,13 +200,13 @@
         </section>
 
         <!-- PORTAFOLIO -->
-        <section id="portafolio" class="section">
+        <section id="portafolio" class="section" data-mira-section="portafolio">
             <div class="section-header">
                 <h2>Portafolio</h2>
                 <p>Proyectos y plataformas desarrolladas</p>
             </div>
             <div class="portfolio-grid">
-                <article class="portfolio-card">
+                <article class="portfolio-card" data-mira-hint="Sistema de inventario para laboratorios y salas con registros y análisis.">
                     <h3>Innova Space Track</h3>
                     <p>
                         Sistema de inventario web para laboratorios, salas y recursos educativos.
@@ -189,18 +216,17 @@
                         Ver demo
                     </a>
                 </article>
-                <article class="portfolio-card">
+                <article class="portfolio-card" data-mira-hint="Asistente IA MIRA, diseñado para acompañar procesos educativos y administrativos.">
                     <h3>MIRA - Asistente Virtual</h3>
                     <p>
                         Asistente de inteligencia artificial con voz, memoria contextual y análisis de
-                        texto, diseñado para apoyar clases y tareas administrativas dentro del ecosistema
-                        de Innova Space Education.
+                        texto, diseñado para apoyar clases y tareas administrativas.
                     </p>
                     <a href="#" class="portfolio-link" target="_blank" rel="noopener">
                         Ver proyecto
                     </a>
                 </article>
-                <article class="portfolio-card">
+                <article class="portfolio-card" data-mira-hint="Plataforma educativa con IA integrada y contenidos interactivos.">
                     <h3>Plataforma Innova Space Education</h3>
                     <p>
                         Sitio educativo con IA integrada, contenido interactivo y diseño espacial
@@ -210,11 +236,11 @@
                         Ver sitio
                     </a>
                 </article>
-                <article class="portfolio-card">
+                <article class="portfolio-card" data-mira-hint="También desarrollamos soluciones a medida según las necesidades de cada institución.">
                     <h3>Otros proyectos personalizados</h3>
                     <p>
                         Páginas web para emprendimientos, módulos de inventario adicionales, paneles de control
-                        y sistemas adaptados a distintas instituciones y contextos.
+                        y sistemas adaptados a distintas instituciones.
                     </p>
                     <a href="#contacto" class="portfolio-link">
                         Solicitar algo similar
@@ -224,25 +250,29 @@
         </section>
 
         <!-- REDES SOCIALES -->
-        <section id="redes" class="section section-dark">
+        <section id="redes" class="section section-dark" data-mira-section="redes">
             <div class="section-header">
                 <h2>Redes sociales</h2>
                 <p>Conecta con nuestro ecosistema digital</p>
             </div>
             <div class="social-grid">
-                <a href="#" class="social-card" target="_blank" rel="noopener">
+                <a href="#" class="social-card" target="_blank" rel="noopener"
+                   data-mira-hint="Puede seguirnos en Instagram para ver proyectos, avances y contenidos visuales.">
                     <i class="ri-instagram-line"></i>
                     <span>Instagram</span>
                 </a>
-                <a href="#" class="social-card" target="_blank" rel="noopener">
+                <a href="#" class="social-card" target="_blank" rel="noopener"
+                   data-mira-hint="En Facebook compartimos noticias, actividades y material educativo.">
                     <i class="ri-facebook-circle-line"></i>
                     <span>Facebook</span>
                 </a>
-                <a href="#" class="social-card" target="_blank" rel="noopener">
+                <a href="#" class="social-card" target="_blank" rel="noopener"
+                   data-mira-hint="En X (Twitter) compartimos ideas, reflexiones y novedades de tecnología educativa.">
                     <i class="ri-twitter-x-line"></i>
                     <span>X (Twitter)</span>
                 </a>
-                <a href="#" class="social-card" target="_blank" rel="noopener">
+                <a href="#" class="social-card" target="_blank" rel="noopener"
+                   data-mira-hint="En YouTube se pueden alojar demostraciones, tutoriales y cápsulas educativas.">
                     <i class="ri-youtube-line"></i>
                     <span>YouTube</span>
                 </a>
@@ -250,13 +280,14 @@
         </section>
 
         <!-- CONTACTO -->
-        <section id="contacto" class="section">
+        <section id="contacto" class="section" data-mira-section="contacto">
             <div class="section-header">
                 <h2>Contacto</h2>
                 <p>Conversemos tu próximo proyecto</p>
             </div>
             <div class="contact-grid">
-                <form class="contact-form" autocomplete="off">
+                <form class="contact-form" autocomplete="off"
+                      data-mira-hint="Aquí puede ingresar sus datos para coordinar una reunión o recibir información personalizada.">
                     <div class="form-group">
                         <label for="nombre">Nombre completo</label>
                         <input type="text" id="nombre" name="nombre" placeholder="Tu nombre" required />
@@ -277,7 +308,7 @@
                         <label for="mensaje">Mensaje</label>
                         <textarea id="mensaje" name="mensaje" rows="4" placeholder="Cuéntanos qué necesitas"></textarea>
                     </div>
-                    <button type="submit" class="btn-primary btn-full" data-mira-hint="Este formulario es demostrativo. Más adelante podremos conectarlo a un sistema real de contacto.">
+                    <button type="submit" class="btn-primary btn-full">
                         <i class="ri-send-plane-fill"></i> Enviar mensaje
                     </button>
                     <p class="form-note">
@@ -291,7 +322,7 @@
                     <p><i class="ri-time-fill"></i> Atención a instituciones y proyectos por agenda.</p>
                     <p>
                         Podemos conectar tus sistemas actuales, crear nuevas plataformas o diseñar proyectos educativos
-                        con IA a la medida, todo con un enfoque futurista y práctico.
+                        con IA a la medida de tu comunidad.
                     </p>
                 </div>
             </div>
@@ -306,18 +337,25 @@
     <div id="mira-widget">
         <!-- Botón flotante -->
         <button id="mira-toggle" aria-label="Abrir asistente MIRA">
-            <!-- Puedes usar PNG / JPG / JPEG / SVG / WEBP -->
-            <img src="assets/logo-mira.png" alt="MIRA Logo">
+            <picture>
+                <source srcset="assets/logo-mira.svg" type="image/svg+xml">
+                <source srcset="assets/logo-mira.webp" type="image/webp">
+                <img src="assets/logo-mira.png" alt="MIRA Logo">
+            </picture>
         </button>
 
         <!-- Ventana del chat -->
         <div id="mira-chat" class="mira-chat-closed">
             <div class="mira-header">
                 <div class="mira-header-info">
-                    <img src="assets/logo-mira.png" alt="MIRA Logo">
+                    <picture>
+                        <source srcset="assets/logo-mira.svg" type="image/svg+xml">
+                        <source srcset="assets/logo-mira.webp" type="image/webp">
+                        <img src="assets/logo-mira.png" alt="MIRA Logo">
+                    </picture>
                     <div>
                         <h4>MIRA · Asistente IA</h4>
-                        <span>Futuristic AI · Voz femenina</span>
+                        <span>Inteligencia asistencial · Voz femenina</span>
                     </div>
                 </div>
                 <div class="mira-header-actions">
@@ -330,7 +368,7 @@
                 </div>
             </div>
             <div class="mira-messages" id="miraMessages">
-                <!-- Mensaje inicial se inyecta desde JS -->
+                <!-- Mensaje inicial se inyecta por JS -->
             </div>
             <div class="mira-loading" id="miraLoading">
                 <div class="loader-mini"></div>
