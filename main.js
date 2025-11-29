@@ -3,7 +3,10 @@
 // URL del backend de MIRA en Render (NO expone la API key de OpenRouter)
 const MIRA_API_URL = "https://ceo-ai-mira.onrender.com/api/mira";
 
-// 1. Loader global (se oculta después de unos segundos)
+/* ------------------------------------------------------------------
+   1. Loader global + inicialización de fondo animado
+------------------------------------------------------------------ */
+
 window.addEventListener("load", () => {
     const loader = document.getElementById("global-loader");
     setTimeout(() => {
@@ -13,7 +16,10 @@ window.addEventListener("load", () => {
     initStarfield();
 });
 
-// 2. Año en footer
+/* ------------------------------------------------------------------
+   2. Año en footer
+------------------------------------------------------------------ */
+
 document.addEventListener("DOMContentLoaded", () => {
     const yearSpan = document.getElementById("year");
     if (yearSpan) {
@@ -21,7 +27,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 
-// 3. Navbar mobile
+/* ------------------------------------------------------------------
+   3. Navbar mobile
+------------------------------------------------------------------ */
+
 const navToggle = document.getElementById("navToggle");
 const navLinks = document.getElementById("navLinks");
 
@@ -164,7 +173,10 @@ function initStarfield() {
             ctx.lineWidth = 2;
             ctx.beginPath();
             ctx.moveTo(s.x, s.y);
-            ctx.lineTo(s.x - s.vx * 0.8 - length * 0.4, s.y - s.vy * 0.8 - length * 0.4);
+            ctx.lineTo(
+                s.x - s.vx * 0.8 - length * 0.4,
+                s.y - s.vy * 0.8 - length * 0.4
+            );
             ctx.stroke();
 
             if (s.life > s.maxLife) {
@@ -257,7 +269,9 @@ if (miraForm && miraInput) {
     });
 }
 
-// Agregar mensajes
+/* ------------------------------------------------------------------
+   6. Mensajes del chat
+------------------------------------------------------------------ */
 
 function addUserMessage(text) {
     if (!miraMessages) return;
@@ -285,7 +299,10 @@ function scrollMiraToBottom() {
     miraMessages.scrollTop = miraMessages.scrollHeight;
 }
 
-// 6. "Pensar" y responder usando backend + fallback local
+/* ------------------------------------------------------------------
+   7. Llamada al backend de MIRA + fallback local
+------------------------------------------------------------------ */
+
 async function handleMiraResponse(userText) {
     if (!miraLoading) return;
     miraLoading.classList.add("active");
@@ -315,7 +332,10 @@ async function handleMiraResponse(userText) {
     addMiraMessage(reply);
 }
 
-// 7. Respuestas básicas según texto del usuario (fallback local)
+/* ------------------------------------------------------------------
+   7b. Respuestas básicas locales (fallback)
+------------------------------------------------------------------ */
+
 function generateMiraResponse(text) {
     const t = text.toLowerCase();
 
@@ -339,7 +359,13 @@ function generateMiraResponse(text) {
         return "Desarrollamos páginas web futuristas, responsivas y conectadas a bases de datos o APIs. Podemos crear un sitio para su colegio, emprendimiento o empresa, incluyendo panel de administración y módulos personalizados.";
     }
 
-    if (t.includes("redes") || t.includes("instagram") || t.includes("facebook") || t.includes("youtube") || t.includes("x ")) {
+    if (
+        t.includes("redes") ||
+        t.includes("instagram") ||
+        t.includes("facebook") ||
+        t.includes("youtube") ||
+        t.includes("x ")
+    ) {
         return "Gestionamos redes sociales como Instagram, Facebook, X y YouTube: identidad visual, diseño de posts, reels y videos, además de planificación de contenidos para que su proyecto tenga una presencia digital coherente.";
     }
 
@@ -347,7 +373,13 @@ function generateMiraResponse(text) {
         return "Puede escribir directamente a <b>contacto@innova-space-edu.cl</b> o usar el formulario de contacto de esta web. Coordinamos reuniones para revisar su proyecto y armar una propuesta a medida.";
     }
 
-    if (t.includes("ubicación") || t.includes("dónde están") || t.includes("donde están") || t.includes("donde estan")) {
+    if (
+        t.includes("ubicación") ||
+        t.includes("ubicacion") ||
+        t.includes("dónde están") ||
+        t.includes("donde están") ||
+        t.includes("donde estan")
+    ) {
         return "Innova Space Education SPA proyecta su trabajo desde la zona norte de Chile, con base en Vallenar – Antofagasta, y atención remota a instituciones de todo el país.";
     }
 
@@ -355,7 +387,10 @@ function generateMiraResponse(text) {
     return "He registrado su consulta. Soy una versión de MIRA integrada en esta página para explicar los servicios de Innova Space Education SPA, la forma en que trabajamos con IA, desarrollo web y proyectos educativos. ¿Sobre qué área le gustaría profundizar?";
 }
 
-// Utilidad para quitar etiquetas HTML antes de hablar
+/* ------------------------------------------------------------------
+   7c. Utilidades para limpiar texto antes de hablar
+------------------------------------------------------------------ */
+
 function stripHtml(html) {
     const temp = document.createElement("div");
     temp.innerHTML = html;
@@ -368,10 +403,11 @@ function sanitizeForSpeech(text) {
 
     let clean = text;
 
-    // Eliminar emojis (rango Unicode general)
+    // Eliminar emojis (rangos Unicode generales)
     try {
         clean = clean.replace(/[\u{1F300}-\u{1FAFF}]/gu, "");
-        clean = clean.replace(/[\u2600-\u27BF]/g, ""); // símbolos varios
+        clean = clean.replace(/[\u2600-\u27BF]/g, "");
+        clean = clean.replace(/[\uFE0F]/g, ""); // variation selectors
     } catch (e) {
         // Si el navegador no soporta unicode escapes, ignoramos este paso
     }
@@ -405,7 +441,7 @@ function initMiraVoice() {
     // Buscar voz femenina en español primero, luego en otros idiomas
     let femaleSpanish = voices.find(v =>
         v.lang.toLowerCase().startsWith("es") &&
-        /female|mujer|español/i.test(v.name)
+        /female|mujer|español|espanol/i.test(v.name)
     );
 
     let anySpanish = voices.find(v => v.lang.toLowerCase().startsWith("es"));
@@ -463,12 +499,19 @@ function setupMiraHints() {
 
 // Voz al entrar en secciones clave (se dice solo una vez por sección)
 function setupMiraSectionObserver() {
-    const sections = document.querySelectorAll(".section[data-mira-section]");
-    if (!("IntersectionObserver" in window) || sections.length === 0) return;
+    if (!("IntersectionObserver" in window)) return;
 
-    const spokenSections = new Set();
+    const sectionsConfig = [
+        { id: "hero", key: "hero" },
+        { id: "sobre", key: "sobre" },
+        { id: "servicios", key: "servicios" },
+        { id: "portafolio", key: "portafolio" },
+        { id: "redes", key: "redes" },
+        { id: "contacto", key: "contacto" }
+    ];
 
     const messages = {
+        "hero": "Está en la sección de inicio de Innova Space Education. Aquí puede ver el mensaje principal y acceder rápidamente al portafolio o al contacto.",
         "sobre": "En la sección Sobre la empresa puede conocer el enfoque de Innova Space Education y las áreas en las que trabajamos.",
         "servicios": "En la sección de Servicios encontrará un resumen de las soluciones en inteligencia artificial, desarrollo web, redes sociales y proyectos educativos.",
         "portafolio": "En el Portafolio se muestran proyectos y plataformas que podemos adaptar a su institución o emprendimiento.",
@@ -476,20 +519,24 @@ function setupMiraSectionObserver() {
         "contacto": "En la sección de Contacto puede enviarnos sus datos para coordinar una reunión o solicitar una propuesta."
     };
 
+    const spokenSections = new Set();
     const observer = new IntersectionObserver(entries => {
         entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                const id = entry.target.getAttribute("data-mira-section");
-                if (!id || spokenSections.has(id)) return;
-                spokenSections.add(id);
+            if (!entry.isIntersecting) return;
+            const key = entry.target.getAttribute("data-mira-key");
+            if (!key || spokenSections.has(key)) return;
+            spokenSections.add(key);
 
-                const msg = messages[id];
-                if (msg) {
-                    speakWithMiraVoice(msg);
-                }
-            }
+            const msg = messages[key];
+            if (msg) speakWithMiraVoice(msg);
         });
     }, { threshold: 0.4 });
 
-    sections.forEach(sec => observer.observe(sec));
+    sectionsConfig.forEach(config => {
+        const el = document.getElementById(config.id);
+        if (el) {
+            el.setAttribute("data-mira-key", config.key);
+            observer.observe(el);
+        }
+    });
 }
