@@ -1,12 +1,10 @@
 // MAIN JS PARA INNOVA SPACE EDUCATION SPA
 
-// URL del backend de MIRA en Render (NO expone la API key de OpenRouter)
+// URL del backend de MIRA en Render (NO expone la API key de OpenRouter ni ElevenLabs)
 const MIRA_API_URL = "https://ceo-ai-mira.onrender.com/api/mira";
+const MIRA_TTS_URL = "https://ceo-ai-mira.onrender.com/api/tts";
 
-/* ------------------------------------------------------------------
-   1. Loader global + inicialización de fondo animado
------------------------------------------------------------------- */
-
+// 1. Loader global (se oculta después de unos segundos)
 window.addEventListener("load", () => {
     const loader = document.getElementById("global-loader");
     setTimeout(() => {
@@ -16,10 +14,7 @@ window.addEventListener("load", () => {
     initStarfield();
 });
 
-/* ------------------------------------------------------------------
-   2. Año en footer
------------------------------------------------------------------- */
-
+// 2. Año en footer
 document.addEventListener("DOMContentLoaded", () => {
     const yearSpan = document.getElementById("year");
     if (yearSpan) {
@@ -27,10 +22,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 
-/* ------------------------------------------------------------------
-   3. Navbar mobile
------------------------------------------------------------------- */
-
+// 3. Navbar mobile
 const navToggle = document.getElementById("navToggle");
 const navLinks = document.getElementById("navLinks");
 
@@ -173,10 +165,7 @@ function initStarfield() {
             ctx.lineWidth = 2;
             ctx.beginPath();
             ctx.moveTo(s.x, s.y);
-            ctx.lineTo(
-                s.x - s.vx * 0.8 - length * 0.4,
-                s.y - s.vy * 0.8 - length * 0.4
-            );
+            ctx.lineTo(s.x - s.vx * 0.8 - length * 0.4, s.y - s.vy * 0.8 - length * 0.4);
             ctx.stroke();
 
             if (s.life > s.maxLife) {
@@ -199,12 +188,11 @@ function initStarfield() {
 }
 
 /* ------------------------------------------------------------------
-   5. Chatbot MIRA (lógica básica con voz femenina)
+   5. Chatbot MIRA (con voz femenina vía ElevenLabs TTS)
 ------------------------------------------------------------------ */
 
 // Estado de MIRA
 let miraVoiceEnabled = true;
-let miraVoice = null;
 
 // Elementos
 const miraToggleBtn = document.getElementById("mira-toggle");
@@ -269,9 +257,7 @@ if (miraForm && miraInput) {
     });
 }
 
-/* ------------------------------------------------------------------
-   6. Mensajes del chat
------------------------------------------------------------------- */
+// Agregar mensajes
 
 function addUserMessage(text) {
     if (!miraMessages) return;
@@ -299,10 +285,7 @@ function scrollMiraToBottom() {
     miraMessages.scrollTop = miraMessages.scrollHeight;
 }
 
-/* ------------------------------------------------------------------
-   7. Llamada al backend de MIRA + fallback local
------------------------------------------------------------------- */
-
+// 6. "Pensar" y responder usando backend + fallback local
 async function handleMiraResponse(userText) {
     if (!miraLoading) return;
     miraLoading.classList.add("active");
@@ -332,10 +315,7 @@ async function handleMiraResponse(userText) {
     addMiraMessage(reply);
 }
 
-/* ------------------------------------------------------------------
-   7b. Respuestas básicas locales (fallback)
------------------------------------------------------------------- */
-
+// 7. Respuestas básicas según texto del usuario (fallback local)
 function generateMiraResponse(text) {
     const t = text.toLowerCase();
 
@@ -359,13 +339,7 @@ function generateMiraResponse(text) {
         return "Desarrollamos páginas web futuristas, responsivas y conectadas a bases de datos o APIs. Podemos crear un sitio para su colegio, emprendimiento o empresa, incluyendo panel de administración y módulos personalizados.";
     }
 
-    if (
-        t.includes("redes") ||
-        t.includes("instagram") ||
-        t.includes("facebook") ||
-        t.includes("youtube") ||
-        t.includes("x ")
-    ) {
+    if (t.includes("redes") || t.includes("instagram") || t.includes("facebook") || t.includes("youtube") || t.includes("x ")) {
         return "Gestionamos redes sociales como Instagram, Facebook, X y YouTube: identidad visual, diseño de posts, reels y videos, además de planificación de contenidos para que su proyecto tenga una presencia digital coherente.";
     }
 
@@ -373,13 +347,7 @@ function generateMiraResponse(text) {
         return "Puede escribir directamente a <b>contacto@innova-space-edu.cl</b> o usar el formulario de contacto de esta web. Coordinamos reuniones para revisar su proyecto y armar una propuesta a medida.";
     }
 
-    if (
-        t.includes("ubicación") ||
-        t.includes("ubicacion") ||
-        t.includes("dónde están") ||
-        t.includes("donde están") ||
-        t.includes("donde estan")
-    ) {
+    if (t.includes("ubicación") || t.includes("dónde están") || t.includes("donde están") || t.includes("donde estan")) {
         return "Innova Space Education SPA proyecta su trabajo desde la zona norte de Chile, con base en Vallenar – Antofagasta, y atención remota a instituciones de todo el país.";
     }
 
@@ -387,10 +355,7 @@ function generateMiraResponse(text) {
     return "He registrado su consulta. Soy una versión de MIRA integrada en esta página para explicar los servicios de Innova Space Education SPA, la forma en que trabajamos con IA, desarrollo web y proyectos educativos. ¿Sobre qué área le gustaría profundizar?";
 }
 
-/* ------------------------------------------------------------------
-   7c. Utilidades para limpiar texto antes de hablar
------------------------------------------------------------------- */
-
+// Utilidad para quitar etiquetas HTML antes de hablar
 function stripHtml(html) {
     const temp = document.createElement("div");
     temp.innerHTML = html;
@@ -403,11 +368,10 @@ function sanitizeForSpeech(text) {
 
     let clean = text;
 
-    // Eliminar emojis (rangos Unicode generales)
+    // Eliminar emojis (rango Unicode general)
     try {
         clean = clean.replace(/[\u{1F300}-\u{1FAFF}]/gu, "");
-        clean = clean.replace(/[\u2600-\u27BF]/g, "");
-        clean = clean.replace(/[\uFE0F]/g, ""); // variation selectors
+        clean = clean.replace(/[\u2600-\u27BF]/g, ""); // símbolos varios
     } catch (e) {
         // Si el navegador no soporta unicode escapes, ignoramos este paso
     }
@@ -422,52 +386,36 @@ function sanitizeForSpeech(text) {
 }
 
 /* ------------------------------------------------------------------
-   8. Voz femenina con SpeechSynthesis
+   8. Voz femenina con ElevenLabs TTS (vía backend)
 ------------------------------------------------------------------ */
 
-function initMiraVoice() {
-    if (!("speechSynthesis" in window)) {
-        console.warn("SpeechSynthesis no disponible en este navegador.");
-        miraVoiceEnabled = false;
-        if (miraVoiceToggle) {
-            miraVoiceToggle.classList.add("voice-off");
-        }
-        return;
-    }
-
-    const voices = window.speechSynthesis.getVoices();
-    if (!voices || voices.length === 0) return;
-
-    // Buscar voz femenina en español primero, luego en otros idiomas
-    let femaleSpanish = voices.find(v =>
-        v.lang.toLowerCase().startsWith("es") &&
-        /female|mujer|español|espanol/i.test(v.name)
-    );
-
-    let anySpanish = voices.find(v => v.lang.toLowerCase().startsWith("es"));
-    let anyFemale = voices.find(v => /female|mujer/i.test(v.name));
-
-    miraVoice = femaleSpanish || anySpanish || anyFemale || voices[0];
-}
-
-if ("speechSynthesis" in window) {
-    window.speechSynthesis.onvoiceschanged = initMiraVoice;
-    initMiraVoice();
-}
-
-function speakWithMiraVoice(text) {
+async function speakWithMiraVoice(text) {
     if (!miraVoiceEnabled) return;
-    if (!("speechSynthesis" in window)) return;
     if (!text) return;
 
-    const utter = new SpeechSynthesisUtterance(text);
-    if (miraVoice) utter.voice = miraVoice;
-    utter.rate = 1.0;
-    utter.pitch = 1.1;
-    utter.volume = 1.0;
+    try {
+        const res = await fetch(MIRA_TTS_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text })
+        });
 
-    window.speechSynthesis.cancel();
-    window.speechSynthesis.speak(utter);
+        if (!res.ok) {
+            console.warn("Fallo HTTP en TTS, status:", res.status);
+            return;
+        }
+
+        const arrayBuffer = await res.arrayBuffer();
+        const blob = new Blob([arrayBuffer], { type: "audio/mpeg" });
+        const url = URL.createObjectURL(blob);
+        const audio = new Audio(url);
+
+        audio.play().catch(err => {
+            console.warn("No se pudo reproducir el audio TTS:", err);
+        });
+    } catch (error) {
+        console.error("Error al llamar a TTS de MIRA:", error);
+    }
 }
 
 // Botón para activar/desactivar voz
@@ -499,19 +447,12 @@ function setupMiraHints() {
 
 // Voz al entrar en secciones clave (se dice solo una vez por sección)
 function setupMiraSectionObserver() {
-    if (!("IntersectionObserver" in window)) return;
+    const sections = document.querySelectorAll(".section[data-mira-section]");
+    if (!("IntersectionObserver" in window) || sections.length === 0) return;
 
-    const sectionsConfig = [
-        { id: "hero", key: "hero" },
-        { id: "sobre", key: "sobre" },
-        { id: "servicios", key: "servicios" },
-        { id: "portafolio", key: "portafolio" },
-        { id: "redes", key: "redes" },
-        { id: "contacto", key: "contacto" }
-    ];
+    const spokenSections = new Set();
 
     const messages = {
-        "hero": "Está en la sección de inicio de Innova Space Education. Aquí puede ver el mensaje principal y acceder rápidamente al portafolio o al contacto.",
         "sobre": "En la sección Sobre la empresa puede conocer el enfoque de Innova Space Education y las áreas en las que trabajamos.",
         "servicios": "En la sección de Servicios encontrará un resumen de las soluciones en inteligencia artificial, desarrollo web, redes sociales y proyectos educativos.",
         "portafolio": "En el Portafolio se muestran proyectos y plataformas que podemos adaptar a su institución o emprendimiento.",
@@ -519,24 +460,20 @@ function setupMiraSectionObserver() {
         "contacto": "En la sección de Contacto puede enviarnos sus datos para coordinar una reunión o solicitar una propuesta."
     };
 
-    const spokenSections = new Set();
     const observer = new IntersectionObserver(entries => {
         entries.forEach(entry => {
-            if (!entry.isIntersecting) return;
-            const key = entry.target.getAttribute("data-mira-key");
-            if (!key || spokenSections.has(key)) return;
-            spokenSections.add(key);
+            if (entry.isIntersecting) {
+                const id = entry.target.getAttribute("data-mira-section");
+                if (!id || spokenSections.has(id)) return;
+                spokenSections.add(id);
 
-            const msg = messages[key];
-            if (msg) speakWithMiraVoice(msg);
+                const msg = messages[id];
+                if (msg) {
+                    speakWithMiraVoice(msg);
+                }
+            }
         });
     }, { threshold: 0.4 });
 
-    sectionsConfig.forEach(config => {
-        const el = document.getElementById(config.id);
-        if (el) {
-            el.setAttribute("data-mira-key", config.key);
-            observer.observe(el);
-        }
-    });
+    sections.forEach(sec => observer.observe(sec));
 }
