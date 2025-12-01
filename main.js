@@ -165,7 +165,10 @@ function initStarfield() {
             ctx.lineWidth = 2;
             ctx.beginPath();
             ctx.moveTo(s.x, s.y);
-            ctx.lineTo(s.x - s.vx * 0.8 - length * 0.4, s.y - s.vy * 0.8 - length * 0.4);
+            ctx.lineTo(
+                s.x - s.vx * 0.8 - length * 0.4,
+                s.y - s.vy * 0.8 - length * 0.4
+            );
             ctx.stroke();
 
             if (s.life > s.maxLife) {
