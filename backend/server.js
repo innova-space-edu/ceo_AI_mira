@@ -1,4 +1,4 @@
-// Backend simple para MIRA (Render + OpenRouter)
+// Backend simple para MIRA (Render + OpenRouter + ElevenLabs TTS)
 const express = require("express");
 const cors = require("cors");
 
@@ -8,13 +8,25 @@ const PORT = process.env.PORT || 3001;
 app.use(cors()); // si luego quieres restringir, acá se puede ajustar
 app.use(express.json());
 
+// --- CLAVES DESDE VARIABLES DE ENTORNO ---
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
+const ELEVENLABS_API_KEY = process.env.ELEVENLABS_API_KEY;
+// VOZ FEMENINA, SUAVE, DULCE, TONO FIRME -> CONFIGURA UN VOICE_ID DE TU CUENTA
+const ELEVENLABS_VOICE_ID = process.env.ELEVENLABS_VOICE_ID || "ELEVEN_VOICE_ID_AQUI";
 
 if (!OPENROUTER_API_KEY) {
     console.warn("⚠️ No se encontró OPENROUTER_API_KEY en las variables de entorno.");
 }
+if (!ELEVENLABS_API_KEY) {
+    console.warn("⚠️ No se encontró ELEVENLABS_API_KEY en las variables de entorno.");
+}
+if (!ELEVENLABS_VOICE_ID || ELEVENLABS_VOICE_ID === "ELEVEN_VOICE_ID_AQUI") {
+    console.warn("⚠️ Recuerda configurar ELEVENLABS_VOICE_ID en Render con el ID de voz femenina que quieras usar.");
+}
 
-// Endpoint principal: /api/mira
+// ---------------------------------------------------------------------
+// 1) Endpoint principal de chat: /api/mira  (OpenRouter)
+// ---------------------------------------------------------------------
 app.post("/api/mira", async (req, res) => {
     try {
         if (!OPENROUTER_API_KEY) {
@@ -103,6 +115,73 @@ Si el usuario hace preguntas técnicas de IA o web, puedes explicar conceptos ge
     }
 });
 
+// ---------------------------------------------------------------------
+// 2) Endpoint de TTS: /api/tts  (ElevenLabs - voz femenina, suave, dulce)
+// ---------------------------------------------------------------------
+app.post("/api/tts", async (req, res) => {
+    try {
+        if (!ELEVENLABS_API_KEY) {
+            return res.status(500).json({
+                error: "Server misconfigured: missing ElevenLabs API key."
+            });
+        }
+        if (!ELEVENLABS_VOICE_ID || ELEVENLABS_VOICE_ID === "ELEVEN_VOICE_ID_AQUI") {
+            return res.status(500).json({
+                error: "Server misconfigured: missing ElevenLabs voice ID."
+            });
+        }
+
+        const { text } = req.body || {};
+        if (!text || typeof text !== "string") {
+            return res.status(400).json({ error: "text es obligatorio" });
+        }
+
+        const ttsResponse = await fetch(
+            `https://api.elevenlabs.io/v1/text-to-speech/${ELEVENLABS_VOICE_ID}`,
+            {
+                method: "POST",
+                headers: {
+                    "xi-api-key": ELEVENLABS_API_KEY,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    text,
+                    model_id: "eleven_multilingual_v2",
+                    voice_settings: {
+                        stability: 0.4,
+                        similarity_boost: 0.8,
+                        style: 0.5,
+                        use_speaker_boost: true
+                    }
+                })
+            }
+        );
+
+        if (!ttsResponse.ok) {
+            const txt = await ttsResponse.text();
+            console.error("Error ElevenLabs TTS:", ttsResponse.status, txt);
+            return res.status(500).json({
+                error: "Error al llamar a ElevenLabs TTS",
+                status: ttsResponse.status
+            });
+        }
+
+        const audioBuffer = await ttsResponse.arrayBuffer();
+        const audioData = Buffer.from(audioBuffer);
+
+        res.set("Content-Type", "audio/mpeg");
+        res.send(audioData);
+    } catch (err) {
+        console.error("Error en /api/tts:", err);
+        return res.status(500).json({
+            error: "Error interno del servidor en TTS"
+        });
+    }
+});
+
+// ---------------------------------------------------------------------
+// 3) Raíz de prueba
+// ---------------------------------------------------------------------
 app.get("/", (req, res) => {
     res.send("MIRA backend funcionando 🚀");
 });
