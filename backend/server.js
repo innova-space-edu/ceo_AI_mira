@@ -1,191 +1,118 @@
-// Backend simple para MIRA (Render + OpenRouter + ElevenLabs TTS)
+// Backend MIRA (Render + OpenRouter) — Versión sin ElevenLabs
+// TTS será manejado 100% en el frontend usando Silero (modelo alojado en GitHub Pages)
+
 const express = require("express");
 const cors = require("cors");
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-app.use(cors()); // si luego quieres restringir, acá se puede ajustar
+app.use(cors());
 app.use(express.json());
 
-// --- CLAVES DESDE VARIABLES DE ENTORNO ---
+// -------------------------------------------------------------
+// VARIABLES DE ENTORNO
+// -------------------------------------------------------------
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
-const ELEVENLABS_API_KEY = process.env.ELEVENLABS_API_KEY;
-// VOZ FEMENINA, SUAVE, DULCE, TONO FIRME -> CONFIGURA UN VOICE_ID DE TU CUENTA
-const ELEVENLABS_VOICE_ID = process.env.ELEVENLABS_VOICE_ID || "ELEVEN_VOICE_ID_AQUI";
 
-if (!OPENROUTER_API_KEY) {
-    console.warn("⚠️ No se encontró OPENROUTER_API_KEY en las variables de entorno.");
-}
-if (!ELEVENLABS_API_KEY) {
-    console.warn("⚠️ No se encontró ELEVENLABS_API_KEY en las variables de entorno.");
-}
-if (!ELEVENLABS_VOICE_ID || ELEVENLABS_VOICE_ID === "ELEVEN_VOICE_ID_AQUI") {
-    console.warn("⚠️ Recuerda configurar ELEVENLABS_VOICE_ID en Render con el ID de voz femenina que quieras usar.");
-}
+// LOGS INFORMATIVOS
+console.log("🔧 VARIABLES DE ENTORNO:");
+console.log("OPENROUTER_API_KEY:", OPENROUTER_API_KEY ? "OK" : "❌ FALTA");
 
-// ---------------------------------------------------------------------
-// 1) Endpoint principal de chat: /api/mira  (OpenRouter)
-// ---------------------------------------------------------------------
+// -------------------------------------------------------------
+// 1) CHAT MIRA → OpenRouter
+// -------------------------------------------------------------
 app.post("/api/mira", async (req, res) => {
     try {
         if (!OPENROUTER_API_KEY) {
-            return res.status(500).json({
-                error: "Server misconfigured: missing OpenRouter API key."
-            });
+            return res.status(500).json({ error: "Falta OPENROUTER_API_KEY" });
         }
 
         const { message, history } = req.body || {};
-        if (!message || typeof message !== "string") {
+
+        if (!message) {
             return res.status(400).json({ error: "message es obligatorio" });
         }
 
-        const messages = [];
-
-        // Mensaje de sistema para el modelo
-        messages.push({
-            role: "system",
-            content: `
+        const messages = [
+            {
+                role: "system",
+                content: `
 Eres MIRA, la asistente virtual futurista de Innova Space Education SPA.
-Hablas en español, con tono cercano, profesional y optimista.
-Tu foco es explicar los servicios de la empresa:
-- Proyectos educativos con IA.
-- Asistentes virtuales como MIRA.
-- Desarrollo de páginas web futuristas e interactivas.
-- Gestión de redes sociales (Instagram, Facebook, X, YouTube).
-No inventes precios. Cuando preguntan por valores o propuestas concretas,
-invita a escribir a contacto@innova-space-edu.cl.
-Si el usuario saluda, responde de forma cálida.
-Si el usuario hace preguntas técnicas de IA o web, puedes explicar conceptos generales.
-            `.trim()
-        });
-
-        // Historial previo (si existe)
-        if (Array.isArray(history)) {
-            for (const msg of history) {
-                if (!msg || !msg.role || !msg.content) continue;
-                messages.push({
-                    role: msg.role,
-                    content: String(msg.content)
-                });
+Hablas español, tono femenino amable, profesional, futurista.
+No uses emojis.
+Tu enfoque:
+- IA educativa e innovación
+- Desarrollo web futurista
+- Asistentes virtuales
+- Remodelación de salas temáticas
+- Integración de tecnología en colegios
+En cotizaciones, invita a escribir a contacto@innova-space-edu.cl.
+                `.trim()
             }
+        ];
+
+        if (Array.isArray(history)) {
+            history.forEach(h => {
+                if (h?.role && h?.content) messages.push(h);
+            });
         }
 
-        // Mensaje actual del usuario
-        messages.push({
-            role: "user",
-            content: message
-        });
+        messages.push({ role: "user", content: message });
 
-        // Llamada a OpenRouter
         const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
             method: "POST",
             headers: {
                 "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
                 "Content-Type": "application/json",
                 "HTTP-Referer": "https://innova-space-edu.cl",
-                "X-Title": "Innova Space Education SPA"
+                "X-Title": "Innova Space Education - MIRA"
             },
             body: JSON.stringify({
                 model: "meta-llama/llama-3.1-70b-instruct",
                 messages,
                 temperature: 0.6,
-                max_tokens: 600
+                max_tokens: 500
             })
         });
 
         if (!response.ok) {
-            const text = await response.text();
-            console.error("Error de OpenRouter:", response.status, text);
-            return res.status(500).json({
-                error: "Error al llamar a OpenRouter",
-                status: response.status
-            });
+            const txt = await response.text();
+            console.error("❌ OpenRouter Error:", txt);
+            return res.status(500).json({ error: "Error OpenRouter", detail: txt });
         }
 
         const data = await response.json();
-        const reply = data?.choices?.[0]?.message?.content || "No pude generar una respuesta en este momento.";
+        const reply = data?.choices?.[0]?.message?.content ?? "No pude generar respuesta.";
 
-        return res.json({ reply });
-    } catch (err) {
-        console.error("Error en /api/mira:", err);
-        return res.status(500).json({
-            error: "Error interno del servidor"
-        });
+        res.json({ reply });
+
+    } catch (error) {
+        console.error("❌ /api/mira ERROR:", error);
+        res.status(500).json({ error: "Error interno del servidor" });
     }
 });
 
-// ---------------------------------------------------------------------
-// 2) Endpoint de TTS: /api/tts  (ElevenLabs - voz femenina, suave, dulce)
-// ---------------------------------------------------------------------
+// -------------------------------------------------------------
+// 2) API DE TTS (ELIMINADA) — SOLO DEVUELVE ERROR CONTROLADO
+// -------------------------------------------------------------
+// Ahora el TTS se maneja 100% en el frontend con Silero
 app.post("/api/tts", async (req, res) => {
-    try {
-        if (!ELEVENLABS_API_KEY) {
-            return res.status(500).json({
-                error: "Server misconfigured: missing ElevenLabs API key."
-            });
-        }
-        if (!ELEVENLABS_VOICE_ID || ELEVENLABS_VOICE_ID === "ELEVEN_VOICE_ID_AQUI") {
-            return res.status(500).json({
-                error: "Server misconfigured: missing ElevenLabs voice ID."
-            });
-        }
-
-        const { text } = req.body || {};
-        if (!text || typeof text !== "string") {
-            return res.status(400).json({ error: "text es obligatorio" });
-        }
-
-        const ttsResponse = await fetch(
-            `https://api.elevenlabs.io/v1/text-to-speech/${ELEVENLABS_VOICE_ID}`,
-            {
-                method: "POST",
-                headers: {
-                    "xi-api-key": ELEVENLABS_API_KEY,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    text,
-                    model_id: "eleven_multilingual_v2",
-                    voice_settings: {
-                        stability: 0.4,
-                        similarity_boost: 0.8,
-                        style: 0.5,
-                        use_speaker_boost: true
-                    }
-                })
-            }
-        );
-
-        if (!ttsResponse.ok) {
-            const txt = await ttsResponse.text();
-            console.error("Error ElevenLabs TTS:", ttsResponse.status, txt);
-            return res.status(500).json({
-                error: "Error al llamar a ElevenLabs TTS",
-                status: ttsResponse.status
-            });
-        }
-
-        const audioBuffer = await ttsResponse.arrayBuffer();
-        const audioData = Buffer.from(audioBuffer);
-
-        res.set("Content-Type", "audio/mpeg");
-        res.send(audioData);
-    } catch (err) {
-        console.error("Error en /api/tts:", err);
-        return res.status(500).json({
-            error: "Error interno del servidor en TTS"
-        });
-    }
+    return res.status(501).json({
+        error: "Este servidor ya no genera TTS. El TTS se procesa en el frontend usando Silero."
+    });
 });
 
-// ---------------------------------------------------------------------
-// 3) Raíz de prueba
-// ---------------------------------------------------------------------
+// -------------------------------------------------------------
+// 3) HOME TEST
+// -------------------------------------------------------------
 app.get("/", (req, res) => {
-    res.send("MIRA backend funcionando 🚀");
+    res.send("🚀 MIRA backend funcionando correctamente (TTS manejado en el frontend con Silero)");
 });
 
+// -------------------------------------------------------------
+// INICIO DEL SERVIDOR
+// -------------------------------------------------------------
 app.listen(PORT, () => {
-    console.log(`MIRA backend escuchando en puerto ${PORT}`);
+    console.log(`🚀 Backend MIRA escuchando en puerto ${PORT}`);
 });
