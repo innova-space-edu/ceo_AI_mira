@@ -12,7 +12,7 @@ app.use(express.json());
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
 const ELEVENLABS_API_KEY = process.env.ELEVENLABS_API_KEY;
 // VOZ FEMENINA, SUAVE, DULCE, TONO FIRME -> CONFIGURA UN VOICE_ID DE TU CUENTA
-const ELEVENLABS_VOICE_ID = process.env.ELEVENLABS_VOICE_ID || "cgSgspJ2msm6clMCkdW9";
+const ELEVENLABS_VOICE_ID = process.env.ELEVENLABS_VOICE_ID || "ELEVEN_VOICE_ID_AQUI";
 
 if (!OPENROUTER_API_KEY) {
     console.warn("⚠️ No se encontró OPENROUTER_API_KEY en las variables de entorno.");
@@ -20,7 +20,7 @@ if (!OPENROUTER_API_KEY) {
 if (!ELEVENLABS_API_KEY) {
     console.warn("⚠️ No se encontró ELEVENLABS_API_KEY en las variables de entorno.");
 }
-if (!ELEVENLABS_VOICE_ID || ELEVENLABS_VOICE_ID === "cgSgspJ2msm6clMCkdW9") {
+if (!ELEVENLABS_VOICE_ID || ELEVENLABS_VOICE_ID === "ELEVEN_VOICE_ID_AQUI") {
     console.warn("⚠️ Recuerda configurar ELEVENLABS_VOICE_ID en Render con el ID de voz femenina que quieras usar.");
 }
 
