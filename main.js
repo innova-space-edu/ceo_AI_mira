@@ -1,7 +1,8 @@
 // MAIN JS PARA INNOVA SPACE EDUCATION SPA
 
-// URL del backend de MIRA en Render (NO expone la API key de OpenRouter ni ElevenLabs)
+// URL del backend de MIRA en Render (NO expone la API key de OpenRouter)
 const MIRA_API_URL = "https://ceo-ai-mira.onrender.com/api/mira";
+// Ya no usamos backend TTS, pero dejamos la constante para no romper nada previo
 const MIRA_TTS_URL = "https://ceo-ai-mira.onrender.com/api/tts";
 
 // 1. Loader global (se oculta después de unos segundos)
@@ -191,7 +192,7 @@ function initStarfield() {
 }
 
 /* ------------------------------------------------------------------
-   5. Chatbot MIRA (con voz femenina vía ElevenLabs TTS)
+   5. Chatbot MIRA (con voz femenina vía Silero TTS local)
 ------------------------------------------------------------------ */
 
 // Estado de MIRA
@@ -229,7 +230,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Intentamos saludo de voz general (algunos navegadores requieren interacción previa)
     setTimeout(() => {
-        speakWithMiraVoice(MIRA_WELCOME_TEXT);
+        speakWithMiraVoice(MIRA_WELCOME_TEXT, "calida");
     }, 1600);
 });
 
@@ -389,35 +390,21 @@ function sanitizeForSpeech(text) {
 }
 
 /* ------------------------------------------------------------------
-   8. Voz femenina con ElevenLabs TTS (vía backend)
+   8. Voz femenina con Silero TTS (vía modelo local en GitHub)
+   Voz predeterminada: femenina latina neutra
 ------------------------------------------------------------------ */
 
-async function speakWithMiraVoice(text) {
+function speakWithMiraVoice(text, emotion = "neutral") {
     if (!miraVoiceEnabled) return;
     if (!text) return;
 
-    try {
-        const res = await fetch(MIRA_TTS_URL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ text })
-        });
+    const clean = sanitizeForSpeech(text);
 
-        if (!res.ok) {
-            console.warn("Fallo HTTP en TTS, status:", res.status);
-            return;
-        }
-
-        const arrayBuffer = await res.arrayBuffer();
-        const blob = new Blob([arrayBuffer], { type: "audio/mpeg" });
-        const url = URL.createObjectURL(blob);
-        const audio = new Audio(url);
-
-        audio.play().catch(err => {
-            console.warn("No se pudo reproducir el audio TTS:", err);
-        });
-    } catch (error) {
-        console.error("Error al llamar a TTS de MIRA:", error);
+    if (typeof window.sileroSpeak === "function") {
+        // Voz por defecto: latina_neutra
+        window.sileroSpeak(clean, "latina_neutra", emotion);
+    } else {
+        console.warn("Silero TTS aún no está cargado (sileroSpeak no definido).");
     }
 }
 
@@ -443,7 +430,7 @@ function setupMiraHints() {
         el.addEventListener("mouseenter", () => {
             const hint = el.getAttribute("data-mira-hint");
             const spoken = sanitizeForSpeech(hint || "");
-            speakWithMiraVoice(spoken);
+            speakWithMiraVoice(spoken, "dulce");
         });
     });
 }
@@ -472,7 +459,7 @@ function setupMiraSectionObserver() {
 
                 const msg = messages[id];
                 if (msg) {
-                    speakWithMiraVoice(msg);
+                    speakWithMiraVoice(msg, "calida");
                 }
             }
         });
