@@ -20,7 +20,7 @@ if (!OPENROUTER_API_KEY) {
 if (!ELEVENLABS_API_KEY) {
     console.warn("⚠️ No se encontró ELEVENLABS_API_KEY en las variables de entorno.");
 }
-if (!ELEVENLABS_VOICE_ID || ELEVENLABS_VOICE_ID === "ELEVEN_VOICE_ID_AQUI") {
+if (!ELEVENLABS_VOICE_ID || ELEVENLABS_VOICE_ID === "cgSgspJ2msm6clMCkdW9") {
     console.warn("⚠️ Recuerda configurar ELEVENLABS_VOICE_ID en Render con el ID de voz femenina que quieras usar.");
 }
 
