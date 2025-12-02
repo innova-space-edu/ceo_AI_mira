@@ -219,8 +219,8 @@ body {
     display: flex;
     align-items: center;
     padding: 0 7%;
-    gap: 40px;               /* NUEVO: espacio entre texto y video */
-    flex-wrap: wrap;         /* NUEVO: permite que se acomode mejor en pantallas medias */
+    gap: 40px;               /* espacio entre texto y video */
+    flex-wrap: wrap;         /* se acomoda mejor en pantallas medias */
 }
 
 .hero-text {
@@ -250,7 +250,7 @@ body {
     margin-bottom: 18px;
 }
 
-/* NUEVO: COLUMNA DEL VIDEO EN EL HERO */
+/* COLUMNA DEL VIDEO EN EL HERO */
 
 .hero-media {
     flex: 1 1 320px;
@@ -261,7 +261,7 @@ body {
 
 .video-carousel {
     width: 100%;
-    max-width: 480px; /* No cubre toda la pantalla, se ve como card futurista */
+    max-width: 480px;
     aspect-ratio: 16 / 9;
     border-radius: 24px;
     padding: 4px;
@@ -273,6 +273,12 @@ body {
     border: 1px solid rgba(255, 255, 255, 0.12);
     overflow: hidden;
     position: relative;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.video-carousel:hover {
+    transform: translateY(-4px) scale(1.01);
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 1);
 }
 
 /* Video interno */
@@ -286,16 +292,26 @@ body {
     background: #000;
 }
 
-/* Pequeño brillo animado en el borde (opcional) */
+/* Brillo animado suave en el borde */
+
 .video-carousel::after {
     content: "";
     position: absolute;
     inset: 0;
     pointer-events: none;
     border-radius: inherit;
-    background: radial-gradient(circle at 10% 0%, rgba(255,255,255,0.16), transparent 55%);
+    background: radial-gradient(circle at 10% 0%, rgba(255,255,255,0.14), transparent 55%);
     mix-blend-mode: screen;
-    opacity: 0.7;
+    animation: videoGlow 4s ease-in-out infinite alternate;
+}
+
+@keyframes videoGlow {
+    0% {
+        opacity: 0.4;
+    }
+    100% {
+        opacity: 0.9;
+    }
 }
 
 /* BOTONES GALAXIA DINÁMICOS */
@@ -926,7 +942,7 @@ body {
     }
     .hero-content {
         padding-inline: 5%;
-        flex-direction: column;      /* NUEVO: en móviles el video queda debajo del texto */
+        flex-direction: column;      /* en móviles el video queda debajo del texto */
         justify-content: center;
     }
     .hero-text {
