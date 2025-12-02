@@ -192,11 +192,13 @@ function initStarfield() {
 }
 
 /* ------------------------------------------------------------------
-   5. Chatbot MIRA (con voz femenina vía Silero TTS local)
+   5. Chatbot MIRA (con voz femenina vía TTS Piper backend)
 ------------------------------------------------------------------ */
 
 // Estado de MIRA
 let miraVoiceEnabled = true;
+// Flag para saber si el navegador ya permite audio
+let miraAudioUnlocked = false;
 
 // Elementos
 const miraToggleBtn = document.getElementById("mira-toggle");
@@ -227,12 +229,33 @@ document.addEventListener("DOMContentLoaded", () => {
     initMiraWelcome();
     setupMiraHints();
     setupMiraSectionObserver();
-
-    // Intentamos saludo de voz general (algunos navegadores requieren interacción previa)
-    setTimeout(() => {
-        speakWithMiraVoice(MIRA_WELCOME_TEXT, "calida");
-    }, 1600);
+    // (Quitamos el autoplay de voz aquí para evitar el bloqueo de navegador)
 });
+
+/* ------------------------------------------------------------------
+   5B. DESBLOQUEAR AUDIO APENAS HAYA INTERACCIÓN (mouse / touch)
+------------------------------------------------------------------ */
+
+function unlockMiraAudio() {
+    if (miraAudioUnlocked) return;
+    miraAudioUnlocked = true;
+
+    console.log("🔊 Audio desbloqueado para MIRA.");
+
+    // Primer saludo suave cuando el audio queda permitido
+    speakWithMiraVoice(
+        "Bienvenido. Soy MIRA, su asistente virtual. Estoy lista para ayudarle.",
+        "calida"
+    );
+
+    // Quitamos los listeners (solo ocurre una vez)
+    window.removeEventListener("mousemove", unlockMiraAudio);
+    window.removeEventListener("touchstart", unlockMiraAudio);
+}
+
+// Al mover el mouse o tocar la pantalla → el navegador permite audio
+window.addEventListener("mousemove", unlockMiraAudio);
+window.addEventListener("touchstart", unlockMiraAudio);
 
 // Abrir / cerrar chat
 if (miraToggleBtn && miraChat && miraCloseBtn) {
@@ -241,6 +264,14 @@ if (miraToggleBtn && miraChat && miraCloseBtn) {
         if (miraChat.classList.contains("mira-chat-open")) {
             initMiraWelcome();
             setTimeout(() => miraInput && miraInput.focus(), 200);
+
+            // Si el audio ya está desbloqueado, MIRA saluda al abrir el chat
+            if (miraAudioUnlocked) {
+                speakWithMiraVoice(
+                    "Estoy a su disposición. ¿Cómo puedo ayudarle?",
+                    "calida"
+                );
+            }
         }
     });
 
@@ -390,8 +421,7 @@ function sanitizeForSpeech(text) {
 }
 
 /* ------------------------------------------------------------------
-   8. Voz femenina con Silero TTS (vía modelo local en GitHub)
-   Voz predeterminada: femenina latina neutra
+   8. Voz femenina con Piper TTS (backend en Render)
 ------------------------------------------------------------------ */
 
 async function speakWithMiraVoice(text, emotion = "neutral") {
@@ -420,7 +450,6 @@ async function speakWithMiraVoice(text, emotion = "neutral") {
         console.error("Error llamando al TTS de MIRA:", err);
     }
 }
-
 
 // Botón para activar/desactivar voz
 if (miraVoiceToggle) {
