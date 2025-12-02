@@ -219,10 +219,13 @@ body {
     display: flex;
     align-items: center;
     padding: 0 7%;
+    gap: 40px;               /* NUEVO: espacio entre texto y video */
+    flex-wrap: wrap;         /* NUEVO: permite que se acomode mejor en pantallas medias */
 }
 
 .hero-text {
     max-width: 640px;
+    flex: 1 1 340px;
 }
 
 .hero-text h1 {
@@ -245,6 +248,54 @@ body {
     flex-wrap: wrap;
     gap: 12px;
     margin-bottom: 18px;
+}
+
+/* NUEVO: COLUMNA DEL VIDEO EN EL HERO */
+
+.hero-media {
+    flex: 1 1 320px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.video-carousel {
+    width: 100%;
+    max-width: 480px; /* No cubre toda la pantalla, se ve como card futurista */
+    aspect-ratio: 16 / 9;
+    border-radius: 24px;
+    padding: 4px;
+    background:
+        radial-gradient(circle at 0 0, rgba(53, 226, 255, 0.3), transparent 55%),
+        radial-gradient(circle at 100% 100%, rgba(255, 75, 255, 0.3), transparent 55%),
+        rgba(5, 8, 20, 0.9);
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    overflow: hidden;
+    position: relative;
+}
+
+/* Video interno */
+
+.video-carousel video {
+    width: 100%;
+    height: 100%;
+    display: block;
+    border-radius: 20px;
+    object-fit: cover;
+    background: #000;
+}
+
+/* Pequeño brillo animado en el borde (opcional) */
+.video-carousel::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    border-radius: inherit;
+    background: radial-gradient(circle at 10% 0%, rgba(255,255,255,0.16), transparent 55%);
+    mix-blend-mode: screen;
+    opacity: 0.7;
 }
 
 /* BOTONES GALAXIA DINÁMICOS */
@@ -875,6 +926,15 @@ body {
     }
     .hero-content {
         padding-inline: 5%;
+        flex-direction: column;      /* NUEVO: en móviles el video queda debajo del texto */
+        justify-content: center;
+    }
+    .hero-text {
+        text-align: left;
+    }
+    .hero-media {
+        width: 100%;
+        justify-content: flex-start;
     }
     .sobre-grid,
     .contact-grid {
