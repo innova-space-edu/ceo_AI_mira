@@ -233,28 +233,31 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 /* ------------------------------------------------------------------
-   5B. DESBLOQUEAR AUDIO APENAS HAYA INTERACCIÓN (mouse / touch)
+   5B. DESBLOQUEAR AUDIO APENAS HAYA INTERACCIÓN (click / tecla / touch)
 ------------------------------------------------------------------ */
 
 function unlockMiraAudio() {
     if (miraAudioUnlocked) return;
-    miraAudioUnlocked = true;
 
+    miraAudioUnlocked = true;
     console.log("🔊 Audio desbloqueado para MIRA.");
 
-    // Primer saludo suave cuando el audio queda permitido
-    speakWithMiraVoice(
-        "Bienvenido. Soy MIRA, su asistente virtual. Estoy lista para ayudarle.",
-        "calida"
-    );
+    // Truco: reproducir un audio silencioso para registrar la interacción
+    const dummyAudio = new Audio();
+    dummyAudio.muted = true;
+    dummyAudio.play().catch(err => {
+        console.warn("No se pudo reproducir el audio silencioso:", err);
+    });
 
-    // Quitamos los listeners (solo ocurre una vez)
-    window.removeEventListener("mousemove", unlockMiraAudio);
+    // Removemos los listeners, ya no se necesitan
+    window.removeEventListener("click", unlockMiraAudio);
+    window.removeEventListener("keydown", unlockMiraAudio);
     window.removeEventListener("touchstart", unlockMiraAudio);
 }
 
-// Al mover el mouse o tocar la pantalla → el navegador permite audio
-window.addEventListener("mousemove", unlockMiraAudio);
+// El navegador solo “confía” en ciertos gestos como interacción real
+window.addEventListener("click", unlockMiraAudio);
+window.addEventListener("keydown", unlockMiraAudio);
 window.addEventListener("touchstart", unlockMiraAudio);
 
 // Abrir / cerrar chat
@@ -312,7 +315,11 @@ function addMiraMessage(htmlText) {
     scrollMiraToBottom();
 
     const spoken = sanitizeForSpeech(stripHtml(htmlText));
-    speakWithMiraVoice(spoken);
+
+    // Solo habla si el audio ya fue desbloqueado
+    if (miraAudioUnlocked) {
+        speakWithMiraVoice(spoken);
+    }
 }
 
 function scrollMiraToBottom() {
@@ -428,6 +435,12 @@ async function speakWithMiraVoice(text, emotion = "neutral") {
     if (!miraVoiceEnabled) return;
     if (!text) return;
 
+    // Si el audio aún no está desbloqueado, no intentamos reproducir
+    if (!miraAudioUnlocked) {
+        console.log("Audio aún no desbloqueado; no se reproduce TTS.");
+        return;
+    }
+
     const clean = sanitizeForSpeech(text);
 
     try {
@@ -445,7 +458,12 @@ async function speakWithMiraVoice(text, emotion = "neutral") {
         const blob = await res.blob();
         const url = URL.createObjectURL(blob);
         const audio = new Audio(url);
-        audio.play();
+
+        try {
+            await audio.play();
+        } catch (playErr) {
+            console.warn("No se pudo reproducir el audio (posible bloqueo del navegador):", playErr);
+        }
     } catch (err) {
         console.error("Error llamando al TTS de MIRA:", err);
     }
@@ -473,7 +491,11 @@ function setupMiraHints() {
         el.addEventListener("mouseenter", () => {
             const hint = el.getAttribute("data-mira-hint");
             const spoken = sanitizeForSpeech(hint || "");
-            speakWithMiraVoice(spoken, "dulce");
+
+            // Solo habla si el audio está desbloqueado
+            if (miraAudioUnlocked) {
+                speakWithMiraVoice(spoken, "dulce");
+            }
         });
     });
 }
@@ -501,7 +523,7 @@ function setupMiraSectionObserver() {
                 spokenSections.add(id);
 
                 const msg = messages[id];
-                if (msg) {
+                if (msg && miraAudioUnlocked) {
                     speakWithMiraVoice(msg, "calida");
                 }
             }
