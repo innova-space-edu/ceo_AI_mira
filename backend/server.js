@@ -1,8 +1,11 @@
-// Backend MIRA (Render + OpenRouter) — Versión sin ElevenLabs
-// TTS será manejado 100% en el frontend usando Silero (modelo alojado en GitHub Pages)
+// Backend MIRA (Render + OpenRouter) — AHORA con TTS Piper (voz mexicana)
+// Mantiene TODAS tus funciones actuales sin borrar nada.
 
 const express = require("express");
 const cors = require("cors");
+const { spawn } = require("child_process");
+const path = require("path");
+const fs = require("fs");
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -20,7 +23,7 @@ console.log("🔧 VARIABLES DE ENTORNO:");
 console.log("OPENROUTER_API_KEY:", OPENROUTER_API_KEY ? "OK" : "❌ FALTA");
 
 // -------------------------------------------------------------
-// 1) CHAT MIRA → OpenRouter
+// 1) CHAT MIRA → OpenRouter (SIN CAMBIOS)
 // -------------------------------------------------------------
 app.post("/api/mira", async (req, res) => {
     try {
@@ -94,20 +97,68 @@ En cotizaciones, invita a escribir a contacto@innova-space-edu.cl.
 });
 
 // -------------------------------------------------------------
-// 2) API DE TTS (ELIMINADA) — SOLO DEVUELVE ERROR CONTROLADO
+// 2) NUEVO API TTS — Piper ONNX (voz femenina mexicana)
 // -------------------------------------------------------------
-// Ahora el TTS se maneja 100% en el frontend con Silero
+
+// Ruta absoluta a los modelos
+const MODEL_DIR = path.join(__dirname, "models");
+const MODEL_PATH = path.join(MODEL_DIR, "es_MX-claude-high.onnx");
+const CONFIG_PATH = path.join(MODEL_DIR, "es_MX-claude-high.onnx.json");
+
+// Valida que existan los archivos
+if (!fs.existsSync(MODEL_PATH) || !fs.existsSync(CONFIG_PATH)) {
+    console.error("❌ ERROR: Los archivos del modelo Piper NO se encuentran en /backend/models/");
+    console.error("Ruta esperada:", MODEL_PATH);
+}
+
 app.post("/api/tts", async (req, res) => {
-    return res.status(501).json({
-        error: "Este servidor ya no genera TTS. El TTS se procesa en el frontend usando Silero."
-    });
+    try {
+        const { text } = req.body || {};
+
+        if (!text || text.trim().length === 0) {
+            return res.status(400).json({ error: "Texto vacío" });
+        }
+
+        console.log("🔊 Generando voz con Piper:", text);
+
+        // Comando Piper ONNX CLI
+        const piper = spawn("piper", [
+            "--model", MODEL_PATH,
+            "--output_file", "output.wav",
+            "--text", text
+        ]);
+
+        piper.stderr.on("data", (data) => {
+            console.error("Piper STDERR:", data.toString());
+        });
+
+        piper.on("close", () => {
+            console.log("✔ Piper generó output.wav");
+
+            const audioPath = path.join(process.cwd(), "output.wav");
+            if (!fs.existsSync(audioPath)) {
+                return res.status(500).json({ error: "Piper no generó el audio" });
+            }
+
+            const audio = fs.readFileSync(audioPath);
+            res.setHeader("Content-Type", "audio/wav");
+            res.send(audio);
+
+            // Limpia archivo temporal
+            fs.unlinkSync(audioPath);
+        });
+
+    } catch (error) {
+        console.error("❌ /api/tts ERROR:", error);
+        res.status(500).json({ error: "Error generando TTS" });
+    }
 });
 
 // -------------------------------------------------------------
 // 3) HOME TEST
 // -------------------------------------------------------------
 app.get("/", (req, res) => {
-    res.send("🚀 MIRA backend funcionando correctamente (TTS manejado en el frontend con Silero)");
+    res.send("🚀 MIRA backend funcionando correctamente con Piper TTS (voz mexicana)");
 });
 
 // -------------------------------------------------------------
