@@ -2,8 +2,8 @@
 
 // URL del backend de MIRA en Render (NO expone la API key de OpenRouter)
 const MIRA_API_URL = "https://ceo-ai-mira.onrender.com/api/mira";
-// Ya no usamos backend TTS, pero dejamos la constante para no romper nada previo
-const MIRA_TTS_URL = "https://ceo-ai-mira.onrender.com/api/tts";
+// Ahora usamos el nuevo backend TTS con Piper (voz mexicana)
+const MIRA_TTS_URL = "https://mira-tts.onrender.com/tts";
 
 // 1. Loader global (se oculta después de unos segundos)
 window.addEventListener("load", () => {
@@ -394,19 +394,33 @@ function sanitizeForSpeech(text) {
    Voz predeterminada: femenina latina neutra
 ------------------------------------------------------------------ */
 
-function speakWithMiraVoice(text, emotion = "neutral") {
+async function speakWithMiraVoice(text, emotion = "neutral") {
     if (!miraVoiceEnabled) return;
     if (!text) return;
 
     const clean = sanitizeForSpeech(text);
 
-    if (typeof window.sileroSpeak === "function") {
-        // Voz por defecto: latina_neutra
-        window.sileroSpeak(clean, "latina_neutra", emotion);
-    } else {
-        console.warn("Silero TTS aún no está cargado (sileroSpeak no definido).");
+    try {
+        const res = await fetch(MIRA_TTS_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text: clean })
+        });
+
+        if (!res.ok) {
+            console.warn("Error TTS:", res.status);
+            return;
+        }
+
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const audio = new Audio(url);
+        audio.play();
+    } catch (err) {
+        console.error("Error llamando al TTS de MIRA:", err);
     }
 }
+
 
 // Botón para activar/desactivar voz
 if (miraVoiceToggle) {
