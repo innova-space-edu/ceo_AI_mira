@@ -192,6 +192,52 @@ function initStarfield() {
 }
 
 /* ------------------------------------------------------------------
+   4.5 CARRUSEL DE VIDEOS EN EL HERO
+------------------------------------------------------------------ */
+
+// Lista de videos (ajusta las rutas según tu carpeta, por ejemplo /videos/)
+const videoList = [
+    "videos/video1.mp4",
+    "videos/video2.mp4",
+    "videos/video3.mp4"
+    // puedes agregar más videos aquí
+];
+
+let currentVideoIndex = 0;
+let videoCarouselInitialized = false;
+
+function initVideoCarousel() {
+    if (videoCarouselInitialized) return;
+    videoCarouselInitialized = true;
+
+    const video = document.getElementById("carouselVideo");
+    if (!video || !videoList.length) return;
+
+    // Ajustes básicos del video
+    video.muted = true;
+    video.autoplay = true;
+    video.playsInline = true;
+    video.loop = false;
+
+    // Cargar primer video
+    video.src = videoList[currentVideoIndex];
+    video.load();
+    video.play().catch(err => {
+        console.warn("No se pudo autoiniciar el video (normal en algunos navegadores):", err);
+    });
+
+    // Cuando termina → siguiente video
+    video.addEventListener("ended", () => {
+        currentVideoIndex = (currentVideoIndex + 1) % videoList.length;
+        video.src = videoList[currentVideoIndex];
+        video.load();
+        video.play().catch(err => {
+            console.warn("No se pudo reproducir el siguiente video:", err);
+        });
+    });
+}
+
+/* ------------------------------------------------------------------
    5. Chatbot MIRA (con voz femenina vía TTS Piper backend)
 ------------------------------------------------------------------ */
 
@@ -229,6 +275,7 @@ document.addEventListener("DOMContentLoaded", () => {
     initMiraWelcome();
     setupMiraHints();
     setupMiraSectionObserver();
+    initVideoCarousel(); // ← inicializamos el carrusel de videos aquí
     // (Quitamos el autoplay de voz aquí para evitar el bloqueo de navegador)
 });
 
@@ -416,6 +463,7 @@ function sanitizeForSpeech(text) {
         clean = clean.replace(/[\u2600-\u27BF]/g, ""); // símbolos varios
     } catch (e) {
         // Si el navegador no soporta unicode escapes, ignoramos este paso
+        console.warn(e);
     }
 
     // Eliminar algunos símbolos de marcado (*, _, ~, `) que no aportan al habla
