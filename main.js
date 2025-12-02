@@ -183,12 +183,12 @@ function initStarfield() {
    4.5 CARRUSEL DE VIDEOS — VERSIÓN COMPLETA
 ------------------------------------------------------------------ */
 const videoList = [
-    "assets/videos/video1.mp4",
-    "assets/videos/video2.mp4",
-    "assets/videos/video3.mp4",
-    "assets/videos/video4.mp4",
-    "assets/videos/video5.mp4",
-    "assets/videos/video6.mp4"
+    "assets/media/video1.mp4",
+    "assets/media/video2.mp4",
+    "assets/media/video3.mp4",
+    "assets/media/video4.mp4",
+    "assets/media/video5.mp4",
+    "assets/media/video6.mp4"
 ];
 
 let currentVideoIndex = 0;
