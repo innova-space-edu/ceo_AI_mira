@@ -17,10 +17,15 @@ app.use(express.json());
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
 const RESEND_API_KEY = process.env.RESEND_API_KEY; // NUEVO: API para envío por HTTP
 const EMAIL_SEND_TO = process.env.EMAIL_SEND_TO || "contacto@innova-space-edu.cl";
+// NUEVO: remitente configurable para Resend
+const EMAIL_FROM =
+    process.env.EMAIL_FROM || "Innova Space Education <onboarding@resend.dev>";
 
 console.log("🔧 VARIABLES DE ENTORNO:");
 console.log("OPENROUTER_API_KEY:", OPENROUTER_API_KEY ? "OK" : "❌ FALTA");
 console.log("RESEND_API_KEY:", RESEND_API_KEY ? "OK" : "❌ FALTA");
+console.log("EMAIL_SEND_TO:", EMAIL_SEND_TO);
+console.log("EMAIL_FROM:", EMAIL_FROM);
 
 // -------------------------------------------------------------
 // 1) CHAT MIRA → OpenRouter
@@ -174,7 +179,7 @@ ${mensaje}
             "Content-Type": "application/json"
         },
         body: JSON.stringify({
-            from: "Innova Space Education <no-reply@innova-space-edu.cl>",
+            from: EMAIL_FROM,          // <-- aquí usamos el remitente configurable
             to: [EMAIL_SEND_TO],
             reply_to: correo,
             subject: asunto,
