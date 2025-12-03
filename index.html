@@ -5,7 +5,7 @@
     <title>Innova Space Education SPA</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description"
-          content="Innova Space Education SPA - Soluciones educativas, inteligencia artificial, páginas web y gestión de redes sociales con diseño futurista." />
+          content="Innova Space Education SPA - Soluciones educativas, inteligencia artificial, páginas web y gestión de proyectos institucionales con diseño futurista." />
 
     <!-- Fuentes -->
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Poppins:wght@300;400;500;600;700&display=swap"
@@ -195,11 +195,11 @@
                     </p>
                 </article>
                 <article class="service-card"
-                         data-mira-hint="Aquí se resumen los servicios de gestión de redes sociales como Instagram, Facebook, X y YouTube.">
+                         data-mira-hint="Remodelación y diseño de espacios institucionales con enfoque temático, innovador y futurista.">
                     <i class="ri-share-fill service-icon"></i>
-                    <h3>Gestión de Proyectos Institucionaless</h3>
+                    <h3>Gestión de Proyectos Institucionales</h3>
                     <p>
-                        Diseño y transformación de áreas educativas en espacios modernos, 
+                        Diseño y transformación de áreas educativas en espacios modernos,
                         funcionales y futuristas. Ambientes innovadores que fortalecen la
                         identidad institucional y mejoran la experiencia de aprendizaje.
                     </p>
@@ -286,8 +286,8 @@
                 <h2>Redes sociales</h2>
                 <p>Conecta con nuestro ecosistema digital</p>
             </div>
-            <div class="https://www.instagram.com/innovaspacemc/">
-                <a href="#"
+            <div class="social-grid">
+                <a href="https://www.instagram.com/innovaspacemc/"
                    class="social-card"
                    target="_blank"
                    rel="noopener"
@@ -326,7 +326,7 @@
                 <p>Conversemos su próximo proyecto</p>
             </div>
             <div class="contact-grid">
-                <form class="contact-form" autocomplete="off">
+                <form id="contactForm" class="contact-form" autocomplete="off">
                     <div class="form-group">
                         <label for="nombre">Nombre completo</label>
                         <input type="text" id="nombre" name="nombre" placeholder="Tu nombre" required />
@@ -347,17 +347,19 @@
                     <div class="form-group">
                         <label for="mensaje">Mensaje</label>
                         <textarea id="mensaje" name="mensaje" rows="4"
-                                  placeholder="Cuéntenos qué necesita"></textarea>
+                                  placeholder="Cuéntenos qué necesita" required></textarea>
                     </div>
                     <button type="submit"
                             class="btn-primary btn-full"
                             data-mira-hint="Este botón envía el formulario de contacto para coordinar una reunión.">
                         <i class="ri-send-plane-fill"></i> Enviar mensaje
                     </button>
-                    <p class="form-note">
-                        Este formulario es solo de demostración (no envía datos reales aún).
+
+                    <p id="formStatus" class="form-note">
+                        Completa el formulario y te contactaremos por correo electrónico.
                     </p>
                 </form>
+
                 <div class="contact-info">
                     <h3>Datos de contacto</h3>
                     <p><i class="ri-mail-fill"></i> contacto@innova-space-edu.cl</p>
