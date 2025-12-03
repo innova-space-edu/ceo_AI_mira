@@ -3,6 +3,7 @@
 
 const express = require("express");
 const cors = require("cors");
+const nodemailer = require("nodemailer");
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -15,7 +16,6 @@ app.use(express.json());
 // -------------------------------------------------------------
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
 
-// LOGS INFORMATIVOS
 console.log("🔧 VARIABLES DE ENTORNO:");
 console.log("OPENROUTER_API_KEY:", OPENROUTER_API_KEY ? "OK" : "❌ FALTA");
 
@@ -95,10 +95,79 @@ En cotizaciones, invita a escribir a contacto@innova-space-edu.cl.
 });
 
 // -------------------------------------------------------------
-// 2) HOME TEST
+// 2) ENVÍO DE CORREO (Zoho Mail) DESDE EL FORMULARIO DE LA WEB
+// -------------------------------------------------------------
+
+// Configuración del transporter para Zoho
+const smtpHost = process.env.SMTP_HOST || "smtp.zoho.com";
+const smtpPort = Number(process.env.SMTP_PORT) || 465; // Zoho SSL
+const smtpSecure = process.env.SMTP_SECURE === "false" ? false : true;
+
+const smtpUser = process.env.SMTP_USER || "contacto@innova-space-edu.cl";
+const smtpPass = process.env.SMTP_PASS; // pon esto en las env vars de Render
+const emailSendTo = process.env.EMAIL_SEND_TO || "contacto@innova-space-edu.cl";
+
+const transporter = nodemailer.createTransport({
+    host: smtpHost,
+    port: smtpPort,
+    secure: smtpSecure,
+    auth: {
+        user: smtpUser,
+        pass: smtpPass
+    }
+});
+
+// Opcional: verificar conexión SMTP al iniciar
+transporter.verify((err, success) => {
+    if (err) {
+        console.error("❌ Error verificando conexión SMTP:", err);
+    } else {
+        console.log("✅ Servidor SMTP listo para enviar correos.");
+    }
+});
+
+app.post("/api/send-email", async (req, res) => {
+    try {
+        const { nombre, correo, institucion, ciudad, mensaje } = req.body || {};
+
+        if (!nombre || !correo || !mensaje) {
+            return res.status(400).json({ error: "Faltan datos obligatorios (nombre, correo, mensaje)." });
+        }
+
+        const asunto = `Nuevo mensaje desde la web - Innova Space Education`;
+        const cuerpoTexto = `
+Nuevo mensaje desde el formulario de contacto:
+
+Nombre: ${nombre}
+Correo: ${correo}
+Institución/Empresa: ${institucion || "-"}
+Ciudad: ${ciudad || "-"}
+
+Mensaje:
+${mensaje}
+        `.trim();
+
+        await transporter.sendMail({
+            from: `"Innova Space Education" <${smtpUser}>`,
+            replyTo: correo,
+            to: emailSendTo,
+            subject: asunto,
+            text: cuerpoTexto
+        });
+
+        res.json({ success: true, message: "Correo enviado correctamente" });
+
+    } catch (error) {
+        console.error("❌ Error al enviar correo:", error);
+        res.status(500).json({ error: "No se pudo enviar el correo" });
+    }
+});
+
+// -------------------------------------------------------------
+// 3) HOME TEST
 // -------------------------------------------------------------
 app.get("/", (req, res) => {
-    res.send("🚀 MIRA backend funcionando correctamente (chat con OpenRouter). La voz se maneja desde el servicio mira-tts.");
+    res.send("🚀 MIRA backend funcionando correctamente (chat con OpenRouter + envío de correos por Zoho). La voz se maneja desde el servicio mira-tts.");
 });
 
 // -------------------------------------------------------------
