@@ -15,9 +15,12 @@ app.use(express.json());
 // VARIABLES DE ENTORNO
 // -------------------------------------------------------------
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
+const RESEND_API_KEY = process.env.RESEND_API_KEY; // NUEVO: API para envío por HTTP
+const EMAIL_SEND_TO = process.env.EMAIL_SEND_TO || "contacto@innova-space-edu.cl";
 
 console.log("🔧 VARIABLES DE ENTORNO:");
 console.log("OPENROUTER_API_KEY:", OPENROUTER_API_KEY ? "OK" : "❌ FALTA");
+console.log("RESEND_API_KEY:", RESEND_API_KEY ? "OK" : "❌ FALTA");
 
 // -------------------------------------------------------------
 // 1) CHAT MIRA → OpenRouter
@@ -95,22 +98,19 @@ En cotizaciones, invita a escribir a contacto@innova-space-edu.cl.
 });
 
 // -------------------------------------------------------------
-// 2) ENVÍO DE CORREO (Zoho Mail) DESDE EL FORMULARIO DE LA WEB
+// 2) ENVÍO DE CORREO (Zoho Mail) - QUEDA COMO OPCIÓN SMTP
+//    OJO: EN RENDER EL SMTP ESTÁ BLOQUEADO → USAREMOS API HTTP
 // -------------------------------------------------------------
 
-// Configuración del transporter para Zoho
-// Para dominios propios Zoho recomienda smtppro.zoho.com con puerto 587 (StartTLS)
+// Configuración del transporter para Zoho (la mantenemos por si luego cambias de hosting)
 const smtpHost = process.env.SMTP_HOST || "smtppro.zoho.com";
 const smtpPort = Number(process.env.SMTP_PORT) || 587;
-
-// Si defines SMTP_SECURE=true en Render usará SSL (465), por defecto usamos StartTLS (false)
 const smtpSecure = process.env.SMTP_SECURE
     ? process.env.SMTP_SECURE === "true"
     : false;
 
 const smtpUser = process.env.SMTP_USER || "contacto@innova-space-edu.cl";
 const smtpPass = process.env.SMTP_PASS; // contraseña de aplicación Zoho
-const emailSendTo = process.env.EMAIL_SEND_TO || "contacto@innova-space-edu.cl";
 
 const transporter = nodemailer.createTransport({
     host: smtpHost,
@@ -121,7 +121,6 @@ const transporter = nodemailer.createTransport({
         pass: smtpPass
     },
     tls: {
-        // Evita problemas de certificado en algunos hosts
         rejectUnauthorized: false
     },
     connectionTimeout: 10000,
@@ -129,12 +128,12 @@ const transporter = nodemailer.createTransport({
     socketTimeout: 10000
 });
 
-// Opcional: verificar conexión SMTP al iniciar (sin tumbar el backend)
+// Verificación SMTP opcional (sabemos que en Render va a fallar por bloqueo de puertos)
 if (smtpHost && smtpUser && smtpPass) {
     transporter.verify((err, success) => {
         if (err) {
             console.error(
-                "❌ Error verificando conexión SMTP (el backend sigue funcionando):",
+                "❌ Error verificando conexión SMTP (Render bloquea SMTP, backend sigue funcionando):",
                 err.message || err
             );
         } else {
@@ -143,21 +142,20 @@ if (smtpHost && smtpUser && smtpPass) {
     });
 } else {
     console.warn(
-        "⚠️ SMTP no configurado completamente. Revisa SMTP_HOST, SMTP_USER y SMTP_PASS."
+        "⚠️ SMTP no configurado completamente. Revisa SMTP_HOST, SMTP_USER y SMTP_PASS si vas a usar SMTP en otro hosting."
     );
 }
 
-// Ruta original /api/send-email (la dejamos tal cual)
-app.post("/api/send-email", async (req, res) => {
-    try {
-        const { nombre, correo, institucion, ciudad, mensaje } = req.body || {};
+// -------------------------------------------------------------
+// FUNCIÓN NUEVA: envío de correo vía API HTTP (Resend)
+// -------------------------------------------------------------
+async function enviarCorreoPorAPI({ nombre, correo, institucion, ciudad, mensaje }) {
+    if (!RESEND_API_KEY) {
+        throw new Error("Falta RESEND_API_KEY en variables de entorno");
+    }
 
-        if (!nombre || !correo || !mensaje) {
-            return res.status(400).json({ error: "Faltan datos obligatorios (nombre, correo, mensaje)." });
-        }
-
-        const asunto = `Nuevo mensaje desde la web - Innova Space Education`;
-        const cuerpoTexto = `
+    const asunto = `Nuevo mensaje desde la web - Innova Space Education`;
+    const cuerpoTexto = `
 Nuevo mensaje desde el formulario de contacto:
 
 Nombre: ${nombre}
@@ -167,15 +165,46 @@ Ciudad: ${ciudad || "-"}
 
 Mensaje:
 ${mensaje}
-        `.trim();
+    `.trim();
 
-        await transporter.sendMail({
-            from: `"Innova Space Education" <${smtpUser}>`,
-            replyTo: correo,
-            to: emailSendTo,
+    const respuesta = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+            "Authorization": `Bearer ${RESEND_API_KEY}`,
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            from: "Innova Space Education <no-reply@innova-space-edu.cl>",
+            to: [EMAIL_SEND_TO],
+            reply_to: correo,
             subject: asunto,
             text: cuerpoTexto
-        });
+        })
+    });
+
+    if (!respuesta.ok) {
+        const txt = await respuesta.text();
+        console.error("❌ Error Resend API:", txt);
+        throw new Error("Fallo en API de correo");
+    }
+
+    const data = await respuesta.json();
+    console.log("📧 Correo enviado por API, id:", data.id || data);
+    return data;
+}
+
+// -------------------------------------------------------------
+// 2a) Ruta /api/send-email (usa API HTTP de correo)
+// -------------------------------------------------------------
+app.post("/api/send-email", async (req, res) => {
+    try {
+        const { nombre, correo, institucion, ciudad, mensaje } = req.body || {};
+
+        if (!nombre || !correo || !mensaje) {
+            return res.status(400).json({ error: "Faltan datos obligatorios (nombre, correo, mensaje)." });
+        }
+
+        await enviarCorreoPorAPI({ nombre, correo, institucion, ciudad, mensaje });
 
         res.json({ success: true, message: "Correo enviado correctamente" });
 
@@ -185,7 +214,9 @@ ${mensaje}
     }
 });
 
-// ⚠️ NUEVO: ruta /api/contact que usa la misma lógica (para que main.js funcione)
+// -------------------------------------------------------------
+// 2b) Ruta /api/contact (misma lógica para el formulario principal)
+// -------------------------------------------------------------
 app.post("/api/contact", async (req, res) => {
     try {
         const { nombre, correo, institucion, ciudad, mensaje } = req.body || {};
@@ -194,26 +225,7 @@ app.post("/api/contact", async (req, res) => {
             return res.status(400).json({ error: "Faltan datos obligatorios (nombre, correo, mensaje)." });
         }
 
-        const asunto = `Nuevo mensaje desde la web - Innova Space Education`;
-        const cuerpoTexto = `
-Nuevo mensaje desde el formulario de contacto:
-
-Nombre: ${nombre}
-Correo: ${correo}
-Institución/Empresa: ${institucion || "-"}
-Ciudad: ${ciudad || "-"}
-
-Mensaje:
-${mensaje}
-        `.trim();
-
-        await transporter.sendMail({
-            from: `"Innova Space Education" <${smtpUser}>`,
-            replyTo: correo,
-            to: emailSendTo,
-            subject: asunto,
-            text: cuerpoTexto
-        });
+        await enviarCorreoPorAPI({ nombre, correo, institucion, ciudad, mensaje });
 
         res.json({ success: true, message: "Correo enviado correctamente" });
 
@@ -227,7 +239,7 @@ ${mensaje}
 // 3) HOME TEST
 // -------------------------------------------------------------
 app.get("/", (req, res) => {
-    res.send("🚀 MIRA backend funcionando correctamente (chat con OpenRouter + envío de correos por Zoho). La voz se maneja desde el servicio mira-tts.");
+    res.send("🚀 MIRA backend funcionando correctamente (chat con OpenRouter + envío de correos por API HTTP). La voz se maneja desde el servicio mira-tts.");
 });
 
 // -------------------------------------------------------------
