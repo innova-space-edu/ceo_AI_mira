@@ -256,11 +256,74 @@ function initMiraWelcome() {
     );
 }
 
+/* ------------------------------------------------------------------
+   5.5 FORMULARIO DE CONTACTO → BACKEND (Render)
+------------------------------------------------------------------ */
+function setupContactForm() {
+    const form = document.getElementById("contactForm");
+    const statusEl = document.getElementById("formStatus");
+
+    if (!form) return;
+
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const nombre = document.getElementById("nombre")?.value.trim() || "";
+        const correo = document.getElementById("correo")?.value.trim() || "";
+        const institucion = document.getElementById("institucion")?.value.trim() || "";
+        const ciudad = document.getElementById("ciudad")?.value.trim() || "";
+        const mensaje = document.getElementById("mensaje")?.value.trim() || "";
+
+        if (!nombre || !correo || !mensaje) {
+            if (statusEl) {
+                statusEl.textContent = "Por favor, completa nombre, correo y mensaje antes de enviar.";
+            }
+            return;
+        }
+
+        if (statusEl) {
+            statusEl.textContent = "Enviando mensaje...";
+        }
+
+        try {
+            const res = await fetch("https://ceo-ai-mira.onrender.com/api/contact", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    nombre,
+                    correo,
+                    institucion,
+                    ciudad,
+                    mensaje
+                })
+            });
+
+            if (!res.ok) {
+                throw new Error("Error al enviar");
+            }
+
+            if (statusEl) {
+                statusEl.textContent = "Mensaje enviado correctamente. Te contactaremos por correo electrónico.";
+            }
+            form.reset();
+        } catch (err) {
+            console.error("Error al enviar formulario:", err);
+            if (statusEl) {
+                statusEl.textContent = "Ocurrió un error al enviar el mensaje. Intenta nuevamente más tarde.";
+            }
+        }
+    });
+}
+
+/* ------------------------------------------------------------------
+   INICIALIZACIÓN DOMContentLoaded (MIRA + HINTS + SECCIONES + VIDEO + CONTACTO)
+------------------------------------------------------------------ */
 document.addEventListener("DOMContentLoaded", () => {
     initMiraWelcome();
     setupMiraHints();
     setupMiraSectionObserver();
     initVideoCarousel();
+    setupContactForm();
 });
 
 /* ------------------------------------------------------------------
