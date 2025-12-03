@@ -99,12 +99,17 @@ En cotizaciones, invita a escribir a contacto@innova-space-edu.cl.
 // -------------------------------------------------------------
 
 // Configuración del transporter para Zoho
-const smtpHost = process.env.SMTP_HOST || "smtp.zoho.com";
-const smtpPort = Number(process.env.SMTP_PORT) || 465; // Zoho SSL
-const smtpSecure = process.env.SMTP_SECURE === "false" ? false : true;
+// Para dominios propios Zoho recomienda smtppro.zoho.com con puerto 587 (StartTLS)
+const smtpHost = process.env.SMTP_HOST || "smtppro.zoho.com";
+const smtpPort = Number(process.env.SMTP_PORT) || 587;
+
+// Si defines SMTP_SECURE=true en Render usará SSL (465), por defecto usamos StartTLS (false)
+const smtpSecure = process.env.SMTP_SECURE
+    ? process.env.SMTP_SECURE === "true"
+    : false;
 
 const smtpUser = process.env.SMTP_USER || "contacto@innova-space-edu.cl";
-const smtpPass = process.env.SMTP_PASS; // pon esto en las env vars de Render
+const smtpPass = process.env.SMTP_PASS; // contraseña de aplicación Zoho
 const emailSendTo = process.env.EMAIL_SEND_TO || "contacto@innova-space-edu.cl";
 
 const transporter = nodemailer.createTransport({
@@ -114,17 +119,33 @@ const transporter = nodemailer.createTransport({
     auth: {
         user: smtpUser,
         pass: smtpPass
-    }
+    },
+    tls: {
+        // Evita problemas de certificado en algunos hosts
+        rejectUnauthorized: false
+    },
+    connectionTimeout: 10000,
+    greetingTimeout: 8000,
+    socketTimeout: 10000
 });
 
-// Opcional: verificar conexión SMTP al iniciar
-transporter.verify((err, success) => {
-    if (err) {
-        console.error("❌ Error verificando conexión SMTP:", err);
-    } else {
-        console.log("✅ Servidor SMTP listo para enviar correos.");
-    }
-});
+// Opcional: verificar conexión SMTP al iniciar (sin tumbar el backend)
+if (smtpHost && smtpUser && smtpPass) {
+    transporter.verify((err, success) => {
+        if (err) {
+            console.error(
+                "❌ Error verificando conexión SMTP (el backend sigue funcionando):",
+                err.message || err
+            );
+        } else {
+            console.log("✅ Servidor SMTP listo para enviar correos.");
+        }
+    });
+} else {
+    console.warn(
+        "⚠️ SMTP no configurado completamente. Revisa SMTP_HOST, SMTP_USER y SMTP_PASS."
+    );
+}
 
 // Ruta original /api/send-email (la dejamos tal cual)
 app.post("/api/send-email", async (req, res) => {
@@ -159,7 +180,7 @@ ${mensaje}
         res.json({ success: true, message: "Correo enviado correctamente" });
 
     } catch (error) {
-        console.error("❌ Error al enviar correo:", error);
+        console.error("❌ Error al enviar correo:", error.message || error);
         res.status(500).json({ error: "No se pudo enviar el correo" });
     }
 });
@@ -197,7 +218,7 @@ ${mensaje}
         res.json({ success: true, message: "Correo enviado correctamente" });
 
     } catch (error) {
-        console.error("❌ Error al enviar correo (ruta /api/contact):", error);
+        console.error("❌ Error al enviar correo (ruta /api/contact):", error.message || error);
         res.status(500).json({ error: "No se pudo enviar el correo" });
     }
 });
