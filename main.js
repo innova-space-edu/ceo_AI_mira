@@ -187,7 +187,7 @@ const videoList = [
     "assets/media/video2.mp4",
     "assets/media/video3.mp4",
     "assets/media/video4.mp4",
-    <"assets/media/video6.mp4"
+    "assets/media/video6.mp4"
 ];
 
 let currentVideoIndex = 0;
