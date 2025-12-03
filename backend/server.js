@@ -4,7 +4,6 @@
 const express = require("express");
 const cors = require("cors");
 const nodemailer = require("nodemailer");
-const fetch = require("node-fetch");
 
 const app = express();
 const PORT = process.env.PORT || 3001;
