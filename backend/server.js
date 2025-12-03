@@ -1,4 +1,4 @@
-// Backend MIRA (Render + OpenRouter)
+// Backend MIRA (Render y OpenRouter)
 // Versión SIN TTS local: la voz se genera en el servicio mira-tts.onrender.com
 
 const express = require("express");
