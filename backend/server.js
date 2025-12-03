@@ -1,9 +1,10 @@
-// Backend MIRA (Render y OpenRouter)
-// Versión SIN TTS local: la voz se genera en el servicio mira-tts.onrender.com
+// Backend MIRA (Render + OpenRouter + Zoho Mail)
+// Versión SIN TTS local: el TTS se gestiona desde mira-tts.onrender.com
 
 const express = require("express");
 const cors = require("cors");
 const nodemailer = require("nodemailer");
+const fetch = require("node-fetch");
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -16,8 +17,20 @@ app.use(express.json());
 // -------------------------------------------------------------
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
 
+// SMTP / Zoho Mail
+const smtpHost = process.env.SMTP_HOST || "smtp.zoho.com";
+const smtpPort = Number(process.env.SMTP_PORT) || 465; // SSL Zoho
+const smtpSecure = process.env.SMTP_SECURE === "false" ? false : true;
+
+const smtpUser = process.env.SMTP_USER || "contacto@innova-space-edu.cl";
+const smtpPass = process.env.SMTP_PASS; // viene desde Render
+const emailSendTo = process.env.EMAIL_SEND_TO || "contacto@innova-space-edu.cl";
+
 console.log("🔧 VARIABLES DE ENTORNO:");
 console.log("OPENROUTER_API_KEY:", OPENROUTER_API_KEY ? "OK" : "❌ FALTA");
+console.log("SMTP_USER:", smtpUser);
+console.log("SMTP_PASS:", smtpPass ? "OK" : "❌ FALTA");
+console.log("-------------------------------------------");
 
 // -------------------------------------------------------------
 // 1) CHAT MIRA → OpenRouter
@@ -30,7 +43,7 @@ app.post("/api/mira", async (req, res) => {
 
         const { message, history } = req.body || {};
 
-        if (!message) {
+        if (!message || typeof message !== "string") {
             return res.status(400).json({ error: "message es obligatorio" });
         }
 
@@ -39,20 +52,20 @@ app.post("/api/mira", async (req, res) => {
                 role: "system",
                 content: `
 Eres MIRA, la asistente virtual futurista de Innova Space Education SPA.
-Hablas español, tono femenino amable, profesional, futurista.
-No uses emojis.
-Tu enfoque:
-- IA educativa e innovación
-- Desarrollo web futurista
-- Asistentes virtuales
-- Remodelación de salas temáticas
-- Integración de tecnología en colegios
-En cotizaciones, invita a escribir a contacto@innova-space-edu.cl.
+Hablas español, tono femenino amable, profesional y futurista.
+NO uses emojis. NO seas demasiado larga.
+Puedes responder sobre:
+- inteligencia artificial educativa
+- desarrollo web futurista
+- remodelación de ambientes escolares
+- asistentes virtuales
+- plataformas con IA
+Si es una cotización o proyecto, invita a enviar correo a contacto@innova-space-edu.cl.
                 `.trim()
             }
         ];
 
-        // Historial opcional
+        // Historial (opcional)
         if (Array.isArray(history)) {
             history.forEach(h => {
                 if (h?.role && h?.content) messages.push(h);
@@ -61,6 +74,7 @@ En cotizaciones, invita a escribir a contacto@innova-space-edu.cl.
 
         messages.push({ role: "user", content: message });
 
+        // Llamado a OpenRouter
         const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
             method: "POST",
             headers: {
@@ -79,12 +93,12 @@ En cotizaciones, invita a escribir a contacto@innova-space-edu.cl.
 
         if (!response.ok) {
             const txt = await response.text();
-            console.error("❌ OpenRouter Error:", txt);
-            return res.status(500).json({ error: "Error OpenRouter", detail: txt });
+            console.error("❌ Error OpenRouter:", txt);
+            return res.status(500).json({ error: "Error desde OpenRouter", detail: txt });
         }
 
         const data = await response.json();
-        const reply = data?.choices?.[0]?.message?.content ?? "No pude generar respuesta.";
+        const reply = data?.choices?.[0]?.message?.content || "No pude generar una respuesta.";
 
         res.json({ reply });
 
@@ -98,15 +112,7 @@ En cotizaciones, invita a escribir a contacto@innova-space-edu.cl.
 // 2) ENVÍO DE CORREO (Zoho Mail) DESDE EL FORMULARIO DE LA WEB
 // -------------------------------------------------------------
 
-// Configuración del transporter para Zoho
-const smtpHost = process.env.SMTP_HOST || "smtp.zoho.com";
-const smtpPort = Number(process.env.SMTP_PORT) || 465; // Zoho SSL
-const smtpSecure = process.env.SMTP_SECURE === "false" ? false : true;
-
-const smtpUser = process.env.SMTP_USER || "contacto@innova-space-edu.cl";
-const smtpPass = process.env.SMTP_PASS; // pon esto en las env vars de Render
-const emailSendTo = process.env.EMAIL_SEND_TO || "contacto@innova-space-edu.cl";
-
+// Transporter Zoho Mail
 const transporter = nodemailer.createTransport({
     host: smtpHost,
     port: smtpPort,
@@ -117,33 +123,38 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-// Opcional: verificar conexión SMTP al iniciar
-transporter.verify((err, success) => {
+// Verificación inicial del SMTP
+transporter.verify((err) => {
     if (err) {
-        console.error("❌ Error verificando conexión SMTP:", err);
+        console.error("❌ Error al conectar con SMTP Zoho:", err);
     } else {
-        console.log("✅ Servidor SMTP listo para enviar correos.");
+        console.log("✅ SMTP Zoho conectado correctamente.");
     }
 });
 
+// Endpoint para enviar correos desde el formulario
 app.post("/api/send-email", async (req, res) => {
     try {
         const { nombre, correo, institucion, ciudad, mensaje } = req.body || {};
 
         if (!nombre || !correo || !mensaje) {
-            return res.status(400).json({ error: "Faltan datos obligatorios (nombre, correo, mensaje)." });
+            return res.status(400).json({
+                error: "Faltan datos obligatorios: nombre, correo y mensaje."
+            });
         }
 
         const asunto = `Nuevo mensaje desde la web - Innova Space Education`;
         const cuerpoTexto = `
-Nuevo mensaje desde el formulario de contacto:
+Nuevo mensaje recibido desde el sitio web:
 
-Nombre: ${nombre}
-Correo: ${correo}
-Institución/Empresa: ${institucion || "-"}
-Ciudad: ${ciudad || "-"}
+━━━━━━━━━━━━━━━━━━━━━━
+👤 Nombre: ${nombre}
+📧 Correo: ${correo}
+🏫 Institución/Empresa: ${institucion || "-"}
+📍 Ciudad: ${ciudad || "-"}
+━━━━━━━━━━━━━━━━━━━━━━
 
-Mensaje:
+📝 Mensaje:
 ${mensaje}
         `.trim();
 
@@ -155,11 +166,14 @@ ${mensaje}
             text: cuerpoTexto
         });
 
-        res.json({ success: true, message: "Correo enviado correctamente" });
+        res.json({
+            success: true,
+            message: "Correo enviado correctamente."
+        });
 
     } catch (error) {
-        console.error("❌ Error al enviar correo:", error);
-        res.status(500).json({ error: "No se pudo enviar el correo" });
+        console.error("❌ Error enviando correo:", error);
+        res.status(500).json({ error: "No se pudo enviar el correo." });
     }
 });
 
@@ -167,7 +181,7 @@ ${mensaje}
 // 3) HOME TEST
 // -------------------------------------------------------------
 app.get("/", (req, res) => {
-    res.send("🚀 MIRA backend funcionando correctamente (chat con OpenRouter + envío de correos por Zoho). La voz se maneja desde el servicio mira-tts.");
+    res.send("🚀 Backend MIRA funcionando (OpenRouter + Zoho Mail). El TTS se gestiona desde mira-tts.");
 });
 
 // -------------------------------------------------------------
