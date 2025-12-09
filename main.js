@@ -350,11 +350,15 @@ window.addEventListener("touchstart", unlockMiraAudio);
 ------------------------------------------------------------------ */
 if (miraToggleBtn && miraChat && miraCloseBtn) {
     miraToggleBtn.addEventListener("click", () => {
+        // 🔓 Aseguramos desbloquear audio antes de saludar
+        unlockMiraAudio();
+
         miraChat.classList.toggle("mira-chat-open");
         if (miraChat.classList.contains("mira-chat-open")) {
             initMiraWelcome();
             setTimeout(() => miraInput?.focus(), 200);
 
+            // Saludo adicional cuando se abre, ahora con audio ya desbloqueado
             if (miraAudioUnlocked) {
                 speakWithMiraVoice("Estoy a su disposición. ¿Cómo puedo ayudarle?");
             }
@@ -474,27 +478,58 @@ function sanitizeForSpeech(text) {
 }
 
 /* ------------------------------------------------------------------
-   PIPER TTS – VOZ MEXICANA
+   PIPER TTS – VOZ MEXICANA + FALLBACK NAVEGADOR
 ------------------------------------------------------------------ */
+
+// Fallback con Web Speech API (navegador)
+function speakWithBrowserVoice(text) {
+    if (!("speechSynthesis" in window)) return;
+    if (!text) return;
+
+    try {
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = "es-ES";
+        utter.rate = 1.0;
+        utter.pitch = 1.0;
+
+        window.speechSynthesis.cancel();
+        window.speechSynthesis.speak(utter);
+    } catch (e) {
+        console.error("Error en Web Speech fallback:", e);
+    }
+}
+
 async function speakWithMiraVoice(text) {
     if (!miraVoiceEnabled) return;
     if (!text || !miraAudioUnlocked) return;
+
+    const safeText = sanitizeForSpeech(text);
+    if (!safeText) return;
 
     try {
         const res = await fetch(MIRA_TTS_URL, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ text })
+            body: JSON.stringify({ text: safeText })
         });
 
-        if (!res.ok) return;
+        if (!res.ok) {
+            console.warn("TTS Piper no disponible, usando voz del navegador.");
+            speakWithBrowserVoice(safeText);
+            return;
+        }
 
         const blob = await res.blob();
         const url = URL.createObjectURL(blob);
         const audio = new Audio(url);
-        await audio.play().catch(() => {});
+        await audio.play().catch((err) => {
+            console.warn("Error al reproducir audio Piper, usando voz del navegador:", err);
+            speakWithBrowserVoice(safeText);
+        });
     } catch (err) {
-        console.error("Error TTS:", err);
+        console.error("Error TTS (Piper):", err);
+        // Fallback si el backend falla
+        speakWithBrowserVoice(safeText);
     }
 }
 
@@ -505,6 +540,10 @@ if (miraVoiceToggle) {
         miraVoiceToggle.innerHTML = miraVoiceEnabled
             ? '<i class="ri-volume-up-fill"></i>'
             : '<i class="ri-volume-mute-fill"></i>';
+
+        if (!miraVoiceEnabled && "speechSynthesis" in window) {
+            window.speechSynthesis.cancel();
+        }
     });
 }
 
