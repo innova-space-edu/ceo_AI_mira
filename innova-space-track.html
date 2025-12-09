@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <title>Innova Space Track · Sistema de Inventario Web</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description"
+          content="Innova Space Track - Sistema de inventario web para laboratorios, salas y recursos educativos. Registra préstamos, controla materiales y genera informes para instituciones educativas.">
+
+    <!-- Fuentes -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Poppins:wght@300;400;500;600;700&display=swap"
+          rel="stylesheet" />
+
+    <!-- Iconos -->
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="style.css" />
+
+    <!-- Estilos específicos de esta página -->
+    <style>
+        .track-hero {
+            position: relative;
+            min-height: 70vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 6rem 1.5rem 3rem;
+        }
+        .track-hero-inner {
+            max-width: 1200px;
+            width: 100%;
+            display: grid;
+            gap: 3rem;
+            grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+        }
+        @media (max-width: 900px) {
+            .track-hero-inner {
+                grid-template-columns: 1fr;
+            }
+        }
+        .badge-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: .75rem;
+            margin-top: 1.25rem;
+        }
+        .badge-chip {
+            padding: .45rem .9rem;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(0,255,255,0.28);
+            font-size: .8rem;
+            display: inline-flex;
+            align-items: center;
+            gap: .35rem;
+        }
+        .badge-chip i {
+            font-size: 1rem;
+        }
+
+        .track-stats {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0,1fr));
+            gap: .9rem;
+            margin-top: 1.75rem;
+        }
+        .track-stat {
+            padding: .85rem 1rem;
+            border-radius: 1rem;
+            background: rgba(4, 12, 35, 0.9);
+            border: 1px solid rgba(88, 101, 242, 0.4);
+            font-size: .85rem;
+        }
+        .track-stat span {
+            display: block;
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        /* Bloques de contenido */
+        .track-grid-2 {
+            display: grid;
+            grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+            gap: 2.5rem;
+        }
+        @media (max-width: 960px) {
+            .track-grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+        .pill-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: .65rem;
+            margin-top: 1rem;
+        }
+        .pill-list span {
+            border-radius: 999px;
+            padding: .35rem .85rem;
+            font-size: .8rem;
+            background: rgba(255,255,255,0.06);
+        }
+
+        .track-feature-grid {
+            display: grid;
+            grid-template-columns: repeat(3,minmax(0,1fr));
+            gap: 1.5rem;
+        }
+        @media (max-width: 1024px) {
+            .track-feature-grid {
+                grid-template-columns: repeat(2,minmax(0,1fr));
+            }
+        }
+        @media (max-width: 720px) {
+            .track-feature-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .track-feature {
+            background: rgba(3,9,30,0.92);
+            border-radius: 1.1rem;
+            padding: 1.2rem 1.2rem 1.1rem;
+            border: 1px solid rgba(121, 134, 255, 0.5);
+            box-shadow: 0 18px 35px rgba(7, 20, 58, 0.9);
+        }
+        .track-feature i {
+            font-size: 1.6rem;
+            margin-bottom: .4rem;
+            display: inline-block;
+        }
+
+        /* Carrusel de imágenes y videos */
+        .track-carousel-wrapper {
+            position: relative;
+            border-radius: 1.3rem;
+            overflow: hidden;
+            background: radial-gradient(circle at top left,#283d7a,#050814 60%);
+            border: 1px solid rgba(120, 176, 255, 0.4);
+            box-shadow: 0 24px 55px rgba(4,0,40,0.85);
+        }
+        .track-carousel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: .85rem 1.3rem .6rem;
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+            font-size: .9rem;
+        }
+        .track-carousel-header span {
+            opacity: .8;
+        }
+        .track-carousel {
+            position: relative;
+            width: 100%;
+            height: 0;
+            padding-bottom: 56.25%; /* 16:9 */
+        }
+        .track-slide {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #020617;
+        }
+        .track-slide.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .track-slide img,
+        .track-slide video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .track-carousel-controls {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: .6rem 1.1rem .9rem;
+            gap: .8rem;
+        }
+        .track-arrow-btn {
+            border-radius: 999px;
+            padding: .4rem .8rem;
+            border: 1px solid rgba(148, 163, 255, 0.9);
+            background: rgba(12, 16, 56, 0.92);
+            color: #e5e7ff;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: .3rem;
+            font-size: .85rem;
+        }
+        .track-dots {
+            display: flex;
+            gap: .32rem;
+            flex-wrap: wrap;
+        }
+        .track-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 999px;
+            background: rgba(148, 163, 255, 0.48);
+            cursor: pointer;
+            transition: transform .2s, background .2s, width .2s;
+        }
+        .track-dot.active {
+            width: 18px;
+            background: #38bdf8;
+            transform: translateY(-1px);
+        }
+
+        .track-note {
+            font-size: .8rem;
+            opacity: .7;
+            margin-top: .45rem;
+        }
+
+        /* Sección diferencia */
+        .difference-list {
+            display: grid;
+            grid-template-columns: repeat(2,minmax(0,1fr));
+            gap: 1.3rem;
+        }
+        @media (max-width: 840px) {
+            .difference-list {
+                grid-template-columns: 1fr;
+            }
+        }
+        .difference-item {
+            padding: 1rem 1.1rem;
+            border-radius: 1rem;
+            background: rgba(15,23,42,0.95);
+            border: 1px solid rgba(56,189,248,0.45);
+            font-size: .92rem;
+        }
+        .difference-item h4 {
+            margin-bottom: .35rem;
+            font-size: 1rem;
+        }
+
+        /* CTA final */
+        .track-cta {
+            text-align: center;
+            max-width: 720px;
+            margin: 0 auto;
+        }
+        .track-cta-buttons {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: .9rem;
+            margin-top: 1.2rem;
+        }
+        .btn-outline {
+            border-radius: 999px;
+            padding: .65rem 1.4rem;
+            border: 1px solid rgba(59, 130, 246, 0.9);
+            background: transparent;
+            color: #e5edff;
+            font-size: .9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: .4rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Canvas de fondo -->
+    <canvas id="starsCanvas"></canvas>
+
+    <!-- Loader global (opcional) -->
+    <div id="global-loader">
+        <div class="loader-content">
+            <div class="loader-galaxy"></div>
+            <p>Cargando demo de Innova Space Track...</p>
+        </div>
+    </div>
+
+    <!-- NAVBAR sencilla con regreso al inicio -->
+    <nav class="navbar">
+        <div class="nav-logo">
+            <picture>
+                <img src="assets/img/logo.jpg" alt="Logo Innova Space Education">
+            </picture>
+            <span class="logo-text-animated">INNOVA SPACE TRACK</span>
+        </div>
+        <button class="nav-toggle" id="navToggle">
+            <i class="ri-menu-3-line"></i>
+        </button>
+        <ul class="nav-links" id="navLinks">
+            <!-- Vuelven a la página principal -->
+            <li><a href="index.html#hero">Inicio</a></li>
+            <li><a href="index.html#portafolio">Portafolio</a></li>
+            <li><a href="#track-media">Demo visual</a></li>
+            <li><a href="#empresa">Información de la empresa</a></li>
+            <li><a href="index.html#contacto">Contacto</a></li>
+        </ul>
+    </nav>
+
+    <!-- HERO TRACK -->
+    <header class="track-hero">
+        <div class="hero-overlay"></div>
+
+        <div class="track-hero-inner section">
+            <div>
+                <h1>Innova Space Track</h1>
+                <p>
+                    Sistema de inventario web diseñado especialmente para laboratorios,
+                    salas temáticas y recursos educativos. Controla préstamos, movimientos,
+                    reposición y análisis de uso en tiempo real, desde cualquier dispositivo.
+                </p>
+
+                <div class="hero-buttons" style="margin-top:1.8rem;">
+                    <a href="#track-media" class="btn-primary"
+                       data-mira-hint="Abrir la demo visual de Innova Space Track, con imágenes y videos explicativos.">
+                        <i class="ri-play-circle-fill"></i> Ver demo visual
+                    </a>
+                    <a href="index.html#contacto" class="btn-secondary"
+                       data-mira-hint="Solicitar una demo personalizada del sistema de inventario para su institución.">
+                        <i class="ri-mail-send-fill"></i> Solicitar para mi institución
+                    </a>
+                </div>
+
+                <div class="badge-row">
+                    <div class="badge-chip">
+                        <i class="ri-flask-fill"></i> Laboratorios y salas de ciencias
+                    </div>
+                    <div class="badge-chip">
+                        <i class="ri-macbook-fill"></i> Salas de computación y tecnologías
+                    </div>
+                    <div class="badge-chip">
+                        <i class="ri-archive-2-fill"></i> Depósitos, bodegas y recursos móviles
+                    </div>
+                </div>
+
+                <div class="track-stats">
+                    <div class="track-stat">
+                        <span>100%</span>
+                        Pensado para colegios e instituciones educativas.
+                    </div>
+                    <div class="track-stat">
+                        <span>Multi-sala</span>
+                        Varios laboratorios, niveles y módulos en un solo panel.
+                    </div>
+                    <div class="track-stat">
+                        <span>Historial</span>
+                        Registro detallado de préstamos, devoluciones y observaciones.
+                    </div>
+                    <div class="track-stat">
+                        <span>Online</span>
+                        Acceso desde cualquier equipo con navegador web.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resumen corto de qué hace el sistema -->
+            <div class="section-dark" style="border-radius:1.4rem; padding:1.8rem;">
+                <h2 style="font-size:1.4rem;">¿Qué resuelve Innova Space Track?</h2>
+                <p>
+                    Un inventario tradicional en planillas se vuelve difícil de mantener,
+                    poco transparente y propenso a errores. Innova Space Track centraliza
+                    toda la información en una sola plataforma visual, donde es posible:
+                </p>
+                <ul class="check-list">
+                    <li>Registrar qué material se presta, a quién y por cuánto tiempo.</li>
+                    <li>Ver rápidamente qué recursos están disponibles en cada laboratorio.</li>
+                    <li>Registrar daños, pérdidas y contextos especiales (robos, desperfectos, etc.).</li>
+                    <li>Generar informes periódicos para gestión interna o rendición de cuentas.</li>
+                </ul>
+                <div class="pill-list">
+                    <span>Gestión transparente</span>
+                    <span>Responsabilidad compartida</span>
+                    <span>Mejor uso del presupuesto</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- DESCRIPCIÓN GENERAL + MÓDULOS -->
+        <section class="section" id="descripcion">
+            <div class="section-header">
+                <h2>¿Qué es Innova Space Track?</h2>
+                <p>Sistema de inventario web diseñado a partir de la realidad de un laboratorio escolar.</p>
+            </div>
+
+            <div class="track-grid-2">
+                <div>
+                    <p>
+                        Innova Space Track es una plataforma web creada por
+                        <strong>Innova Space Education SPA</strong> para colegios, liceos,
+                        universidades y centros de formación que necesitan controlar
+                        material de laboratorio, tecnología y recursos de forma clara,
+                        rápida y visual.
+                    </p>
+                    <p>
+                        El sistema se adapta a diferentes áreas: ciencias, tecnología,
+                        biblioteca, bodegas, talleres y laboratorios especializados.
+                        Cada módulo mantiene su propio inventario, pero toda la
+                        información se integra en un panel central de administración.
+                    </p>
+                    <p>
+                        Fue desarrollado a partir de la experiencia real en laboratorio
+                        de ciencias y salas temáticas, recogiendo las necesidades de
+                        docentes, encargados de inventario y equipos directivos.
+                    </p>
+                </div>
+                <div>
+                    <h3>Principales módulos del sistema</h3>
+                    <div class="track-feature-grid" style="margin-top:1.1rem;">
+                        <article class="track-feature">
+                            <i class="ri-booklet-fill"></i>
+                            <h4>Inventario por sala</h4>
+                            <p>
+                                Cada laboratorio o sala tiene su propio registro de materiales,
+                                cantidades, estados y ubicación precisa.
+                            </p>
+                        </article>
+                        <article class="track-feature">
+                            <i class="ri-user-shared-fill"></i>
+                            <h4>Préstamos y devoluciones</h4>
+                            <p>
+                                Registro de quién solicita, qué lleva, por cuánto tiempo,
+                                y quién recibe de vuelta el material.
+                            </p>
+                        </article>
+                        <article class="track-feature">
+                            <i class="ri-bar-chart-2-fill"></i>
+                            <h4>Análisis de uso</h4>
+                            <p>
+                                Visualización de qué recursos se utilizan más, qué salas
+                                solicitan más material y en qué períodos del año.
+                            </p>
+                        </article>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- BENEFICIOS -->
+        <section class="section section-dark" id="beneficios">
+            <div class="section-header">
+                <h2>Beneficios para tu institución</h2>
+                <p>Más control, menos pérdidas y decisiones basadas en datos.</p>
+            </div>
+
+            <div class="track-feature-grid">
+                <article class="track-feature">
+                    <i class="ri-shield-check-fill"></i>
+                    <h4>Control y trazabilidad reales</h4>
+                    <p>
+                        Cada movimiento queda registrado: quién pidió, qué se llevó,
+                        cuándo debió devolverlo y en qué estado regresó el material.
+                    </p>
+                </article>
+                <article class="track-feature">
+                    <i class="ri-group-line"></i>
+                    <h4>Responsabilidad compartida</h4>
+                    <p>
+                        Estudiantes, docentes y encargados comparten la responsabilidad
+                        del uso del material, lo que disminuye pérdidas y daños.
+                    </p>
+                </article>
+                <article class="track-feature">
+                    <i class="ri-pie-chart-2-fill"></i>
+                    <h4>Decisiones con evidencia</h4>
+                    <p>
+                        Los informes permiten priorizar compras, renovar material
+                        realmente utilizado y justificar inversiones ante equipos directivos.
+                    </p>
+                </article>
+                <article class="track-feature">
+                    <i class="ri-cloud-fill"></i>
+                    <h4>Acceso desde cualquier lugar</h4>
+                    <p>
+                        Solo necesitas un navegador web para revisar o actualizar el
+                        inventario, sin instalaciones complejas.
+                    </p>
+                </article>
+                <article class="track-feature">
+                    <i class="ri-tools-fill"></i>
+                    <h4>Diseño adaptado a la práctica</h4>
+                    <p>
+                        Interfaz creada a partir de la realidad de un laboratorio
+                        escolar: solicitudes rápidas, registro de observaciones y
+                        contexto de uso.
+                    </p>
+                </article>
+                <article class="track-feature">
+                    <i class="ri-magic-fill"></i>
+                    <h4>Integrable con otros proyectos</h4>
+                    <p>
+                        Puede conectarse con otros módulos educativos o asistentes
+                        virtuales desarrollados por Innova Space Education.
+                    </p>
+                </article>
+            </div>
+        </section>
+
+        <!-- DIFERENCIAS CON OTRAS PÁGINAS DE INVENTARIO -->
+        <section class="section" id="diferencias">
+            <div class="section-header">
+                <h2>¿Qué lo distingue de otros sistemas de inventario?</h2>
+                <p>Diseñado específicamente para educación, no para una bodega genérica.</p>
+            </div>
+
+            <div class="difference-list">
+                <div class="difference-item">
+                    <h4>Enfoque educativo real</h4>
+                    <p>
+                        No es una copia de un sistema empresarial. Se diseñó considerando
+                        dinámicas de curso, proyectos de ciencias, ferias, salidas a
+                        terreno y trabajo grupal.
+                    </p>
+                </div>
+                <div class="difference-item">
+                    <h4>Registro de contexto</h4>
+                    <p>
+                        Cada solicitud puede incluir observaciones: robos, daños,
+                        extravíos, mal uso, o situaciones especiales; ideal para informes
+                        a inspectoría o dirección.
+                    </p>
+                </div>
+                <div class="difference-item">
+                    <h4>Módulo de préstamos por mes</h4>
+                    <p>
+                        Permite ver rápidamente quién ha solicitado más materiales,
+                        en qué meses y qué recursos prácticamente no se usan.
+                    </p>
+                </div>
+                <div class="difference-item">
+                    <h4>Escalable y personalizable</h4>
+                    <p>
+                        Se pueden agregar nuevos módulos de inventario (computación,
+                        biblioteca, talleres, salas temáticas) manteniendo el mismo
+                        estilo futurista y panel central.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- DEMO VISUAL: CARRUSEL -->
+        <section class="section section-dark" id="track-media">
+            <div class="section-header">
+                <h2>Demo visual de Innova Space Track</h2>
+                <p>Vista general del panel, registros de préstamos y análisis de datos.</p>
+            </div>
+
+            <div class="track-grid-2">
+                <!-- Carrusel -->
+                <div class="track-carousel-wrapper">
+                    <div class="track-carousel-header">
+                        <div>
+                            <strong>Vista previa interactiva</strong><br>
+                            <span>Imágenes + videos cortos del sistema funcionando.</span>
+                        </div>
+                        <span><i class="ri-monitor-fill"></i> Demo local</span>
+                    </div>
+
+                    <div class="track-carousel" id="trackCarousel">
+                        <!-- 5 imágenes (cámbialas por tus capturas reales) -->
+                        <div class="track-slide active">
+                            <img src="assets/track/track-1.jpg"
+                                 alt="Panel principal de Innova Space Track con vista general de salas y laboratorios.">
+                        </div>
+                        <div class="track-slide">
+                            <img src="assets/track/track-2.jpg"
+                                 alt="Registro de préstamos y devoluciones con detalle de estudiantes y fechas.">
+                        </div>
+                        <div class="track-slide">
+                            <img src="assets/track/track-3.jpg"
+                                 alt="Formulario de ingreso de materiales y actualización de inventario.">
+                        </div>
+                        <div class="track-slide">
+                            <img src="assets/track/track-4.jpg"
+                                 alt="Gráficos de análisis de uso de materiales por sala y periodo.">
+                        </div>
+                        <div class="track-slide">
+                            <img src="assets/track/track-5.jpg"
+                                 alt="Panel administrativo con resumen de movimientos y observaciones.">
+                        </div>
+
+                        <!-- 4 videos cortos (puedes reemplazar las rutas) -->
+                        <div class="track-slide">
+                            <video src="assets/track/track-demo-1.mp4"
+                                   controls
+                                   preload="metadata"></video>
+                        </div>
+                        <div class="track-slide">
+                            <video src="assets/track/track-demo-2.mp4"
+                                   controls
+                                   preload="metadata"></video>
+                        </div>
+                        <div class="track-slide">
+                            <video src="assets/track/track-demo-3.mp4"
+                                   controls
+                                   preload="metadata"></video>
+                        </div>
+                        <div class="track-slide">
+                            <video src="assets/track/track-demo-4.mp4"
+                                   controls
+                                   preload="metadata"></video>
+                        </div>
+                    </div>
+
+                    <div class="track-carousel-controls">
+                        <button class="track-arrow-btn" id="trackPrev">
+                            <i class="ri-arrow-left-s-line"></i> Anterior
+                        </button>
+                        <div class="track-dots" id="trackDots"></div>
+                        <button class="track-arrow-btn" id="trackNext">
+                            Siguiente <i class="ri-arrow-right-s-line"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Texto explicativo asociado a la demo -->
+                <div>
+                    <h3>¿Qué está viendo en la demo?</h3>
+                    <p>
+                        Cada imagen y video corresponde a una parte clave del sistema:
+                        panel principal, flujo de préstamo, carga de inventario y
+                        análisis de datos. El objetivo es mostrar cómo se ve en la
+                        práctica el uso diario de Innova Space Track.
+                    </p>
+                    <ul class="check-list">
+                        <li>Panel principal con resumen de salas, categorías y niveles.</li>
+                        <li>Flujo de préstamo y devolución para estudiantes, cursos y funcionarios.</li>
+                        <li>Registro de observaciones y estados de los materiales.</li>
+                        <li>Informes que pueden exportarse o replicarse en presentaciones internas.</li>
+                    </ul>
+                    <p class="track-note">
+                        Cuando el sistema esté instalado en su institución, la demo se
+                        adapta a la realidad de su laboratorio: nombres de salas,
+                        cursos, módulos y tipos de material.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- INFORMACIÓN DE LA EMPRESA -->
+        <section class="section" id="empresa">
+            <div class="section-header">
+                <h2>Innova Space Education SPA</h2>
+                <p>Empresa responsable del desarrollo de Innova Space Track.</p>
+            </div>
+
+            <div class="track-grid-2">
+                <div>
+                    <h3>Quiénes somos</h3>
+                    <p>
+                        <strong>Innova Space Education SPA</strong> es una empresa chilena
+                        que integra educación, inteligencia artificial y desarrollo web
+                        para crear experiencias futuristas en colegios, liceos e
+                        instituciones. Desarrollamos asistentes virtuales, plataformas
+                        interactivas, páginas web y sistemas de gestión a medida.
+                    </p>
+                    <p>
+                        Nuestro enfoque combina experiencia docente en aula con diseño
+                        tecnológico, lo que nos permite crear soluciones que responden a
+                        necesidades reales de laboratorios, salas y equipos directivos.
+                    </p>
+                </div>
+                <div>
+                    <h3>Datos de contacto</h3>
+                    <ul>
+                        <li><strong>Nombre:</strong> Innova Space Education SPA</li>
+                        <li><strong>Ubicación:</strong> Vallenar – Antofagasta, Chile</li>
+                        <li><strong>Correo:</strong> contacto@innova-space-edu.cl</li>
+                        <li><strong>Áreas:</strong> Educación, IA, Desarrollo Web, Gestión de proyectos institucionales.</li>
+                        <li><strong>Proyectos:</strong> Asistente virtual MIRA, plataformas educativas, sistemas de inventario, remodelación de salas temáticas.</li>
+                    </ul>
+                    <div class="track-cta" style="margin-top:1.4rem;">
+                        <p>
+                            Si tu institución necesita una solución similar, podemos
+                            adaptar Innova Space Track a la realidad de tus laboratorios
+                            y módulos.
+                        </p>
+                        <div class="track-cta-buttons">
+                            <a href="index.html#contacto" class="btn-primary">
+                                <i class="ri-calendar-event-fill"></i> Agendar reunión
+                            </a>
+                            <a href="index.html#hero" class="btn-outline">
+                                <i class="ri-arrow-go-back-fill"></i> Volver al inicio del sitio
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>© <span id="year"></span> Innova Space Education SPA · Todos los derechos reservados.</p>
+    </footer>
+
+    <!-- CHATBOT MIRA flotante (mismo de index) -->
+    <div id="mira-widget">
+        <!-- Botón flotante con SVG inline -->
+        <button id="mira-toggle" aria-label="Abrir asistente MIRA">
+            <svg width="110" height="110" viewBox="0 0 110 110" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="rainbow" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#ff3c3c">
+                            <animate attributeName="stop-color"
+                                     values="#ff3c3c;#ffbe30;#35e835;#359bff;#8f38f7;#ff3c3c"
+                                     dur="6s"
+                                     repeatCount="indefinite" />
+                        </stop>
+                        <stop offset="50%" stop-color="#ffbe30">
+                            <animate attributeName="stop-color"
+                                     values="#ffbe30;#35e835;#359bff;#8f38f7;#ff3c3c;#ffbe30"
+                                     dur="6s"
+                                     repeatCount="indefinite" />
+                        </stop>
+                        <stop offset="100%" stop-color="#35e835">
+                            <animate attributeName="stop-color"
+                                     values="#35e835;#359bff;#8f38f7;#ff3c3c;#ffbe30;#35e835"
+                                     dur="6s"
+                                     repeatCount="indefinite" />
+                        </stop>
+                    </linearGradient>
+                    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+                        <feGaussianBlur stdDeviation="2.5" result="coloredBlur" />
+                        <feMerge>
+                            <feMergeNode in="coloredBlur" />
+                            <feMergeNode in="SourceGraphic" />
+                        </feMerge>
+                    </filter>
+                </defs>
+                <circle
+                    cx="55"
+                    cy="55"
+                    r="44"
+                    stroke="url(#rainbow)"
+                    stroke-width="8"
+                    fill="none"
+                    filter="url(#glow)">
+                    <animate attributeName="r" values="44;49;44" dur="1.4s" repeatCount="indefinite" />
+                    <animate attributeName="stroke-width" values="8;12;8" dur="1.4s" repeatCount="indefinite" />
+                    <animate attributeName="stroke-opacity" values="0.7;1;0.7" dur="1.4s" repeatCount="indefinite" />
+                </circle>
+            </svg>
+        </button>
+
+        <!-- Ventana del chat -->
+        <div id="mira-chat" class="mira-chat-closed">
+            <div class="mira-header">
+                <div class="mira-header-info">
+                    <svg width="32" height="32" viewBox="0 0 110 110" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="rainbow-mini" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#ff3c3c" />
+                                <stop offset="50%" stop-color="#ffbe30" />
+                                <stop offset="100%" stop-color="#35e835" />
+                            </linearGradient>
+                        </defs>
+                        <circle
+                            cx="55"
+                            cy="55"
+                            r="44"
+                            stroke="url(#rainbow-mini)"
+                            stroke-width="8"
+                            fill="none" />
+                    </svg>
+                    <div>
+                        <h4>MIRA · Asistente IA</h4>
+                        <span>Futuristic AI · Voz femenina</span>
+                    </div>
+                </div>
+                <div class="mira-header-actions">
+                    <button id="mira-voice-toggle" title="Activar/Desactivar voz">
+                        <i class="ri-volume-up-fill"></i>
+                    </button>
+                    <button id="mira-close" title="Cerrar">
+                        <i class="ri-close-fill"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="mira-messages" id="miraMessages"></div>
+            <div class="mira-loading" id="miraLoading">
+                <div class="loader-mini"></div>
+                <span>MIRA está pensando...</span>
+            </div>
+            <form id="miraForm" class="mira-input-area">
+                <input type="text"
+                       id="miraInput"
+                       placeholder="Escriba aquí... Ej: ¿Cómo funciona Innova Space Track?"
+                       autocomplete="off" />
+                <button type="submit">
+                    <i class="ri-send-plane-2-fill"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Script general del sitio (canvas, navbar, MIRA, etc.) -->
+    <script src="main.js" defer></script>
+
+    <!-- Script del carrusel de Innova Space Track -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const slides = document.querySelectorAll(".track-slide");
+            const prevBtn = document.getElementById("trackPrev");
+            const nextBtn = document.getElementById("trackNext");
+            const dotsContainer = document.getElementById("trackDots");
+
+            if (!slides.length || !prevBtn || !nextBtn || !dotsContainer) return;
+
+            let current = 0;
+            let autoTimer = null;
+
+            // Crear dots
+            slides.forEach((_, idx) => {
+                const dot = document.createElement("div");
+                dot.className = "track-dot" + (idx === 0 ? " active" : "");
+                dot.dataset.index = idx;
+                dot.addEventListener("click", () => showSlide(idx, true));
+                dotsContainer.appendChild(dot);
+            });
+
+            const dots = dotsContainer.querySelectorAll(".track-dot");
+
+            function pauseAllVideos() {
+                slides.forEach(slide => {
+                    const video = slide.querySelector("video");
+                    if (video && !video.paused) {
+                        video.pause();
+                    }
+                });
+            }
+
+            function showSlide(index, fromUser = false) {
+                if (index < 0) index = slides.length - 1;
+                if (index >= slides.length) index = 0;
+
+                slides[current].classList.remove("active");
+                dots[current].classList.remove("active");
+
+                pauseAllVideos();
+
+                current = index;
+                slides[current].classList.add("active");
+                dots[current].classList.add("active");
+
+                if (fromUser) {
+                    resetAuto();
+                }
+            }
+
+            function nextSlide() {
+                showSlide(current + 1);
+            }
+
+            function resetAuto() {
+                if (autoTimer) clearInterval(autoTimer);
+                autoTimer = setInterval(nextSlide, 12000);
+            }
+
+            prevBtn.addEventListener("click", () => showSlide(current - 1, true));
+            nextBtn.addEventListener("click", () => showSlide(current + 1, true));
+
+            resetAuto();
+        });
+    </script>
+</body>
+</html>
