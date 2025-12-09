@@ -249,8 +249,8 @@ function initMiraWelcome() {
     miraMessages.innerHTML = "";
     addMiraMessage(
         "Bienvenido a Innova Space Education.<br>" +
-        "Soy <strong>MIRA</strong>, una inteligencia asistencial diseñada para acompañarle.<br>" +
-        "Estoy lista para ayudarle en lo que necesite."
+        "Soy <strong>MIRA</strong>, una asistente virtual diseñada para acompañarte.<br>" +
+        "Estoy lista para ayudarte en lo que necesites."
     );
 }
 
