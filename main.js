@@ -2,8 +2,6 @@
 
 // URL del backend de MIRA en Render (NO expone la API key de OpenRouter)
 const MIRA_API_URL = "https://ceo-ai-mira.onrender.com/api/mira";
-// Nuevo backend TTS con Piper (voz mexicana es_MX-claude-high)
-const MIRA_TTS_URL = "https://mira-tts.onrender.com/tts";
 
 /* ------------------------------------------------------------------
    1. LOADER GLOBAL
@@ -248,6 +246,7 @@ const miraLoading = document.getElementById("miraLoading");
 const miraVoiceToggle = document.getElementById("mira-voice-toggle");
 
 function initMiraWelcome() {
+    if (!miraMessages) return;
     miraMessages.innerHTML = "";
     addMiraMessage(
         "Bienvenido a Innova Space Education.<br>" +
@@ -327,12 +326,13 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 /* ------------------------------------------------------------------
-   DESBLOQUEO DE AUDIO
+   DESBLOQUEO DE AUDIO (lo usamos como "permiso" lógico, aunque ahora la voz es del navegador)
 ------------------------------------------------------------------ */
 function unlockMiraAudio() {
     if (miraAudioUnlocked) return;
     miraAudioUnlocked = true;
 
+    // Este audio vacío ya no es imprescindible, pero lo dejamos por compatibilidad
     const a = new Audio();
     a.muted = true;
     a.play().catch(() => {});
@@ -350,7 +350,7 @@ window.addEventListener("touchstart", unlockMiraAudio);
 ------------------------------------------------------------------ */
 if (miraToggleBtn && miraChat && miraCloseBtn) {
     miraToggleBtn.addEventListener("click", () => {
-        // Aseguramos desbloquear audio antes de saludar
+        // aseguramos marcar que hubo interacción
         unlockMiraAudio();
 
         miraChat.classList.toggle("mira-chat-open");
@@ -358,8 +358,10 @@ if (miraToggleBtn && miraChat && miraCloseBtn) {
             initMiraWelcome();
             setTimeout(() => miraInput?.focus(), 200);
 
-            // Saludo adicional cuando se abre
-            speakWithMiraVoice("Estoy a su disposición. ¿Cómo puedo ayudarle?");
+            // Saludo cuando se abre el chat (si ya se desbloqueó la interacción)
+            if (miraAudioUnlocked) {
+                speakWithMiraVoice("Estoy a su disposición. ¿Cómo puedo ayudarle?");
+            }
         }
     });
 
@@ -385,6 +387,7 @@ if (miraForm && miraInput) {
 }
 
 function addUserMessage(text) {
+    if (!miraMessages) return;
     const div = document.createElement("div");
     div.className = "mira-msg user";
     div.innerText = text;
@@ -393,6 +396,7 @@ function addUserMessage(text) {
 }
 
 function addMiraMessage(htmlText) {
+    if (!miraMessages) return;
     const div = document.createElement("div");
     div.className = "mira-msg bot";
     div.innerHTML = htmlText;
@@ -400,10 +404,13 @@ function addMiraMessage(htmlText) {
     scrollMiraToBottom();
 
     const spoken = sanitizeForSpeech(stripHtml(htmlText));
-    speakWithMiraVoice(spoken);
+    if (miraAudioUnlocked) {
+        speakWithMiraVoice(spoken);
+    }
 }
 
 function scrollMiraToBottom() {
+    if (!miraMessages) return;
     miraMessages.scrollTop = miraMessages.scrollHeight;
 }
 
@@ -411,7 +418,7 @@ function scrollMiraToBottom() {
    RESPUESTAS – BACKEND + FALLBACK
 ------------------------------------------------------------------ */
 async function handleMiraResponse(userText) {
-    miraLoading.classList.add("active");
+    if (miraLoading) miraLoading.classList.add("active");
 
     let reply = "";
     try {
@@ -425,16 +432,17 @@ async function handleMiraResponse(userText) {
 
         const data = await res.json();
         reply = data.reply || generateMiraResponse(userText);
-    } catch {
+    } catch (err) {
+        console.warn("Error llamando a backend MIRA, usando respuesta local:", err);
         reply = generateMiraResponse(userText);
     }
 
-    miraLoading.classList.remove("active");
+    if (miraLoading) miraLoading.classList.remove("active");
     addMiraMessage(reply);
 }
 
 function generateMiraResponse(text) {
-    const t = text.toLowerCase();
+    const t = (text || "").toLowerCase();
 
     if (t.includes("hola")) {
         return "Hola, es un gusto saludarle. Soy MIRA, la asistente virtual futurista de Innova Space Education.";
@@ -468,88 +476,56 @@ function sanitizeForSpeech(text) {
     if (!text) return "";
 
     let clean = text;
+    // Quitar emojis
     clean = clean.replace(/[\u{1F300}-\u{1FAFF}]/gu, "");
     clean = clean.replace(/[\u2600-\u27BF]/g, "");
+    // Quitar símbolos de markdown
     clean = clean.replace(/[*_`~]+/g, "");
+    // Espacios extra
     clean = clean.replace(/\s{2,}/g, " ");
     return clean.trim();
 }
 
 /* ------------------------------------------------------------------
-   PIPER TTS – VOZ MEXICANA + FALLBACK NAVEGADOR
+   TTS SOLO NAVEGADOR – WEB SPEECH API
 ------------------------------------------------------------------ */
-
-// Fallback con Web Speech API (navegador)
-function speakWithBrowserVoice(text) {
+function speakWithMiraVoice(text) {
     if (!("speechSynthesis" in window)) {
-        console.warn("[MIRA TTS] El navegador no soporta speechSynthesis.");
+        console.warn("[MIRA TTS] Este navegador no soporta speechSynthesis.");
         return;
     }
-    if (!text) return;
-    if (!miraVoiceEnabled) return;
-
-    try {
-        const utter = new SpeechSynthesisUtterance(text);
-        utter.lang = "es-CL"; // puedes cambiar a es-ES o es-MX si prefieres
-        utter.rate = 1.0;
-        utter.pitch = 1.0;
-
-        window.speechSynthesis.cancel();
-        window.speechSynthesis.speak(utter);
-        console.log("[MIRA TTS] Usando voz del navegador (fallback).");
-    } catch (e) {
-        console.error("[MIRA TTS] Error en Web Speech fallback:", e);
-    }
-}
-
-async function speakWithMiraVoice(text) {
     if (!miraVoiceEnabled) return;
     if (!text) return;
 
     const safeText = sanitizeForSpeech(text);
     if (!safeText) return;
 
-    // Si el audio del navegador aún no está desbloqueado,
-    // al menos usamos speechSynthesis (que normalmente no está bloqueado).
-    if (!miraAudioUnlocked) {
-        console.log("[MIRA TTS] Audio no desbloqueado, usando solo voz del navegador.");
-        speakWithBrowserVoice(safeText);
-        return;
-    }
-
     try {
-        console.log("[MIRA TTS] Enviando texto al backend TTS...");
+        const utter = new SpeechSynthesisUtterance(safeText);
 
-        const res = await fetch(MIRA_TTS_URL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ text: safeText })
-        });
+        // Puedes probar "es-CL", "es-ES", "es-MX"
+        utter.lang = "es-CL";
+        utter.rate = 1.0;
+        utter.pitch = 1.0;
 
-        if (!res.ok) {
-            console.warn("[MIRA TTS] Respuesta no OK:", res.status, res.statusText);
-            speakWithBrowserVoice(safeText);
-            return;
+        // Seleccionar alguna voz en español si existe
+        const voices = window.speechSynthesis.getVoices();
+        const spanishVoices = voices.filter(v =>
+            v.lang.toLowerCase().startsWith("es")
+        );
+        if (spanishVoices.length > 0) {
+            utter.voice = spanishVoices[0];
         }
 
-        const blob = await res.blob();
-        const url = URL.createObjectURL(blob);
-        const audio = new Audio(url);
-
-        audio.onended = () => {
-            URL.revokeObjectURL(url);
-        };
-
-        await audio.play().catch(err => {
-            console.warn("[MIRA TTS] Error al reproducir audio Piper:", err);
-            speakWithBrowserVoice(safeText);
-        });
-    } catch (err) {
-        console.error("[MIRA TTS] Error en la petición:", err);
-        speakWithBrowserVoice(safeText);
+        window.speechSynthesis.cancel();
+        window.speechSynthesis.speak(utter);
+        console.log("[MIRA TTS] Usando voz del navegador:", utter.lang, utter.voice?.name);
+    } catch (e) {
+        console.error("[MIRA TTS] Error usando speechSynthesis:", e);
     }
 }
 
+// Botón de volumen
 if (miraVoiceToggle) {
     miraVoiceToggle.addEventListener("click", () => {
         miraVoiceEnabled = !miraVoiceEnabled;
@@ -602,7 +578,9 @@ function setupMiraSectionObserver() {
             if (!id || spokenSections.has(id)) return;
 
             spokenSections.add(id);
-            if (messages[id]) speakWithMiraVoice(messages[id]);
+            if (messages[id] && miraAudioUnlocked) {
+                speakWithMiraVoice(messages[id]);
+            }
         });
     }, { threshold: 0.4 });
 
