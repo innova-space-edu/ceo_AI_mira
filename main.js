@@ -328,7 +328,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (miraVoiceEnabled) {
             speakWithMiraVoice(
                 "Bienvenido a Innova Space Education. Soy MIRA, su asistente virtual. " +
-                "Estoy lista para acompañarle y responder sus consultas."
+                "Estoy lista para acompañarte y responder tus consultas."
             );
         }
     }, 1200);
@@ -424,11 +424,11 @@ function generateMiraResponse(text) {
     const t = text.toLowerCase();
 
     if (t.includes("hola")) {
-        return "Hola, es un gusto saludarle. Soy MIRA, la asistente virtual futurista de Innova Space Education.";
+        return "Hola, es un gusto saludarte. Soy MIRA, tu asistente virtual de Innova Space Education.";
     }
 
     if (t.includes("empresa")) {
-        return "Innova Space Education SPA integra educación, inteligencia artificial y desarrollo web para crear soluciones futuristas.";
+        return "Innova Space Education SPA integra educación, inteligencia artificial y desarrollo web para crear soluciones innovadoras.";
     }
 
     if (t.includes("web")) {
