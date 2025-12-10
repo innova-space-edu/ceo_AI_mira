@@ -1,424 +1,583 @@
-// Backend MIRA (Render y OpenRouter + Resend + Azure TTS Aria)
+// MAIN JS PARA INNOVA SPACE EDUCATION SPA
 
-const express = require("express");
-const cors = require("cors");
-const nodemailer = require("nodemailer");
+// URL del backend de MIRA en Render (NO expone la API key de OpenRouter)
+const MIRA_API_URL = "https://ceo-ai-mira.onrender.com/api/mira";
+const MIRA_TTS_URL = "https://ceo-ai-mira.onrender.com/api/tts";
 
-// Polyfill de fetch para Node (usando node-fetch v3 con import dinámico)
-const fetchFn = (...args) =>
-  import("node-fetch").then(({ default: fetch }) => fetch(...args));
+/* ------------------------------------------------------------------
+   1. LOADER GLOBAL
+------------------------------------------------------------------ */
+window.addEventListener("load", () => {
+    const loader = document.getElementById("global-loader");
+    setTimeout(() => loader?.classList.add("hidden"), 1500);
+    initStarfield();
+});
 
-const app = express();
-const PORT = process.env.PORT || 3001;
+/* ------------------------------------------------------------------
+   2. AÑO EN EL FOOTER
+------------------------------------------------------------------ */
+document.addEventListener("DOMContentLoaded", () => {
+    const yearSpan = document.getElementById("year");
+    if (yearSpan) yearSpan.textContent = new Date().getFullYear();
+});
 
-app.use(cors());
-app.use(express.json());
+/* ------------------------------------------------------------------
+   3. NAVBAR MOBILE
+------------------------------------------------------------------ */
+const navToggle = document.getElementById("navToggle");
+const navLinks = document.getElementById("navLinks");
 
-/* -------------------------------------------------------------
-   VARIABLES DE ENTORNO
-------------------------------------------------------------- */
-const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
-const RESEND_API_KEY = process.env.RESEND_API_KEY; // API para envío por HTTP
-const EMAIL_SEND_TO =
-  process.env.EMAIL_SEND_TO || "contacto@innova-space-edu.cl";
+if (navToggle && navLinks) {
+    navToggle.addEventListener("click", () => {
+        navLinks.classList.toggle("nav-open");
+    });
 
-// Remitente por defecto usando tu propio dominio en Resend
-const EMAIL_FROM =
-  process.env.EMAIL_FROM ||
-  "Innova Space Education <contacto@innova-space-edu.cl>";
+    navLinks.querySelectorAll("a").forEach(link => {
+        link.addEventListener("click", () => navLinks.classList.remove("nav-open"));
+    });
+}
 
-// Azure Speech (TTS Aria)
-const AZURE_SPEECH_KEY = process.env.AZURE_SPEECH_KEY;
-const AZURE_SPEECH_REGION = process.env.AZURE_SPEECH_REGION;
+/* ------------------------------------------------------------------
+   4. FONDO ANIMADO: ESTRELLAS + NEBULOSA + FUGACES
+------------------------------------------------------------------ */
+function initStarfield() {
+    const canvas = document.getElementById("starsCanvas");
+    if (!canvas) return;
 
-console.log("🔧 VARIABLES DE ENTORNO:");
-console.log("OPENROUTER_API_KEY:", OPENROUTER_API_KEY ? "OK" : "❌ FALTA");
-console.log("RESEND_API_KEY:", RESEND_API_KEY ? "OK" : "❌ FALTA");
-console.log("EMAIL_SEND_TO:", EMAIL_SEND_TO);
-console.log("EMAIL_FROM:", EMAIL_FROM);
-console.log("AZURE_SPEECH_KEY:", AZURE_SPEECH_KEY ? "OK" : "❌ FALTA");
-console.log("AZURE_SPEECH_REGION:", AZURE_SPEECH_REGION || "❌ FALTA");
+    const ctx = canvas.getContext("2d");
+    let width, height;
+    let stars = [];
+    let shootingStars = [];
 
-/* -------------------------------------------------------------
-   1) CHAT MIRA → OpenRouter
-------------------------------------------------------------- */
-app.post("/api/mira", async (req, res) => {
-  try {
-    if (!OPENROUTER_API_KEY) {
-      return res.status(500).json({ error: "Falta OPENROUTER_API_KEY" });
+    const STAR_COUNT = 200;
+    const STAR_SPEED_MIN = 0.02;
+    const STAR_SPEED_MAX = 0.18;
+
+    function resize() {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
     }
 
-    const { message, history } = req.body || {};
-
-    if (!message) {
-      return res.status(400).json({ error: "message es obligatorio" });
+    function createStars() {
+        stars = [];
+        for (let i = 0; i < STAR_COUNT; i++) {
+            stars.push({
+                x: Math.random() * width,
+                y: Math.random() * height,
+                size: Math.random() * 1.6 + 0.3,
+                speed: STAR_SPEED_MIN + Math.random() * (STAR_SPEED_MAX - STAR_SPEED_MIN),
+                alpha: 0.3 + Math.random() * 0.7,
+                twinkleOffset: Math.random() * Math.PI * 2
+            });
+        }
     }
 
-    const messages = [
-      {
-        role: "system",
-        content: `
-Eres MIRA, la asistente virtual futurista de Innova Space Education SPA.
-Hablas español, tono femenino amable, profesional, futurista.
-Si el usuario habla en inglés, responde en inglés.
-No uses emojis.
-Tu enfoque:
-- IA educativa e innovación
-- Desarrollo web futurista
-- Asistentes virtuales
-- Remodelación de salas temáticas
-- Integración de tecnología en colegios
-En cotizaciones, invita a escribir a contacto@innova-space-edu.cl.
-        `.trim(),
-      },
-    ];
+    function addShootingStar() {
+        const startX = Math.random() < 0.5 ? Math.random() * width : -50;
+        const startY = Math.random() < 0.5 ? -40 : Math.random() * height;
+        const angle = Math.random() * 0.4 + 0.2;
 
-    // Historial opcional
-    if (Array.isArray(history)) {
-      history.forEach((h) => {
-        if (h?.role && h?.content) messages.push(h);
-      });
+        shootingStars.push({
+            x: startX,
+            y: startY,
+            vx: Math.cos(angle) * 15,
+            vy: Math.sin(angle) * 10,
+            life: 0,
+            maxLife: 40 + Math.random() * 20
+        });
     }
 
-    messages.push({ role: "user", content: message });
+    function scheduleShootingStar() {
+        const delay = 3000 + Math.random() * 3000;
+        setTimeout(() => {
+            addShootingStar();
+            scheduleShootingStar();
+        }, delay);
+    }
 
-    const response = await fetchFn(
-      "https://openrouter.ai/api/v1/chat/completions",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${OPENROUTER_API_KEY}`,
-          "Content-Type": "application/json",
-          "HTTP-Referer": "https://innova-space-edu.cl",
-          "X-Title": "Innova Space Education - MIRA",
-        },
-        body: JSON.stringify({
-          model: "meta-llama/llama-3.1-70b-instruct",
-          messages,
-          temperature: 0.6,
-          max_tokens: 500,
-        }),
-      }
+    function drawNebula() {
+        const g1 = ctx.createRadialGradient(
+            width * 0.3, height * 0.25, 0,
+            width * 0.3, height * 0.25, width * 0.7
+        );
+        g1.addColorStop(0, "rgba(120,180,255,0.95)");
+        g1.addColorStop(0.4, "rgba(80,130,255,0.6)");
+        g1.addColorStop(1, "rgba(10,15,30,0)");
+
+        const g2 = ctx.createRadialGradient(
+            width * 0.85, height * 0.85, 0,
+            width * 0.85, height * 0.85, width * 0.5
+        );
+        g2.addColorStop(0, "rgba(200,90,255,0.9)");
+        g2.addColorStop(0.4, "rgba(150,50,230,0.6)");
+        g2.addColorStop(1, "rgba(10,5,30,0)");
+
+        ctx.fillStyle = g1;
+        ctx.fillRect(0, 0, width, height);
+        ctx.fillStyle = g2;
+        ctx.fillRect(0, 0, width, height);
+    }
+
+    function update() {
+        ctx.clearRect(0, 0, width, height);
+        ctx.fillStyle = "#02030a";
+        ctx.fillRect(0, 0, width, height);
+
+        drawNebula();
+
+        const time = Date.now() * 0.0015;
+        for (const star of stars) {
+            star.x += star.speed;
+            if (star.x > width) {
+                star.x = -2;
+                star.y = Math.random() * height;
+            }
+
+            const tw = (Math.sin(time + star.twinkleOffset) + 1) / 2;
+            const alpha = star.alpha * (0.4 + 0.6 * tw);
+
+            ctx.beginPath();
+            ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+            ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        for (let i = shootingStars.length - 1; i >= 0; i--) {
+            const s = shootingStars[i];
+            s.x += s.vx;
+            s.y += s.vy;
+            s.life++;
+
+            const ratio = 1 - s.life / s.maxLife;
+            const len = 120 * ratio;
+
+            ctx.strokeStyle = `rgba(255,255,255,${ratio})`;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(s.x, s.y);
+            ctx.lineTo(
+                s.x - s.vx * 0.8 - len * 0.4,
+                s.y - s.vy * 0.8 - len * 0.4
+            );
+            ctx.stroke();
+
+            if (s.life > s.maxLife) shootingStars.splice(i, 1);
+        }
+
+        requestAnimationFrame(update);
+    }
+
+    window.addEventListener("resize", () => {
+        resize();
+        createStars();
+    });
+
+    resize();
+    createStars();
+    scheduleShootingStar();
+    update();
+}
+
+/* ------------------------------------------------------------------
+   4.5 CARRUSEL DE VIDEOS — VERSIÓN COMPLETA
+------------------------------------------------------------------ */
+const videoList = [
+    "assets/media/video1.mp4",
+    "assets/media/video2.mp4",
+    "assets/media/video3.mp4",
+    "assets/media/video4.mp4",
+    "assets/media/video6.mp4"
+];
+
+let currentVideoIndex = 0;
+let videoCarouselInitialized = false;
+let videoErrorCount = 0;
+
+function initVideoCarousel() {
+    if (videoCarouselInitialized) return;
+    videoCarouselInitialized = true;
+
+    const video = document.getElementById("carouselVideo");
+    if (!video || videoList.length === 0) return;
+
+    video.muted = true;
+    video.autoplay = true;
+    video.playsInline = true;
+    video.loop = false;
+
+    function playVideo(index) {
+        currentVideoIndex = index % videoList.length;
+        video.src = videoList[currentVideoIndex];
+        video.load();
+
+        video.play().catch(err => {
+            console.warn("Error al reproducir video:", err);
+        });
+    }
+
+    video.addEventListener("error", () => {
+        videoErrorCount++;
+        if (videoErrorCount < 3) {
+            playVideo((currentVideoIndex + 1) % videoList.length);
+        }
+    });
+
+    video.addEventListener("ended", () => {
+        videoErrorCount = 0;
+        playVideo(currentVideoIndex + 1);
+    });
+
+    playVideo(0);
+}
+
+/* ------------------------------------------------------------------
+   5. CHATBOT MIRA
+------------------------------------------------------------------ */
+
+let miraVoiceEnabled = true;
+let miraAudioUnlocked = false;
+
+const miraToggleBtn = document.getElementById("mira-toggle");
+const miraChat = document.getElementById("mira-chat");
+const miraCloseBtn = document.getElementById("mira-close");
+const miraMessages = document.getElementById("miraMessages");
+const miraForm = document.getElementById("miraForm");
+const miraInput = document.getElementById("miraInput");
+const miraLoading = document.getElementById("miraLoading");
+const miraVoiceToggle = document.getElementById("mira-voice-toggle");
+
+function initMiraWelcome() {
+    if (!miraMessages) return;
+    miraMessages.innerHTML = "";
+    addMiraMessage(
+        "Bienvenido a Innova Space Education.<br>" +
+        "Soy <strong>MIRA</strong>, una asistente virtual diseñada para acompañarte.<br>" +
+        "Estoy lista para ayudarte en lo que necesites."
     );
-
-    if (!response.ok) {
-      const txt = await response.text();
-      console.error("❌ OpenRouter Error:", txt);
-      return res.status(500).json({ error: "Error OpenRouter", detail: txt });
-    }
-
-    const data = await response.json();
-    const reply =
-      data?.choices?.[0]?.message?.content ?? "No pude generar respuesta.";
-
-    res.json({ reply });
-  } catch (error) {
-    console.error("❌ /api/mira ERROR:", error);
-    res.status(500).json({ error: "Error interno del servidor" });
-  }
-});
-
-/* -------------------------------------------------------------
-   2) SMTP (Zoho) – LEGADO / OPCIONAL
-   Render bloquea SMTP, pero mantenemos la configuración
-   por si en el futuro migras a otro hosting que sí lo permita
-------------------------------------------------------------- */
-
-const smtpHost = process.env.SMTP_HOST || "smtppro.zoho.com";
-const smtpPort = Number(process.env.SMTP_PORT) || 587;
-const smtpSecure = process.env.SMTP_SECURE
-  ? process.env.SMTP_SECURE === "true"
-  : false;
-
-const smtpUser = process.env.SMTP_USER || "contacto@innova-space-edu.cl";
-const smtpPass = process.env.SMTP_PASS; // contraseña de aplicación Zoho
-
-const transporter = nodemailer.createTransport({
-  host: smtpHost,
-  port: smtpPort,
-  secure: smtpSecure,
-  auth: {
-    user: smtpUser,
-    pass: smtpPass,
-  },
-  tls: {
-    rejectUnauthorized: false,
-  },
-  connectionTimeout: 10000,
-  greetingTimeout: 8000,
-  socketTimeout: 10000,
-});
-
-// Verificación SMTP opcional (sabemos que en Render normalmente fallará)
-if (smtpHost && smtpUser && smtpPass) {
-  transporter.verify((err, success) => {
-    if (err) {
-      console.error(
-        "❌ Error verificando conexión SMTP (Render suele bloquear SMTP; el backend SIGUE funcionando):",
-        err.message || err
-      );
-    } else {
-      console.log("✅ Servidor SMTP listo para enviar correos.");
-    }
-  });
-} else {
-  console.warn(
-    "⚠️ SMTP no configurado completamente. Revisa SMTP_HOST, SMTP_USER y SMTP_PASS si vas a usar SMTP en otro hosting."
-  );
 }
 
-/* -------------------------------------------------------------
-   FUNCIÓN: envío de correo vía API HTTP (Resend)
-------------------------------------------------------------- */
-async function enviarCorreoPorAPI({
-  nombre,
-  correo,
-  institucion,
-  ciudad,
-  mensaje,
-}) {
-  if (!RESEND_API_KEY) {
-    throw new Error("Falta RESEND_API_KEY en variables de entorno");
-  }
+/* ------------------------------------------------------------------
+   5.1 DESBLOQUEO DE AUDIO (POLÍTICAS DEL NAVEGADOR)
+------------------------------------------------------------------ */
+function unlockMiraAudio() {
+    if (miraAudioUnlocked) return;
+    miraAudioUnlocked = true;
 
-  const asunto = `Nuevo mensaje desde la web - Innova Space Education`;
+    // Pequeño truco para "despertar" el contexto de audio
+    const a = new Audio();
+    a.muted = true;
+    a.play().catch(() => {});
 
-  const cuerpoTexto = `
-Nuevo mensaje desde el formulario de contacto:
-
-Nombre: ${nombre}
-Correo: ${correo}
-Institución/Empresa: ${institucion || "-"}
-Ciudad: ${ciudad || "-"}
-
-Mensaje:
-${mensaje}
-  `.trim();
-
-  const cuerpoHtml = `
-    <h2>Nuevo mensaje desde la web de Innova Space Education</h2>
-    <p><strong>Nombre:</strong> ${nombre}</p>
-    <p><strong>Correo:</strong> ${correo}</p>
-    <p><strong>Institución / Empresa:</strong> ${institucion || "-"}</p>
-    <p><strong>Ciudad:</strong> ${ciudad || "-"}</p>
-    <p><strong>Mensaje:</strong></p>
-    <p>${(mensaje || "").replace(/\n/g, "<br>")}</p>
-  `;
-
-  const respuesta = await fetchFn("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${RESEND_API_KEY}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      from: EMAIL_FROM,
-      to: [EMAIL_SEND_TO],
-      reply_to: correo,
-      subject: asunto,
-      text: cuerpoTexto,
-      html: cuerpoHtml,
-    }),
-  });
-
-  if (!respuesta.ok) {
-    const txt = await respuesta.text();
-    console.error("❌ Error Resend API:", txt);
-    throw new Error("Fallo en API de correo");
-  }
-
-  const data = await respuesta.json();
-  console.log("📧 Correo enviado por API, id:", data.id || data);
-  return data;
+    window.removeEventListener("click", unlockMiraAudio);
+    window.removeEventListener("keydown", unlockMiraAudio);
+    window.removeEventListener("touchstart", unlockMiraAudio);
 }
 
-/* -------------------------------------------------------------
-   2a) Ruta /api/send-email (usa API HTTP de correo)
-------------------------------------------------------------- */
-app.post("/api/send-email", async (req, res) => {
-  try {
-    const { nombre, correo, institucion, ciudad, mensaje } = req.body || {};
+window.addEventListener("click", unlockMiraAudio);
+window.addEventListener("keydown", unlockMiraAudio);
+window.addEventListener("touchstart", unlockMiraAudio);
 
-    if (!nombre || !correo || !mensaje) {
-      return res.status(400).json({
-        error: "Faltan datos obligatorios (nombre, correo, mensaje).",
-      });
-    }
+/* ------------------------------------------------------------------
+   5.5 FORMULARIO DE CONTACTO → BACKEND (Render)
+------------------------------------------------------------------ */
+function setupContactForm() {
+    const form = document.getElementById("contactForm");
+    const statusEl = document.getElementById("formStatus");
 
-    const data = await enviarCorreoPorAPI({
-      nombre,
-      correo,
-      institucion,
-      ciudad,
-      mensaje,
+    if (!form) return;
+
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const nombre = document.getElementById("nombre")?.value.trim() || "";
+        const correo = document.getElementById("correo")?.value.trim() || "";
+        const institucion = document.getElementById("institucion")?.value.trim() || "";
+        const ciudad = document.getElementById("ciudad")?.value.trim() || "";
+        const mensaje = document.getElementById("mensaje")?.value.trim() || "";
+
+        if (!nombre || !correo || !mensaje) {
+            if (statusEl) {
+                statusEl.textContent = "Por favor, completa nombre, correo y mensaje antes de enviar.";
+            }
+            return;
+        }
+
+        if (statusEl) {
+            statusEl.textContent = "Enviando mensaje...";
+        }
+
+        try {
+            const res = await fetch("https://ceo-ai-mira.onrender.com/api/contact", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    nombre,
+                    correo,
+                    institucion,
+                    ciudad,
+                    mensaje
+                })
+            });
+
+            if (!res.ok) {
+                throw new Error("Error al enviar");
+            }
+
+            if (statusEl) {
+                statusEl.textContent = "Mensaje enviado correctamente. Te contactaremos por correo electrónico.";
+            }
+            form.reset();
+        } catch (err) {
+            console.error("Error al enviar formulario:", err);
+            if (statusEl) {
+                statusEl.textContent = "Ocurrió un error al enviar el mensaje. Intenta nuevamente más tarde.";
+            }
+        }
     });
-
-    res.json({
-      success: true,
-      message: "Correo enviado correctamente",
-      id: data.id || null,
-    });
-  } catch (error) {
-    console.error("❌ Error al enviar correo:", error.message || error);
-    res.status(500).json({ error: "No se pudo enviar el correo" });
-  }
-});
-
-/* -------------------------------------------------------------
-   2b) Ruta /api/contact (misma lógica para el formulario principal)
-------------------------------------------------------------- */
-app.post("/api/contact", async (req, res) => {
-  try {
-    const { nombre, correo, institucion, ciudad, mensaje } = req.body || {};
-
-    if (!nombre || !correo || !mensaje) {
-      return res.status(400).json({
-        error: "Faltan datos obligatorios (nombre, correo, mensaje).",
-      });
-    }
-
-    const data = await enviarCorreoPorAPI({
-      nombre,
-      correo,
-      institucion,
-      ciudad,
-      mensaje,
-    });
-
-    res.json({
-      success: true,
-      message: "Correo enviado correctamente",
-      id: data.id || null,
-    });
-  } catch (error) {
-    console.error(
-      "❌ Error al enviar correo (ruta /api/contact):",
-      error.message || error
-    );
-    res.status(500).json({ error: "No se pudo enviar el correo" });
-  }
-});
-
-/* -------------------------------------------------------------
-   3) AZURE TTS – VOZ ARIA (bilingüe ES/EN)
-------------------------------------------------------------- */
-
-// Pequeño helper para escapar texto en SSML
-function escapeXml(unsafe) {
-  if (!unsafe) return "";
-  return unsafe
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&apos;");
 }
 
-// Detección muy simple de idioma para elegir ES o EN
-function detectarIdioma(texto) {
-  if (!texto) return "es";
+/* ------------------------------------------------------------------
+   INICIALIZACIÓN DOMContentLoaded (MIRA + HINTS + SECCIONES + VIDEO + CONTACTO)
+------------------------------------------------------------------ */
+document.addEventListener("DOMContentLoaded", () => {
+    initMiraWelcome();
+    setupMiraHints();
+    setupMiraSectionObserver();
+    initVideoCarousel();
+    setupContactForm();
 
-  const hasTildes = /[áéíóúñ¿¡]/i.test(texto);
-  const hasOnlyBasicAscii = /^[\x00-\x7F]*$/.test(texto);
-  const containsCommonEnglishWords = /\b(the|and|you|for|with|this|that|is|are|can)\b/i.test(
-    texto
-  );
+    // 👋 Saludo automático solo con voz al cargar/recargar la página (sin abrir el chat)
+    setTimeout(() => {
+        if (miraVoiceEnabled) {
+            speakWithMiraVoice(
+                "Bienvenido a Innova Space Education. Soy MIRA, su asistente virtual. " +
+                "Estoy lista para acompañarle y responder sus consultas."
+            );
+        }
+    }, 1200);
+});
 
-  // Si tiene tildes o signos de interrogación/exclamación invertidos → español
-  if (hasTildes) return "es";
+/* ------------------------------------------------------------------
+   CHATBOT – APERTURA / CIERRE
+------------------------------------------------------------------ */
+if (miraToggleBtn && miraChat && miraCloseBtn) {
+    miraToggleBtn.addEventListener("click", () => {
+        // Aseguramos desbloquear audio cuando el usuario interactúe
+        unlockMiraAudio();
 
-  // Si son caracteres básicos y muchas palabras típicas de inglés → inglés
-  if (hasOnlyBasicAscii && containsCommonEnglishWords) return "en";
-
-  // Por defecto, asumimos español
-  return "es";
-}
-
-app.post("/api/tts", async (req, res) => {
-  try {
-    const { text } = req.body || {};
-
-    if (!text || !text.trim()) {
-      return res.status(400).json({ error: "text es obligatorio" });
-    }
-
-    if (!AZURE_SPEECH_KEY || !AZURE_SPEECH_REGION) {
-      return res.status(500).json({
-        error:
-          "Faltan AZURE_SPEECH_KEY o AZURE_SPEECH_REGION en las variables de entorno",
-      });
-    }
-
-    // Limitamos un poco el largo por seguridad
-    const rawText = text.trim();
-    const truncatedText =
-      rawText.length > 800 ? rawText.slice(0, 800) + "..." : rawText;
-
-    const idioma = detectarIdioma(truncatedText);
-
-    // Voz Aria en español latino (bilingüe, pronuncia bien inglés dentro)
-    let locale = "es-MX";
-    let voiceName = "es-MX-AriaNeural";
-
-    // Si detecta inglés fuertemente, usamos la Aria de EE.UU.
-    if (idioma === "en") {
-      locale = "en-US";
-      voiceName = "en-US-AriaNeural";
-    }
-
-    const ssml = `
-<speak version="1.0" xml:lang="${locale}">
-  <voice name="${voiceName}">
-    ${escapeXml(truncatedText)}
-  </voice>
-</speak>
-    `.trim();
-
-    const ttsEndpoint = `https://${AZURE_SPEECH_REGION}.tts.speech.microsoft.com/cognitiveservices/v1`;
-
-    const azureResp = await fetchFn(ttsEndpoint, {
-      method: "POST",
-      headers: {
-        "Ocp-Apim-Subscription-Key": AZURE_SPEECH_KEY,
-        "Content-Type": "application/ssml+xml",
-        "X-Microsoft-OutputFormat": "audio-24khz-48kbitrate-mono-mp3",
-        "User-Agent": "mira-backend",
-      },
-      body: ssml,
+        miraChat.classList.toggle("mira-chat-open");
+        if (miraChat.classList.contains("mira-chat-open")) {
+            initMiraWelcome();
+            setTimeout(() => miraInput?.focus(), 200);
+        }
     });
 
-    if (!azureResp.ok) {
-      const errText = await azureResp.text();
-      console.error("❌ Azure TTS error:", errText);
-      return res
-        .status(500)
-        .json({ error: "Error al generar audio con Azure TTS" });
+    miraCloseBtn.addEventListener("click", () => {
+        miraChat.classList.remove("mira-chat-open");
+    });
+}
+
+/* ------------------------------------------------------------------
+   CHATBOT – ENVÍO
+------------------------------------------------------------------ */
+if (miraForm && miraInput) {
+    miraForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+
+        const text = miraInput.value.trim();
+        if (!text) return;
+
+        addUserMessage(text);
+        miraInput.value = "";
+        handleMiraResponse(text);
+    });
+}
+
+function addUserMessage(text) {
+    if (!miraMessages) return;
+    const div = document.createElement("div");
+    div.className = "mira-msg user";
+    div.innerText = text;
+    miraMessages.appendChild(div);
+    scrollMiraToBottom();
+}
+
+function addMiraMessage(htmlText) {
+    if (!miraMessages) return;
+    const div = document.createElement("div");
+    div.className = "mira-msg bot";
+    div.innerHTML = htmlText;
+    miraMessages.appendChild(div);
+    scrollMiraToBottom();
+
+    const spoken = sanitizeForSpeech(stripHtml(htmlText));
+    if (miraVoiceEnabled) speakWithMiraVoice(spoken);
+}
+
+function scrollMiraToBottom() {
+    if (!miraMessages) return;
+    miraMessages.scrollTop = miraMessages.scrollHeight;
+}
+
+/* ------------------------------------------------------------------
+   RESPUESTAS – BACKEND + FALLBACK
+------------------------------------------------------------------ */
+async function handleMiraResponse(userText) {
+    if (miraLoading) miraLoading.classList.add("active");
+
+    let reply = "";
+    try {
+        const res = await fetch(MIRA_API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ message: userText })
+        });
+
+        if (!res.ok) throw new Error("Error backend");
+
+        const data = await res.json();
+        reply = data.reply || generateMiraResponse(userText);
+    } catch {
+        reply = generateMiraResponse(userText);
     }
 
-    const arrayBuffer = await azureResp.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
+    if (miraLoading) miraLoading.classList.remove("active");
+    addMiraMessage(reply);
+}
 
-    res.set("Content-Type", "audio/mpeg");
-    res.set("Content-Length", buffer.length.toString());
-    res.send(buffer);
-  } catch (error) {
-    console.error("❌ /api/tts ERROR:", error);
-    res.status(500).json({ error: "Error interno generando TTS" });
-  }
-});
+function generateMiraResponse(text) {
+    const t = text.toLowerCase();
 
-/* -------------------------------------------------------------
-   4) HOME TEST
-------------------------------------------------------------- */
-app.get("/", (req, res) => {
-  res.send(
-    "🚀 MIRA backend funcionando correctamente (chat con OpenRouter + correos con Resend + TTS Azure Aria en /api/tts)."
-  );
-});
+    if (t.includes("hola")) {
+        return "Hola, es un gusto saludarle. Soy MIRA, la asistente virtual de Innova Space Education.";
+    }
 
-/* -------------------------------------------------------------
-   INICIO DEL SERVIDOR
-------------------------------------------------------------- */
-app.listen(PORT, () => {
-  console.log(`🚀 Backend MIRA escuchando en puerto ${PORT}`);
-});
+    if (t.includes("empresa")) {
+        return "Innova Space Education SPA integra educación, inteligencia artificial y desarrollo web para crear soluciones futuristas.";
+    }
+
+    if (t.includes("web")) {
+        return "Creamos páginas web futuristas, responsivas y conectadas a bases de datos.";
+    }
+
+    if (t.includes("contacto")) {
+        return "Puede escribirnos a contacto@innova-space-edu.cl.";
+    }
+
+    return "He registrado su consulta. ¿Desea información sobre IA, desarrollo web o proyectos educativos?";
+}
+
+/* ------------------------------------------------------------------
+   UTILIDADES
+------------------------------------------------------------------ */
+function stripHtml(html) {
+    const temp = document.createElement("div");
+    temp.innerHTML = html;
+    return temp.textContent || "";
+}
+
+function sanitizeForSpeech(text) {
+    if (!text) return "";
+
+    let clean = text;
+    clean = clean.replace(/[\u{1F300}-\u{1FAFF}]/gu, "");
+    clean = clean.replace(/[\u2600-\u27BF]/g, "");
+    clean = clean.replace(/[*_`~]+/g, "");
+    clean = clean.replace(/\s{2,}/g, " ");
+    return clean.trim();
+}
+
+/* ------------------------------------------------------------------
+   TTS MIRA – ElevenLabs via backend Render
+------------------------------------------------------------------ */
+async function speakWithMiraVoice(text) {
+    if (!miraVoiceEnabled) return;
+    if (!text) return;
+    if (!miraAudioUnlocked) {
+        // Intentamos igual: algunos navegadores permiten el primer audio
+        console.warn("Audio aún no desbloqueado por interacción del usuario.");
+    }
+
+    const safeText = sanitizeForSpeech(text);
+    if (!safeText) return;
+
+    try {
+        const res = await fetch(MIRA_TTS_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text: safeText })
+        });
+
+        if (!res.ok) {
+            console.warn("TTS backend no disponible:", await res.text());
+            return;
+        }
+
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const audio = new Audio(url);
+
+        await audio.play().catch(err => {
+            console.warn("Error al reproducir audio TTS:", err);
+        });
+    } catch (err) {
+        console.error("Error llamando a /api/tts:", err);
+    }
+}
+
+if (miraVoiceToggle) {
+    miraVoiceToggle.addEventListener("click", () => {
+        miraVoiceEnabled = !miraVoiceEnabled;
+        miraVoiceToggle.classList.toggle("voice-off", !miraVoiceEnabled);
+        miraVoiceToggle.innerHTML = miraVoiceEnabled
+            ? '<i class="ri-volume-up-fill"></i>'
+            : '<i class="ri-volume-mute-fill"></i>';
+    });
+}
+
+/* ------------------------------------------------------------------
+   HINTS Y TEXTO GUIADO
+------------------------------------------------------------------ */
+function setupMiraHints() {
+    const hints = document.querySelectorAll("[data-mira-hint]");
+    hints.forEach(el => {
+        el.addEventListener("mouseenter", () => {
+            if (!miraVoiceEnabled) return;
+            const hint = sanitizeForSpeech(el.getAttribute("data-mira-hint"));
+            speakWithMiraVoice(hint);
+        });
+    });
+}
+
+/* ------------------------------------------------------------------
+   DETECCIÓN DE SECCIONES (MIRA HABLA SEGÚN SECCIÓN)
+------------------------------------------------------------------ */
+function setupMiraSectionObserver() {
+    const sections = document.querySelectorAll(".section[data-mira-section]");
+    if (!("IntersectionObserver" in window)) return;
+
+    const spokenSections = new Set();
+    const messages = {
+        "sobre": "En esta sección podrá conocer el enfoque de Innova Space Education.",
+        "servicios": "Aquí encontrará los servicios que ofrecemos.",
+        "portafolio": "Aquí podrá ver algunos proyectos realizados.",
+        "redes": "Puede visitar nuestras redes sociales para más información.",
+        "contacto": "En la sección de contacto puede enviarnos un mensaje directo."
+    };
+
+    const obs = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+            if (!entry.isIntersecting) return;
+
+            const id = entry.target.getAttribute("data-mira-section");
+            if (!id || spokenSections.has(id)) return;
+
+            spokenSections.add(id);
+            if (messages[id] && miraVoiceEnabled) {
+                speakWithMiraVoice(messages[id]);
+            }
+        });
+    }, { threshold: 0.4 });
+
+    sections.forEach(sec => obs.observe(sec));
+}
