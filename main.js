@@ -2,6 +2,7 @@
 
 // URL del backend de MIRA en Render (NO expone la API key de OpenRouter)
 const MIRA_API_URL = "https://ceo-ai-mira.onrender.com/api/mira";
+const MIRA_TTS_URL = "https://ceo-ai-mira.onrender.com/api/tts";
 
 /* ------------------------------------------------------------------
    1. LOADER GLOBAL
@@ -328,7 +329,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (miraVoiceEnabled) {
             speakWithMiraVoice(
                 "Bienvenido a Innova Space Education. Soy MIRA, su asistente virtual. " +
-                "Estoy lista para acompañarte y responder sus consultas."
+                "Estoy lista para acompañarte y responder tus consultas."
             );
         }
     }, 1200);
@@ -482,19 +483,17 @@ function detectLanguageFromText(text) {
 }
 
 /* ------------------------------------------------------------------
-   VOZ MIRA – NAVEGADOR BILINGÜE (ES / EN) MÁS LENTA Y FEMENINA
+   VOZ DEL NAVEGADOR (FALLBACK) – BILINGÜE, FEMENINA Y MÁS LENTA
 ------------------------------------------------------------------ */
 
 let miraVoiceEs = null;
 let miraVoiceEn = null;
 
-// Inicializar voces cuando estén disponibles
 if ("speechSynthesis" in window) {
     window.speechSynthesis.onvoiceschanged = () => {
         const voices = window.speechSynthesis.getVoices();
         if (!voices || !voices.length) return;
 
-        // Si ya están seteadas, no repetimos
         if (!miraVoiceEs) {
             const femaleEs = voices.find(v =>
                 v.lang.startsWith("es") &&
@@ -515,7 +514,7 @@ if ("speechSynthesis" in window) {
     };
 }
 
-function speakWithMiraVoice(text) {
+function speakWithBrowserVoice(text) {
     if (!miraVoiceEnabled) return;
     if (!text) return;
     if (!("speechSynthesis" in window)) return;
@@ -557,12 +556,57 @@ function speakWithMiraVoice(text) {
         utter.lang = langDetected === "en" ? "en-US" : "es-CL";
     }
 
-    // 🔊 Más lento y entendible en ambos idiomas
+    // Más lento y entendible
     utter.rate = 0.9;
     utter.pitch = 1.0;
 
     synth.cancel();
     synth.speak(utter);
+}
+
+/* ------------------------------------------------------------------
+   VOZ MIRA – USA AZURE (BACKEND) + FALLBACK NAVEGADOR
+------------------------------------------------------------------ */
+async function speakWithMiraVoice(text) {
+    if (!miraVoiceEnabled) return;
+    if (!text) return;
+
+    const safeText = sanitizeForSpeech(text);
+    if (!safeText) return;
+
+    const langDetected = detectLanguageFromText(safeText);
+
+    // Si es claramente INGLÉS, usamos solo la voz del navegador (mejor pronunciación)
+    if (langDetected === "en") {
+        speakWithBrowserVoice(safeText);
+        return;
+    }
+
+    // Si es español (o dudoso), intentamos primero Azure → fallback navegador
+    try {
+        const res = await fetch(MIRA_TTS_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text: safeText })
+        });
+
+        if (!res.ok) {
+            console.warn("TTS Azure no disponible, usando voz del navegador.");
+            speakWithBrowserVoice(safeText);
+            return;
+        }
+
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const audio = new Audio(url);
+        audio.play().catch(err => {
+            console.warn("Error al reproducir audio Azure, usando voz del navegador:", err);
+            speakWithBrowserVoice(safeText);
+        });
+    } catch (err) {
+        console.error("Error TTS Azure:", err);
+        speakWithBrowserVoice(safeText);
+    }
 }
 
 if (miraVoiceToggle) {
