@@ -249,8 +249,8 @@ function initMiraWelcome() {
     miraMessages.innerHTML = "";
     addMiraMessage(
         "Bienvenido a Innova Space Education.<br>" +
-        "Soy <strong>MIRA</strong>, una asistente virtual diseñada para acompañarte.<br>" +
-        "Estoy lista para ayudarte en lo que necesites."
+        "Soy <strong>MIRA</strong>, una inteligencia asistencial diseñada para acompañarle.<br>" +
+        "Estoy lista para ayudarle en lo que necesite."
     );
 }
 
@@ -328,7 +328,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (miraVoiceEnabled) {
             speakWithMiraVoice(
                 "Bienvenido a Innova Space Education. Soy MIRA, su asistente virtual. " +
-                "Estoy lista para acompañarte y responder tus consultas."
+                "Estoy lista para acompañarle y responder sus consultas."
             );
         }
     }, 1200);
@@ -424,11 +424,11 @@ function generateMiraResponse(text) {
     const t = text.toLowerCase();
 
     if (t.includes("hola")) {
-        return "Hola, es un gusto saludarte. Soy MIRA, tu asistente virtual de Innova Space Education.";
+        return "Hola, es un gusto saludarle. Soy MIRA, la asistente virtual futurista de Innova Space Education.";
     }
 
     if (t.includes("empresa")) {
-        return "Innova Space Education SPA integra educación, inteligencia artificial y desarrollo web para crear soluciones innovadoras.";
+        return "Innova Space Education SPA integra educación, inteligencia artificial y desarrollo web para crear soluciones futuristas.";
     }
 
     if (t.includes("web")) {
@@ -463,31 +463,55 @@ function sanitizeForSpeech(text) {
 }
 
 /* ------------------------------------------------------------------
-   VOZ MIRA – SOLO NAVEGADOR (Web Speech API) MÁS LENTA Y FEMENINA
+   DETECCIÓN SIMPLE DE IDIOMA (ES / EN)
+------------------------------------------------------------------ */
+function detectLanguageFromText(text) {
+    if (!text) return "es";
+
+    const lower = text.toLowerCase();
+
+    const hasSpanishChars = /[áéíóúñü¿¡]/.test(lower);
+    const commonEs = /\b(hola|gracias|usted|ustedes|bienvenido|bienvenida|colegio|institución|proyecto|educación|spa)\b/.test(lower);
+    const commonEn = /\b(hello|hi|thanks|thank you|please|school|project|education|welcome)\b/.test(lower);
+
+    if (hasSpanishChars || commonEs) return "es";
+    if (commonEn) return "en";
+
+    // Por defecto, asumimos español
+    return "es";
+}
+
+/* ------------------------------------------------------------------
+   VOZ MIRA – NAVEGADOR BILINGÜE (ES / EN) MÁS LENTA Y FEMENINA
 ------------------------------------------------------------------ */
 
-let miraSelectedVoice = null;
+let miraVoiceEs = null;
+let miraVoiceEn = null;
 
-// Intentamos preparar las voces cuando se cargan
+// Inicializar voces cuando estén disponibles
 if ("speechSynthesis" in window) {
     window.speechSynthesis.onvoiceschanged = () => {
         const voices = window.speechSynthesis.getVoices();
         if (!voices || !voices.length) return;
 
-        // Si ya elegimos una voz antes, no la cambiamos
-        if (miraSelectedVoice) return;
+        // Si ya están seteadas, no repetimos
+        if (!miraVoiceEs) {
+            const femaleEs = voices.find(v =>
+                v.lang.startsWith("es") &&
+                v.name.toLowerCase().includes("female")
+            );
+            const genericEs = voices.find(v => v.lang.startsWith("es"));
+            miraVoiceEs = femaleEs || genericEs || null;
+        }
 
-        // 1) Buscamos voz femenina en español
-        const femaleEs = voices.find(v =>
-            v.lang.startsWith("es") &&
-            v.name.toLowerCase().includes("female")
-        );
-
-        // 2) Si no hay, buscamos alguna voz en español (Google, Microsoft, etc.)
-        const genericEs = voices.find(v => v.lang.startsWith("es"));
-
-        // 3) Si no hay español, tomamos la primera
-        miraSelectedVoice = femaleEs || genericEs || voices[0];
+        if (!miraVoiceEn) {
+            const femaleEn = voices.find(v =>
+                v.lang.toLowerCase().startsWith("en") &&
+                v.name.toLowerCase().includes("female")
+            );
+            const genericEn = voices.find(v => v.lang.toLowerCase().startsWith("en"));
+            miraVoiceEn = femaleEn || genericEn || null;
+        }
     };
 }
 
@@ -502,28 +526,40 @@ function speakWithMiraVoice(text) {
     const synth = window.speechSynthesis;
     if (!synth) return;
 
+    const langDetected = detectLanguageFromText(safeText); // "es" o "en"
     const utter = new SpeechSynthesisUtterance(safeText);
 
     const voices = synth.getVoices();
-    if (!miraSelectedVoice && voices && voices.length) {
+    if (!miraVoiceEs && voices && voices.length) {
         const femaleEs = voices.find(v =>
             v.lang.startsWith("es") &&
             v.name.toLowerCase().includes("female")
         );
         const genericEs = voices.find(v => v.lang.startsWith("es"));
-        miraSelectedVoice = femaleEs || genericEs || voices[0];
+        miraVoiceEs = femaleEs || genericEs || null;
+    }
+    if (!miraVoiceEn && voices && voices.length) {
+        const femaleEn = voices.find(v =>
+            v.lang.toLowerCase().startsWith("en") &&
+            v.name.toLowerCase().includes("female")
+        );
+        const genericEn = voices.find(v => v.lang.toLowerCase().startsWith("en"));
+        miraVoiceEn = femaleEn || genericEn || null;
     }
 
-    if (miraSelectedVoice) {
-        utter.voice = miraSelectedVoice;
-        utter.lang = miraSelectedVoice.lang;
+    if (langDetected === "en" && miraVoiceEn) {
+        utter.voice = miraVoiceEn;
+        utter.lang = miraVoiceEn.lang;
+    } else if (miraVoiceEs) {
+        utter.voice = miraVoiceEs;
+        utter.lang = miraVoiceEs.lang;
     } else {
-        utter.lang = "es-CL";
+        utter.lang = langDetected === "en" ? "en-US" : "es-CL";
     }
 
-    // 🔊 Más lento y entendible
-    utter.rate = 0.9;   // antes era 1.0 → ahora un poco más lento
-    utter.pitch = 1.0;  // tono neutro, más natural
+    // 🔊 Más lento y entendible en ambos idiomas
+    utter.rate = 0.9;
+    utter.pitch = 1.0;
 
     synth.cancel();
     synth.speak(utter);
