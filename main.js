@@ -236,6 +236,7 @@ function initVideoCarousel() {
 
 let miraVoiceEnabled = true;
 let miraAudioUnlocked = false;
+let miraHasWelcomed = false;
 
 const miraToggleBtn = document.getElementById("mira-toggle");
 const miraChat = document.getElementById("mira-chat");
@@ -245,6 +246,11 @@ const miraForm = document.getElementById("miraForm");
 const miraInput = document.getElementById("miraInput");
 const miraLoading = document.getElementById("miraLoading");
 const miraVoiceToggle = document.getElementById("mira-voice-toggle");
+
+function getMiraGreetingText() {
+    return "Bienvenido a Innova Space Education. Soy MIRA, su asistente virtual. " +
+           "Estoy lista para acompañarle y responder sus consultas.";
+}
 
 /**
  * Inicializa el mensaje de bienvenida en el chat,
@@ -278,6 +284,14 @@ function unlockMiraAudio() {
     const a = new Audio();
     a.muted = true;
     a.play().catch(() => {});
+
+    // Si todavía no saludó por voz, lo hacemos una vez aquí
+    if (miraVoiceEnabled && !miraHasWelcomed) {
+        setTimeout(() => {
+            speakWithMiraVoice(getMiraGreetingText());
+            miraHasWelcomed = true;
+        }, 300);
+    }
 
     window.removeEventListener("click", unlockMiraAudio);
     window.removeEventListener("keydown", unlockMiraAudio);
@@ -358,14 +372,11 @@ document.addEventListener("DOMContentLoaded", () => {
     initVideoCarousel();
     setupContactForm();
 
-    // 👋 Saludo automático SOLO con voz al cargar/recargar la página
-    // El chat NO se abre automáticamente.
+    // 👋 Intento de saludo automático solo si el audio ya está desbloqueado
     setTimeout(() => {
-        if (miraVoiceEnabled) {
-            speakWithMiraVoice(
-                "Bienvenido a Innova Space Education. Soy MIRA, su asistente virtual. " +
-                "Estoy lista para acompañarle y responder sus consultas."
-            );
+        if (miraVoiceEnabled && miraAudioUnlocked && !miraHasWelcomed) {
+            speakWithMiraVoice(getMiraGreetingText());
+            miraHasWelcomed = true;
         }
     }, 1200);
 });
