@@ -249,8 +249,8 @@ function initMiraWelcome() {
     miraMessages.innerHTML = "";
     addMiraMessage(
         "Bienvenido a Innova Space Education.<br>" +
-        "Soy <strong>MIRA</strong>, una asistente virtual diseñada para acompañarte.<br>" +
-        "Estoy lista para ayudarte en lo que necesites."
+        "Soy <strong>MIRA</strong>, una inteligencia asistencial diseñada para acompañarle.<br>" +
+        "Estoy lista para ayudarle en lo que necesite."
     );
 }
 
@@ -317,11 +317,21 @@ function setupContactForm() {
    INICIALIZACIÓN DOMContentLoaded (MIRA + HINTS + SECCIONES + VIDEO + CONTACTO)
 ------------------------------------------------------------------ */
 document.addEventListener("DOMContentLoaded", () => {
-    initMiraWelcome();          // 👉 Esto genera el mensaje inicial y hace que MIRA lo lea (voz)
+    initMiraWelcome();
     setupMiraHints();
     setupMiraSectionObserver();
     initVideoCarousel();
     setupContactForm();
+
+    // 👋 Saludo automático solo con voz al cargar/recargar la página (sin abrir el chat)
+    setTimeout(() => {
+        if (miraVoiceEnabled) {
+            speakWithMiraVoice(
+                "Bienvenido a Innova Space Education. Soy MIRA, su asistente virtual. " +
+                "Estoy lista para acompañarle y responder sus consultas."
+            );
+        }
+    }, 1200);
 });
 
 /* ------------------------------------------------------------------
@@ -331,7 +341,7 @@ if (miraToggleBtn && miraChat && miraCloseBtn) {
     miraToggleBtn.addEventListener("click", () => {
         miraChat.classList.toggle("mira-chat-open");
         if (miraChat.classList.contains("mira-chat-open")) {
-            // Reiniciamos el mensaje de bienvenida dentro del chat
+            // Solo inicializa mensajes, no vuelve a saludar con voz aquí
             initMiraWelcome();
             setTimeout(() => miraInput?.focus(), 200);
         }
@@ -376,8 +386,7 @@ function addMiraMessage(htmlText) {
     scrollMiraToBottom();
 
     const spoken = sanitizeForSpeech(stripHtml(htmlText));
-    // Siempre intenta hablar con voz femenina del navegador
-    speakWithMiraVoice(spoken);
+    if (miraVoiceEnabled) speakWithMiraVoice(spoken);
 }
 
 function scrollMiraToBottom() {
@@ -454,8 +463,33 @@ function sanitizeForSpeech(text) {
 }
 
 /* ------------------------------------------------------------------
-   VOZ DEL NAVEGADOR – INTENTAR SIEMPRE VOZ FEMENINA EN ESPAÑOL
+   VOZ MIRA – SOLO NAVEGADOR (Web Speech API) MÁS LENTA Y FEMENINA
 ------------------------------------------------------------------ */
+
+let miraSelectedVoice = null;
+
+// Intentamos preparar las voces cuando se cargan
+if ("speechSynthesis" in window) {
+    window.speechSynthesis.onvoiceschanged = () => {
+        const voices = window.speechSynthesis.getVoices();
+        if (!voices || !voices.length) return;
+
+        // Si ya elegimos una voz antes, no la cambiamos
+        if (miraSelectedVoice) return;
+
+        // 1) Buscamos voz femenina en español
+        const femaleEs = voices.find(v =>
+            v.lang.startsWith("es") &&
+            v.name.toLowerCase().includes("female")
+        );
+
+        // 2) Si no hay, buscamos alguna voz en español (Google, Microsoft, etc.)
+        const genericEs = voices.find(v => v.lang.startsWith("es"));
+
+        // 3) Si no hay español, tomamos la primera
+        miraSelectedVoice = femaleEs || genericEs || voices[0];
+    };
+}
 
 function speakWithMiraVoice(text) {
     if (!miraVoiceEnabled) return;
@@ -465,50 +499,34 @@ function speakWithMiraVoice(text) {
     const safeText = sanitizeForSpeech(text);
     if (!safeText) return;
 
-    try {
-        const synth = window.speechSynthesis;
-        const utter = new SpeechSynthesisUtterance(safeText);
+    const synth = window.speechSynthesis;
+    if (!synth) return;
 
-        let voices = synth.getVoices() || [];
+    const utter = new SpeechSynthesisUtterance(safeText);
 
-        // 1) Preferir voces femeninas en español (Chile, España, México, genérico)
-        let preferred = voices.filter(v =>
-            v.lang &&
-            v.lang.toLowerCase().startsWith("es") &&
-            /female|femenina|mujer/i.test(v.name)
+    const voices = synth.getVoices();
+    if (!miraSelectedVoice && voices && voices.length) {
+        const femaleEs = voices.find(v =>
+            v.lang.startsWith("es") &&
+            v.name.toLowerCase().includes("female")
         );
-
-        // 2) Si no hay "female" explícito, tomar cualquier voz en español
-        if (!preferred.length) {
-            preferred = voices.filter(v => v.lang && v.lang.toLowerCase().startsWith("es"));
-        }
-
-        // 3) Si no hay ninguna, usar lo que el navegador tenga
-        const chosenVoice = preferred[0] || voices[0] || null;
-
-        if (chosenVoice) {
-            utter.voice = chosenVoice;
-            utter.lang = chosenVoice.lang || "es-CL";
-        } else {
-            utter.lang = "es-CL";
-        }
-
-        utter.rate = 1.0;
-        utter.pitch = 1.05;
-
-        // Cancelar lo anterior para que no se empalmen voces
-        synth.cancel();
-        synth.speak(utter);
-    } catch (e) {
-        console.error("Error en Web Speech:", e);
+        const genericEs = voices.find(v => v.lang.startsWith("es"));
+        miraSelectedVoice = femaleEs || genericEs || voices[0];
     }
-}
 
-// Opcional: solo para ver en consola qué voces hay
-if ("speechSynthesis" in window) {
-    speechSynthesis.onvoiceschanged = () => {
-        console.log("Voces disponibles:", speechSynthesis.getVoices());
-    };
+    if (miraSelectedVoice) {
+        utter.voice = miraSelectedVoice;
+        utter.lang = miraSelectedVoice.lang;
+    } else {
+        utter.lang = "es-CL";
+    }
+
+    // 🔊 Más lento y entendible
+    utter.rate = 0.9;   // antes era 1.0 → ahora un poco más lento
+    utter.pitch = 1.0;  // tono neutro, más natural
+
+    synth.cancel();
+    synth.speak(utter);
 }
 
 if (miraVoiceToggle) {
@@ -532,6 +550,7 @@ function setupMiraHints() {
     const hints = document.querySelectorAll("[data-mira-hint]");
     hints.forEach(el => {
         el.addEventListener("mouseenter", () => {
+            if (!miraVoiceEnabled) return;
             const hint = sanitizeForSpeech(el.getAttribute("data-mira-hint"));
             speakWithMiraVoice(hint);
         });
@@ -562,7 +581,9 @@ function setupMiraSectionObserver() {
             if (!id || spokenSections.has(id)) return;
 
             spokenSections.add(id);
-            if (messages[id]) speakWithMiraVoice(messages[id]);
+            if (messages[id] && miraVoiceEnabled) {
+                speakWithMiraVoice(messages[id]);
+            }
         });
     }, { threshold: 0.4 });
 
