@@ -235,6 +235,7 @@ function initVideoCarousel() {
 ------------------------------------------------------------------ */
 
 let miraVoiceEnabled = true;
+let miraAudioUnlocked = false;
 
 const miraToggleBtn = document.getElementById("mira-toggle");
 const miraChat = document.getElementById("mira-chat");
@@ -245,15 +246,47 @@ const miraInput = document.getElementById("miraInput");
 const miraLoading = document.getElementById("miraLoading");
 const miraVoiceToggle = document.getElementById("mira-voice-toggle");
 
+/**
+ * Inicializa el mensaje de bienvenida en el chat,
+ * SIN hablar por voz (el saludo hablado se maneja aparte).
+ */
 function initMiraWelcome() {
     if (!miraMessages) return;
     miraMessages.innerHTML = "";
-    addMiraMessage(
-        "Bienvenido a Innova Space Education.<br>" +
-        "Soy <strong>MIRA</strong>, una asistente virtual diseñada para acompañarte.<br>" +
-        "Estoy lista para ayudarte en lo que necesites."
-    );
+
+    const html = `
+        Bienvenido a Innova Space Education.<br>
+        Soy <strong>MIRA</strong>, una asistente virtual diseñada para acompañarte.<br>
+        Estoy lista para ayudarte en lo que necesites.
+    `;
+
+    const div = document.createElement("div");
+    div.className = "mira-msg bot";
+    div.innerHTML = html;
+    miraMessages.appendChild(div);
+    scrollMiraToBottom();
 }
+
+/* ------------------------------------------------------------------
+   5.1 DESBLOQUEO DE AUDIO (POLÍTICAS DEL NAVEGADOR)
+------------------------------------------------------------------ */
+function unlockMiraAudio() {
+    if (miraAudioUnlocked) return;
+    miraAudioUnlocked = true;
+
+    // Pequeño truco para "despertar" el contexto de audio
+    const a = new Audio();
+    a.muted = true;
+    a.play().catch(() => {});
+
+    window.removeEventListener("click", unlockMiraAudio);
+    window.removeEventListener("keydown", unlockMiraAudio);
+    window.removeEventListener("touchstart", unlockMiraAudio);
+}
+
+window.addEventListener("click", unlockMiraAudio);
+window.addEventListener("keydown", unlockMiraAudio);
+window.addEventListener("touchstart", unlockMiraAudio);
 
 /* ------------------------------------------------------------------
    5.5 FORMULARIO DE CONTACTO → BACKEND (Render)
@@ -315,7 +348,8 @@ function setupContactForm() {
 }
 
 /* ------------------------------------------------------------------
-   INICIALIZACIÓN DOMContentLoaded (MIRA + HINTS + SECCIONES + VIDEO + CONTACTO)
+   INICIALIZACIÓN DOMContentLoaded
+   (MIRA + HINTS + SECCIONES + VIDEO + CONTACTO + SALUDO DE VOZ)
 ------------------------------------------------------------------ */
 document.addEventListener("DOMContentLoaded", () => {
     initMiraWelcome();
@@ -324,12 +358,13 @@ document.addEventListener("DOMContentLoaded", () => {
     initVideoCarousel();
     setupContactForm();
 
-    // 👋 Saludo automático solo con voz al cargar/recargar la página (sin abrir el chat)
+    // 👋 Saludo automático SOLO con voz al cargar/recargar la página
+    // El chat NO se abre automáticamente.
     setTimeout(() => {
         if (miraVoiceEnabled) {
             speakWithMiraVoice(
                 "Bienvenido a Innova Space Education. Soy MIRA, su asistente virtual. " +
-                "Estoy lista para acompañarte y responder tus consultas."
+                "Estoy lista para acompañarle y responder sus consultas."
             );
         }
     }, 1200);
@@ -340,9 +375,12 @@ document.addEventListener("DOMContentLoaded", () => {
 ------------------------------------------------------------------ */
 if (miraToggleBtn && miraChat && miraCloseBtn) {
     miraToggleBtn.addEventListener("click", () => {
+        // Desbloqueamos audio cuando el usuario interactúa
+        unlockMiraAudio();
+
         miraChat.classList.toggle("mira-chat-open");
         if (miraChat.classList.contains("mira-chat-open")) {
-            // Solo inicializa mensajes, no vuelve a saludar con voz aquí
+            // Solo inicializa mensajes; NO vuelve a saludar por voz aquí.
             initMiraWelcome();
             setTimeout(() => miraInput?.focus(), 200);
         }
@@ -464,108 +502,7 @@ function sanitizeForSpeech(text) {
 }
 
 /* ------------------------------------------------------------------
-   DETECCIÓN SIMPLE DE IDIOMA (ES / EN)
------------------------------------------------------------------- */
-function detectLanguageFromText(text) {
-    if (!text) return "es";
-
-    const lower = text.toLowerCase();
-
-    const hasSpanishChars = /[áéíóúñü¿¡]/.test(lower);
-    const commonEs = /\b(hola|gracias|usted|ustedes|bienvenido|bienvenida|colegio|institución|proyecto|educación|spa)\b/.test(lower);
-    const commonEn = /\b(hello|hi|thanks|thank you|please|school|project|education|welcome)\b/.test(lower);
-
-    if (hasSpanishChars || commonEs) return "es";
-    if (commonEn) return "en";
-
-    // Por defecto, asumimos español
-    return "es";
-}
-
-/* ------------------------------------------------------------------
-   VOZ DEL NAVEGADOR (FALLBACK) – BILINGÜE, FEMENINA Y MÁS LENTA
------------------------------------------------------------------- */
-
-let miraVoiceEs = null;
-let miraVoiceEn = null;
-
-if ("speechSynthesis" in window) {
-    window.speechSynthesis.onvoiceschanged = () => {
-        const voices = window.speechSynthesis.getVoices();
-        if (!voices || !voices.length) return;
-
-        if (!miraVoiceEs) {
-            const femaleEs = voices.find(v =>
-                v.lang.startsWith("es") &&
-                v.name.toLowerCase().includes("female")
-            );
-            const genericEs = voices.find(v => v.lang.startsWith("es"));
-            miraVoiceEs = femaleEs || genericEs || null;
-        }
-
-        if (!miraVoiceEn) {
-            const femaleEn = voices.find(v =>
-                v.lang.toLowerCase().startsWith("en") &&
-                v.name.toLowerCase().includes("female")
-            );
-            const genericEn = voices.find(v => v.lang.toLowerCase().startsWith("en"));
-            miraVoiceEn = femaleEn || genericEn || null;
-        }
-    };
-}
-
-function speakWithBrowserVoice(text) {
-    if (!miraVoiceEnabled) return;
-    if (!text) return;
-    if (!("speechSynthesis" in window)) return;
-
-    const safeText = sanitizeForSpeech(text);
-    if (!safeText) return;
-
-    const synth = window.speechSynthesis;
-    if (!synth) return;
-
-    const langDetected = detectLanguageFromText(safeText); // "es" o "en"
-    const utter = new SpeechSynthesisUtterance(safeText);
-
-    const voices = synth.getVoices();
-    if (!miraVoiceEs && voices && voices.length) {
-        const femaleEs = voices.find(v =>
-            v.lang.startsWith("es") &&
-            v.name.toLowerCase().includes("female")
-        );
-        const genericEs = voices.find(v => v.lang.startsWith("es"));
-        miraVoiceEs = femaleEs || genericEs || null;
-    }
-    if (!miraVoiceEn && voices && voices.length) {
-        const femaleEn = voices.find(v =>
-            v.lang.toLowerCase().startsWith("en") &&
-            v.name.toLowerCase().includes("female")
-        );
-        const genericEn = voices.find(v => v.lang.toLowerCase().startsWith("en"));
-        miraVoiceEn = femaleEn || genericEn || null;
-    }
-
-    if (langDetected === "en" && miraVoiceEn) {
-        utter.voice = miraVoiceEn;
-        utter.lang = miraVoiceEn.lang;
-    } else if (miraVoiceEs) {
-        utter.voice = miraVoiceEs;
-        utter.lang = miraVoiceEs.lang;
-    } else {
-        utter.lang = langDetected === "en" ? "en-US" : "es-CL";
-    }
-
-    // Más lento y entendible
-    utter.rate = 0.9;
-    utter.pitch = 1.0;
-
-    synth.cancel();
-    synth.speak(utter);
-}
-
-/* ------------------------------------------------------------------
-   VOZ MIRA – USA AZURE (BACKEND) + FALLBACK NAVEGADOR
+   TTS MIRA – ElevenLabs via backend Render
 ------------------------------------------------------------------ */
 async function speakWithMiraVoice(text) {
     if (!miraVoiceEnabled) return;
@@ -574,15 +511,6 @@ async function speakWithMiraVoice(text) {
     const safeText = sanitizeForSpeech(text);
     if (!safeText) return;
 
-    const langDetected = detectLanguageFromText(safeText);
-
-    // Si es claramente INGLÉS, usamos solo la voz del navegador (mejor pronunciación)
-    if (langDetected === "en") {
-        speakWithBrowserVoice(safeText);
-        return;
-    }
-
-    // Si es español (o dudoso), intentamos primero Azure → fallback navegador
     try {
         const res = await fetch(MIRA_TTS_URL, {
             method: "POST",
@@ -591,21 +519,19 @@ async function speakWithMiraVoice(text) {
         });
 
         if (!res.ok) {
-            console.warn("TTS Azure no disponible, usando voz del navegador.");
-            speakWithBrowserVoice(safeText);
+            console.warn("TTS backend no disponible:", await res.text());
             return;
         }
 
         const blob = await res.blob();
         const url = URL.createObjectURL(blob);
         const audio = new Audio(url);
-        audio.play().catch(err => {
-            console.warn("Error al reproducir audio Azure, usando voz del navegador:", err);
-            speakWithBrowserVoice(safeText);
+
+        await audio.play().catch(err => {
+            console.warn("Error al reproducir audio TTS:", err);
         });
     } catch (err) {
-        console.error("Error TTS Azure:", err);
-        speakWithBrowserVoice(safeText);
+        console.error("Error llamando a /api/tts:", err);
     }
 }
 
@@ -616,10 +542,6 @@ if (miraVoiceToggle) {
         miraVoiceToggle.innerHTML = miraVoiceEnabled
             ? '<i class="ri-volume-up-fill"></i>'
             : '<i class="ri-volume-mute-fill"></i>';
-
-        if (!miraVoiceEnabled && "speechSynthesis" in window) {
-            window.speechSynthesis.cancel();
-        }
     });
 }
 
