@@ -1,4 +1,5 @@
-// Backend MIRA (Render, OpenRouter, Resend, ElevenLabs TTS)
+// Backend MIRA (Render y OpenRouter)
+// Chat IA + Correos (Resend) + endpoint TTS (ElevenLabs)
 
 const express = require("express");
 const cors = require("cors");
@@ -29,7 +30,8 @@ const EMAIL_FROM =
 
 // 🔊 ElevenLabs TTS
 const ELEVEN_API_KEY = process.env.ELEVEN_API_KEY || "";
-const ELEVEN_VOICE_ID = process.env.ELEVEN_VOICE_ID || ""; // pon aquí el ID en Render
+// En Render la variable se llama ELEVENLABS_VOICE_ID
+const ELEVEN_VOICE_ID = process.env.ELEVENLABS_VOICE_ID || "";
 
 console.log("🔧 VARIABLES DE ENTORNO:");
 console.log("OPENROUTER_API_KEY:", OPENROUTER_API_KEY ? "OK" : "❌ FALTA");
@@ -38,7 +40,9 @@ console.log("EMAIL_SEND_TO:", EMAIL_SEND_TO);
 console.log("EMAIL_FROM:", EMAIL_FROM);
 console.log(
   "ELEVEN_TTS:",
-  ELEVEN_API_KEY && ELEVEN_VOICE_ID ? "OK (configurado)" : "❌ FALTA ELEVEN_API_KEY o ELEVEN_VOICE_ID"
+  ELEVEN_API_KEY && ELEVEN_VOICE_ID
+    ? "OK (clave y voz configuradas)"
+    : "❌ FALTA ELEVEN_API_KEY o ELEVENLABS_VOICE_ID"
 );
 
 // -------------------------------------------------------------
@@ -61,8 +65,7 @@ app.post("/api/mira", async (req, res) => {
         role: "system",
         content: `
 Eres MIRA, la asistente virtual futurista de Innova Space Education SPA.
-Hablas preferentemente español, tono femenino amable, profesional, futurista.
-Si el usuario escribe en inglés, responde en inglés.
+Hablas español, tono femenino amable, profesional, futurista.
 No uses emojis.
 Tu enfoque:
 - IA educativa e innovación
@@ -71,7 +74,7 @@ Tu enfoque:
 - Remodelación de salas temáticas
 - Integración de tecnología en colegios
 En cotizaciones, invita a escribir a contacto@innova-space-edu.cl.
-        `.trim(),
+                `.trim(),
       },
     ];
 
@@ -149,9 +152,9 @@ const transporter = nodemailer.createTransport({
   socketTimeout: 10000,
 });
 
-// Verificación SMTP opcional
+// Verificación SMTP opcional (sabemos que Render suele bloquear SMTP)
 if (smtpHost && smtpUser && smtpPass) {
-  transporter.verify((err) => {
+  transporter.verify((err, success) => {
     if (err) {
       console.error(
         "❌ Error verificando conexión SMTP (Render suele bloquear SMTP; el backend SIGUE funcionando):",
@@ -305,50 +308,50 @@ app.post("/api/contact", async (req, res) => {
 app.post("/api/tts", async (req, res) => {
   try {
     const { text } = req.body || {};
-
-    if (!text || !text.trim()) {
+    if (!text) {
       return res.status(400).json({ error: "Falta 'text' en el cuerpo." });
     }
 
     if (!ELEVEN_API_KEY || !ELEVEN_VOICE_ID) {
       return res.status(500).json({
         error:
-          "Servicio de voz no configurado. Falta ELEVEN_API_KEY o ELEVEN_VOICE_ID.",
+          "Servicio de voz no configurado. Falta ELEVEN_API_KEY o ELEVENLABS_VOICE_ID.",
       });
     }
 
-    const safeText = text.toString().slice(0, 500);
-
-    const elevenUrl = `https://api.elevenlabs.io/v1/text-to-speech/${ELEVEN_VOICE_ID}`;
-
-    const elevenRes = await fetchFn(elevenUrl, {
-      method: "POST",
-      headers: {
-        "xi-api-key": ELEVEN_API_KEY,
-        "Content-Type": "application/json",
-        Accept: "audio/mpeg",
-      },
-      body: JSON.stringify({
-        text: safeText,
-        model_id: "eleven_monolingual_v1", // puedes cambiarlo luego si quieres
-        voice_settings: {
-          stability: 0.4,
-          similarity_boost: 0.8,
+    // Llamada a ElevenLabs TTS (sin model_id viejo: que use el modelo por defecto)
+    const elevenRes = await fetchFn(
+      `https://api.elevenlabs.io/v1/text-to-speech/${ELEVEN_VOICE_ID}`,
+      {
+        method: "POST",
+        headers: {
+          "xi-api-key": ELEVEN_API_KEY,
+          "Content-Type": "application/json",
+          Accept: "audio/mpeg",
         },
-      }),
-    });
+        body: JSON.stringify({
+          text,
+          // Sin model_id → usa el modelo actualizado por defecto de esa voz
+          voice_settings: {
+            stability: 0.55,
+            similarity_boost: 0.75,
+          },
+        }),
+      }
+    );
 
     if (!elevenRes.ok) {
-      const txt = await elevenRes.text();
-      console.error("❌ ElevenLabs TTS error:", txt);
+      const errText = await elevenRes.text();
+      console.error("❌ ElevenLabs TTS error:", errText);
       return res.status(500).json({ error: "Fallo en ElevenLabs TTS" });
     }
 
-    const audioBuffer = Buffer.from(await elevenRes.arrayBuffer());
+    const audioBuffer = await elevenRes.arrayBuffer();
+    const buf = Buffer.from(audioBuffer);
 
     res.setHeader("Content-Type", "audio/mpeg");
-    res.setHeader("Content-Length", audioBuffer.length);
-    return res.send(audioBuffer);
+    res.setHeader("Content-Length", buf.length);
+    res.send(buf);
   } catch (err) {
     console.error("❌ /api/tts ERROR:", err);
     res.status(500).json({ error: "Error interno en TTS" });
@@ -360,7 +363,7 @@ app.post("/api/tts", async (req, res) => {
 // -------------------------------------------------------------
 app.get("/", (req, res) => {
   res.send(
-    "🚀 MIRA backend funcionando correctamente (chat con OpenRouter + correos por Resend + /api/tts con ElevenLabs)."
+    "🚀 MIRA backend funcionando correctamente (chat con OpenRouter + correos por Resend + /api/tts para voz ElevenLabs)."
   );
 });
 
