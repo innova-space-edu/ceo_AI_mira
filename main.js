@@ -22,6 +22,85 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 /* ------------------------------------------------------------------
+   2.5 MODO "SIN SCROLL" + NAVEGACIÓN POR VISTAS (PANEL FLOTANTE)
+   - Mantiene todo tu sitio, pero se comporta como app (sin scroll)
+   - Navega entre "vistas" usando data-view-link (agregado en index)
+------------------------------------------------------------------ */
+function lockScroll() {
+    // Bloqueo extra por JS (por si CSS aún permite scroll)
+    document.documentElement.style.overflow = "hidden";
+    document.body.style.overflow = "hidden";
+    document.body.style.height = "100vh";
+}
+
+function getAllViews() {
+    // Incluye el hero (header.view) y las secciones .view
+    return Array.from(document.querySelectorAll(".view[data-view]"));
+}
+
+function setActiveView(viewId, { focusTop = true, speakSection = true } = {}) {
+    const views = getAllViews();
+    if (!views.length) return;
+
+    // Si no existe, no hacemos nada
+    const target = document.querySelector(`.view[data-view="${viewId}"]`);
+    if (!target) return;
+
+    // Activar/Desactivar vistas
+    views.forEach(v => v.classList.remove("active"));
+    target.classList.add("active");
+
+    // Cerrar menú móvil al navegar
+    if (navLinks) navLinks.classList.remove("nav-open");
+
+    // Si hay video en hero, solo inicializar carrusel cuando estás en hero
+    if (viewId === "hero") {
+        initVideoCarousel();
+    }
+
+    // En modo sin scroll, "subir" a arriba (realmente no scrollea, pero por seguridad)
+    if (focusTop) {
+        window.scrollTo(0, 0);
+    }
+
+    // MIRA: hablar al cambiar de sección (reemplaza IntersectionObserver)
+    if (speakSection) {
+        notifyMiraSection(viewId);
+    }
+
+    // Marcar en el navbar cuál está activo (opcional, pero útil)
+    highlightActiveNav(viewId);
+}
+
+function highlightActiveNav(viewId) {
+    const links = document.querySelectorAll('[data-view-link]');
+    links.forEach(a => {
+        const isActive = a.getAttribute("data-view-link") === viewId;
+        a.classList.toggle("is-active", isActive);
+        // Opcional: también el <li>
+        const li = a.closest("li");
+        if (li) li.classList.toggle("is-active", isActive);
+    });
+}
+
+function setupViewNavigation() {
+    // Todos los links que tienen data-view-link deben navegar sin scroll
+    const viewLinks = document.querySelectorAll("[data-view-link]");
+    viewLinks.forEach(link => {
+        link.addEventListener("click", (e) => {
+            e.preventDefault();
+            const viewId = link.getAttribute("data-view-link");
+            if (viewId) setActiveView(viewId, { focusTop: true, speakSection: true });
+        });
+    });
+
+    // Vista inicial: hero (si existe). Mantener por compatibilidad.
+    // Si por alguna razón ya hay otra activa, respetamos.
+    const anyActive = document.querySelector('.view.active[data-view]');
+    if (!anyActive) setActiveView("hero", { focusTop: true, speakSection: false });
+}
+
+/* ------------------------------------------------------------------
    3. NAVBAR MOBILE
 ------------------------------------------------------------------ */
 const navToggle = document.getElementById("navToggle");
@@ -32,6 +111,8 @@ if (navToggle && navLinks) {
         navLinks.classList.toggle("nav-open");
     });
 
+    // Mantener este comportamiento:
+    // (ahora los links también llaman setActiveView por data-view-link)
     navLinks.querySelectorAll("a").forEach(link => {
         link.addEventListener("click", () => navLinks.classList.remove("nav-open"));
     });
@@ -366,10 +447,14 @@ function setupContactForm() {
    (MIRA + HINTS + SECCIONES + VIDEO + CONTACTO + SALUDO DE VOZ)
 ------------------------------------------------------------------ */
 document.addEventListener("DOMContentLoaded", () => {
+    // Modo app sin scroll
+    lockScroll();
+    setupViewNavigation();
+
     initMiraWelcome();
     setupMiraHints();
-    setupMiraSectionObserver();
-    initVideoCarousel();
+    setupMiraSectionObserver(); // ahora queda adaptado a modo sin scroll
+    // initVideoCarousel(); // se inicializa cuando estás en hero (setActiveView)
     setupContactForm();
 
     // 👋 Intento de saludo automático solo si el audio ya está desbloqueado
@@ -572,8 +657,13 @@ function setupMiraHints() {
 
 /* ------------------------------------------------------------------
    DETECCIÓN DE SECCIONES (MIRA HABLA SEGÚN SECCIÓN)
+   - Antes usabas IntersectionObserver por scroll.
+   - Ahora (sin scroll) MIRA habla al cambiar de vista.
 ------------------------------------------------------------------ */
 function setupMiraSectionObserver() {
+    // Se mantiene la función para no "borrar nada",
+    // pero en modo sin scroll se maneja con notifyMiraSection(viewId)
+    // Igual dejamos un fallback por si alguien activa scroll más adelante.
     const sections = document.querySelectorAll(".section[data-mira-section]");
     if (!("IntersectionObserver" in window)) return;
 
@@ -601,4 +691,30 @@ function setupMiraSectionObserver() {
     }, { threshold: 0.4 });
 
     sections.forEach(sec => obs.observe(sec));
+}
+
+/* ------------------------------------------------------------------
+   NUEVO: MENSAJE DE MIRA SEGÚN VISTA ACTIVA (sin scroll)
+------------------------------------------------------------------ */
+const miraSectionSpoken = new Set();
+const miraSectionMessages = {
+    "hero": "Bienvenido. Puede explorar nuestras secciones desde el panel superior.",
+    "sobre": "En esta sección podrá conocer el enfoque de Innova Space Education.",
+    "servicios": "Aquí encontrará los servicios que ofrecemos.",
+    "portafolio": "Aquí podrá ver algunos proyectos realizados.",
+    "redes": "Puede visitar nuestras redes sociales para más información.",
+    "contacto": "En la sección de contacto puede enviarnos un mensaje directo."
+};
+
+function notifyMiraSection(viewId) {
+    if (!viewId) return;
+
+    // Solo hablar una vez por sección (como antes)
+    if (miraSectionSpoken.has(viewId)) return;
+    miraSectionSpoken.add(viewId);
+
+    const msg = miraSectionMessages[viewId];
+    if (msg && miraVoiceEnabled) {
+        speakWithMiraVoice(msg);
+    }
 }
