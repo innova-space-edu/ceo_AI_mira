@@ -22,85 +22,6 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 /* ------------------------------------------------------------------
-   2.5 MODO "SIN SCROLL" + NAVEGACIÓN POR VISTAS (PANEL FLOTANTE)
-   - Mantiene todo tu sitio, pero se comporta como app (sin scroll)
-   - Navega entre "vistas" usando data-view-link (agregado en index)
------------------------------------------------------------------- */
-function lockScroll() {
-    // Bloqueo extra por JS (por si CSS aún permite scroll)
-    document.documentElement.style.overflow = "hidden";
-    document.body.style.overflow = "hidden";
-    document.body.style.height = "100vh";
-}
-
-function getAllViews() {
-    // Incluye el hero (header.view) y las secciones .view
-    return Array.from(document.querySelectorAll(".view[data-view]"));
-}
-
-function setActiveView(viewId, { focusTop = true, speakSection = true } = {}) {
-    const views = getAllViews();
-    if (!views.length) return;
-
-    // Si no existe, no hacemos nada
-    const target = document.querySelector(`.view[data-view="${viewId}"]`);
-    if (!target) return;
-
-    // Activar/Desactivar vistas
-    views.forEach(v => v.classList.remove("active"));
-    target.classList.add("active");
-
-    // Cerrar menú móvil al navegar
-    if (navLinks) navLinks.classList.remove("nav-open");
-
-    // Si hay video en hero, solo inicializar carrusel cuando estás en hero
-    if (viewId === "hero") {
-        initVideoCarousel();
-    }
-
-    // En modo sin scroll, "subir" a arriba (realmente no scrollea, pero por seguridad)
-    if (focusTop) {
-        window.scrollTo(0, 0);
-    }
-
-    // MIRA: hablar al cambiar de sección (reemplaza IntersectionObserver)
-    if (speakSection) {
-        notifyMiraSection(viewId);
-    }
-
-    // Marcar en el navbar cuál está activo (opcional, pero útil)
-    highlightActiveNav(viewId);
-}
-
-function highlightActiveNav(viewId) {
-    const links = document.querySelectorAll('[data-view-link]');
-    links.forEach(a => {
-        const isActive = a.getAttribute("data-view-link") === viewId;
-        a.classList.toggle("is-active", isActive);
-        // Opcional: también el <li>
-        const li = a.closest("li");
-        if (li) li.classList.toggle("is-active", isActive);
-    });
-}
-
-function setupViewNavigation() {
-    // Todos los links que tienen data-view-link deben navegar sin scroll
-    const viewLinks = document.querySelectorAll("[data-view-link]");
-    viewLinks.forEach(link => {
-        link.addEventListener("click", (e) => {
-            e.preventDefault();
-            const viewId = link.getAttribute("data-view-link");
-            if (viewId) setActiveView(viewId, { focusTop: true, speakSection: true });
-        });
-    });
-
-    // Vista inicial: hero (si existe). Mantener por compatibilidad.
-    // Si por alguna razón ya hay otra activa, respetamos.
-    const anyActive = document.querySelector('.view.active[data-view]');
-    if (!anyActive) setActiveView("hero", { focusTop: true, speakSection: false });
-}
-
-/* ------------------------------------------------------------------
    3. NAVBAR MOBILE
 ------------------------------------------------------------------ */
 const navToggle = document.getElementById("navToggle");
@@ -111,8 +32,6 @@ if (navToggle && navLinks) {
         navLinks.classList.toggle("nav-open");
     });
 
-    // Mantener este comportamiento:
-    // (ahora los links también llaman setActiveView por data-view-link)
     navLinks.querySelectorAll("a").forEach(link => {
         link.addEventListener("click", () => navLinks.classList.remove("nav-open"));
     });
@@ -312,6 +231,120 @@ function initVideoCarousel() {
 }
 
 /* ------------------------------------------------------------------
+   4.8 ✅ BARRA DE NAVEGACIÓN POR SECCIONES (SIN DEPENDER DEL SCROLL)
+   - Funciona en index.html e innova-space-track.html
+------------------------------------------------------------------ */
+function setupSectionNavigator() {
+    const nav = document.getElementById("section-nav");
+    const btnPrev = document.getElementById("navPrev");
+    const btnNext = document.getElementById("navNext");
+    const dotsWrap = document.getElementById("navDots");
+
+    if (!nav || !btnPrev || !btnNext || !dotsWrap) return;
+
+    // Orden: hero + secciones + footer (opcional)
+    const ordered = [];
+
+    const hero = document.getElementById("hero");
+    if (hero) ordered.push({ el: hero, id: "hero", label: "Inicio" });
+
+    // Todas las secciones principales
+    document.querySelectorAll("main .section").forEach(sec => {
+        const id = sec.id || sec.getAttribute("data-mira-section") || "section";
+        const h2 = sec.querySelector(".section-header h2");
+        const label = (h2?.textContent || id).trim();
+        ordered.push({ el: sec, id, label });
+    });
+
+    // Footer como última parada (si existe)
+    const footer = document.querySelector("footer.footer");
+    if (footer) ordered.push({ el: footer, id: "footer", label: "Final" });
+
+    if (ordered.length <= 1) return;
+
+    let currentIndex = 0;
+    let isProgrammatic = false;
+
+    // Crear dots
+    dotsWrap.innerHTML = "";
+    ordered.forEach((item, idx) => {
+        const dot = document.createElement("button");
+        dot.className = "section-dot" + (idx === 0 ? " active" : "");
+        dot.type = "button";
+        dot.setAttribute("aria-label", item.label);
+        dot.title = item.label;
+        dot.dataset.index = String(idx);
+        dot.addEventListener("click", () => goTo(idx, true));
+        dotsWrap.appendChild(dot);
+    });
+
+    const dots = Array.from(dotsWrap.querySelectorAll(".section-dot"));
+
+    function setActive(idx) {
+        currentIndex = Math.max(0, Math.min(idx, ordered.length - 1));
+        dots.forEach((d, i) => d.classList.toggle("active", i === currentIndex));
+
+        // Deshabilitar botones en extremos
+        btnPrev.disabled = currentIndex === 0;
+        btnNext.disabled = currentIndex === ordered.length - 1;
+    }
+
+    function goTo(idx, fromUser = false) {
+        const target = ordered[idx]?.el;
+        if (!target) return;
+
+        isProgrammatic = true;
+        setActive(idx);
+
+        // Navegación sin necesidad de scroll manual
+        target.scrollIntoView({ behavior: "smooth", block: "start" });
+
+        // Evita saltos de observer mientras termina el scroll
+        setTimeout(() => {
+            isProgrammatic = false;
+        }, fromUser ? 700 : 550);
+    }
+
+    btnPrev.addEventListener("click", () => goTo(currentIndex - 1, true));
+    btnNext.addEventListener("click", () => goTo(currentIndex + 1, true));
+
+    // Teclas
+    window.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowDown" || e.key === "PageDown") goTo(currentIndex + 1, true);
+        if (e.key === "ArrowUp" || e.key === "PageUp") goTo(currentIndex - 1, true);
+        if (e.key === "Home") goTo(0, true);
+        if (e.key === "End") goTo(ordered.length - 1, true);
+    });
+
+    // Detectar sección visible para activar dot (sin romper tu observer de MIRA)
+    if ("IntersectionObserver" in window) {
+        const obs = new IntersectionObserver((entries) => {
+            if (isProgrammatic) return;
+
+            // Tomamos la más visible
+            let bestIdx = currentIndex;
+            let bestRatio = 0;
+
+            entries.forEach(en => {
+                if (!en.isIntersecting) return;
+                const idx = ordered.findIndex(x => x.el === en.target);
+                if (idx >= 0 && en.intersectionRatio > bestRatio) {
+                    bestRatio = en.intersectionRatio;
+                    bestIdx = idx;
+                }
+            });
+
+            if (bestIdx !== currentIndex) setActive(bestIdx);
+        }, { threshold: [0.25, 0.4, 0.55, 0.7] });
+
+        ordered.forEach(item => obs.observe(item.el));
+    }
+
+    // Estado inicial
+    setActive(0);
+}
+
+/* ------------------------------------------------------------------
    5. CHATBOT MIRA
 ------------------------------------------------------------------ */
 
@@ -444,18 +477,17 @@ function setupContactForm() {
 
 /* ------------------------------------------------------------------
    INICIALIZACIÓN DOMContentLoaded
-   (MIRA + HINTS + SECCIONES + VIDEO + CONTACTO + SALUDO DE VOZ)
+   (MIRA + HINTS + SECCIONES + VIDEO + CONTACTO + SALUDO DE VOZ + NAV)
 ------------------------------------------------------------------ */
 document.addEventListener("DOMContentLoaded", () => {
-    // Modo app sin scroll
-    lockScroll();
-    setupViewNavigation();
-
     initMiraWelcome();
     setupMiraHints();
-    setupMiraSectionObserver(); // ahora queda adaptado a modo sin scroll
-    // initVideoCarousel(); // se inicializa cuando estás en hero (setActiveView)
+    setupMiraSectionObserver();
+    initVideoCarousel();
     setupContactForm();
+
+    // ✅ Nueva: barra de navegación por secciones
+    setupSectionNavigator();
 
     // 👋 Intento de saludo automático solo si el audio ya está desbloqueado
     setTimeout(() => {
@@ -657,13 +689,8 @@ function setupMiraHints() {
 
 /* ------------------------------------------------------------------
    DETECCIÓN DE SECCIONES (MIRA HABLA SEGÚN SECCIÓN)
-   - Antes usabas IntersectionObserver por scroll.
-   - Ahora (sin scroll) MIRA habla al cambiar de vista.
 ------------------------------------------------------------------ */
 function setupMiraSectionObserver() {
-    // Se mantiene la función para no "borrar nada",
-    // pero en modo sin scroll se maneja con notifyMiraSection(viewId)
-    // Igual dejamos un fallback por si alguien activa scroll más adelante.
     const sections = document.querySelectorAll(".section[data-mira-section]");
     if (!("IntersectionObserver" in window)) return;
 
@@ -691,30 +718,4 @@ function setupMiraSectionObserver() {
     }, { threshold: 0.4 });
 
     sections.forEach(sec => obs.observe(sec));
-}
-
-/* ------------------------------------------------------------------
-   NUEVO: MENSAJE DE MIRA SEGÚN VISTA ACTIVA (sin scroll)
------------------------------------------------------------------- */
-const miraSectionSpoken = new Set();
-const miraSectionMessages = {
-    "hero": "Bienvenido. Puede explorar nuestras secciones desde el panel superior.",
-    "sobre": "En esta sección podrá conocer el enfoque de Innova Space Education.",
-    "servicios": "Aquí encontrará los servicios que ofrecemos.",
-    "portafolio": "Aquí podrá ver algunos proyectos realizados.",
-    "redes": "Puede visitar nuestras redes sociales para más información.",
-    "contacto": "En la sección de contacto puede enviarnos un mensaje directo."
-};
-
-function notifyMiraSection(viewId) {
-    if (!viewId) return;
-
-    // Solo hablar una vez por sección (como antes)
-    if (miraSectionSpoken.has(viewId)) return;
-    miraSectionSpoken.add(viewId);
-
-    const msg = miraSectionMessages[viewId];
-    if (msg && miraVoiceEnabled) {
-        speakWithMiraVoice(msg);
-    }
 }
