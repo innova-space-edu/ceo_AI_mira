@@ -5,6 +5,18 @@ const MIRA_API_URL = "https://ceo-ai-mira.onrender.com/api/mira";
 const MIRA_TTS_URL = "https://ceo-ai-mira.onrender.com/api/tts";
 
 /* ------------------------------------------------------------------
+   ✅ NUEVO: ELEVENLABS CONVAI WIDGET (MODO VOZ)
+   - No afecta tu chat actual
+   - Solo agrega un “modo” alternativo dentro del panel
+------------------------------------------------------------------ */
+const ELEVENLABS_WIDGET_SCRIPT = "https://elevenlabs.io/convai-widget/index.js";
+const ELEVENLABS_AGENT_ID = "YOUR_ELEVENLABS_AGENT_ID"; // 👈 CAMBIA ESTO POR TU AGENT ID REAL
+
+let miraMode = "chat";              // "chat" | "voice"
+let elevenWidgetLoaded = false;
+let miraTTSMutedByMode = false;     // silencia tu TTS propio SOLO cuando el modo voz está activo
+
+/* ------------------------------------------------------------------
    1. LOADER GLOBAL
 ------------------------------------------------------------------ */
 window.addEventListener("load", () => {
@@ -476,6 +488,159 @@ function setupContactForm() {
 }
 
 /* ------------------------------------------------------------------
+   ✅ NUEVO: MODO SWITCH (CHAT / VOZ) SIN ROMPER TU CHAT
+   - Crea los elementos si no existen en el HTML
+   - Inserta el widget de ElevenLabs dentro del panel
+------------------------------------------------------------------ */
+function setupMiraModeSwitch() {
+    if (!miraChat) return;
+
+    const header = miraChat.querySelector(".mira-header");
+    if (!header) return;
+
+    // Elementos de chat existentes
+    if (!miraMessages || !miraForm || !miraLoading) return;
+
+    // Si ya existe el switch, no duplicar
+    let switchBar = document.getElementById("mira-mode-switch");
+    let btnChat = document.getElementById("mira-mode-chat");
+    let btnVoice = document.getElementById("mira-mode-voice");
+    let voiceModeWrap = document.getElementById("mira-voice-mode");
+    let chatModeWrap = document.getElementById("mira-chat-mode");
+    let elevenContainer = document.getElementById("elevenlabs-container");
+
+    // Crear wrappers si no existen
+    if (!chatModeWrap) {
+        chatModeWrap = document.createElement("div");
+        chatModeWrap.id = "mira-chat-mode";
+        // Insertaremos “chat mode” donde estaban los elementos
+    }
+
+    if (!voiceModeWrap) {
+        voiceModeWrap = document.createElement("div");
+        voiceModeWrap.id = "mira-voice-mode";
+        voiceModeWrap.style.display = "none";
+    }
+
+    // Crear switch bar si no existe
+    if (!switchBar) {
+        switchBar = document.createElement("div");
+        switchBar.id = "mira-mode-switch";
+
+        btnChat = document.createElement("button");
+        btnChat.id = "mira-mode-chat";
+        btnChat.type = "button";
+        btnChat.textContent = "💬 Chat";
+        btnChat.setAttribute("aria-pressed", "true");
+
+        btnVoice = document.createElement("button");
+        btnVoice.id = "mira-mode-voice";
+        btnVoice.type = "button";
+        btnVoice.textContent = "🎙️ Voz";
+        btnVoice.setAttribute("aria-pressed", "false");
+
+        switchBar.appendChild(btnChat);
+        switchBar.appendChild(btnVoice);
+
+        // Insertar switch justo debajo del header
+        header.insertAdjacentElement("afterend", switchBar);
+    }
+
+    // Reubicar elementos del chat dentro de chatModeWrap (solo si aún no están envueltos)
+    // Orden original: miraMessages, miraLoading, miraForm (tal cual tu HTML)
+    if (!miraMessages.parentElement || miraMessages.parentElement.id !== "mira-chat-mode") {
+        // Insertar chatModeWrap después del switch (o header si no hay switch)
+        if (!chatModeWrap.isConnected) {
+            switchBar.insertAdjacentElement("afterend", chatModeWrap);
+        }
+
+        chatModeWrap.appendChild(miraMessages);
+        chatModeWrap.appendChild(miraLoading);
+        chatModeWrap.appendChild(miraForm);
+    }
+
+    // Insertar voiceModeWrap después de chatModeWrap si no existe
+    if (!voiceModeWrap.isConnected) {
+        chatModeWrap.insertAdjacentElement("afterend", voiceModeWrap);
+    }
+
+    // Crear contenedor del widget si no existe
+    if (!elevenContainer) {
+        elevenContainer = document.createElement("div");
+        elevenContainer.id = "elevenlabs-container";
+        voiceModeWrap.appendChild(elevenContainer);
+    }
+
+    // Crear el elemento del widget (custom element)
+    // Importante: solo si hay Agent ID definido
+    if (ELEVENLABS_AGENT_ID && ELEVENLABS_AGENT_ID !== "YOUR_ELEVENLABS_AGENT_ID") {
+        if (!elevenContainer.querySelector("elevenlabs-convai")) {
+            const widgetEl = document.createElement("elevenlabs-convai");
+            widgetEl.setAttribute("agent-id", ELEVENLABS_AGENT_ID);
+            elevenContainer.appendChild(widgetEl);
+        }
+        loadElevenWidgetScriptOnce();
+    } else {
+        // Si no tiene agent id aún, mostramos aviso dentro del contenedor para que no quede vacío
+        if (!elevenContainer.querySelector(".mira-eleven-note")) {
+            const note = document.createElement("div");
+            note.className = "mira-msg bot mira-eleven-note";
+            note.style.maxWidth = "100%";
+            note.style.margin = "6px";
+            note.innerHTML = "⚠️ Para activar el modo <strong>Voz</strong>, debes colocar tu <strong>ELEVENLABS_AGENT_ID</strong> en <code>main.js</code>.";
+            elevenContainer.appendChild(note);
+        }
+    }
+
+    function setMode(mode) {
+        miraMode = mode;
+
+        // Desbloqueamos audio al cambiar modo
+        unlockMiraAudio();
+
+        const isChat = mode === "chat";
+
+        // Mostrar/ocultar paneles
+        chatModeWrap.style.display = isChat ? "" : "none";
+        voiceModeWrap.style.display = isChat ? "none" : "";
+
+        // Estado visual de botones
+        btnChat?.setAttribute("aria-pressed", isChat ? "true" : "false");
+        btnVoice?.setAttribute("aria-pressed", isChat ? "false" : "true");
+
+        // ✅ Muy importante: evitar “doble voz”
+        // Cuando estás en modo Voz (widget), silenciamos el TTS propio SOLO por modo.
+        miraTTSMutedByMode = !isChat;
+
+        // Foco al input si vuelve a chat
+        if (isChat) {
+            setTimeout(() => miraInput?.focus(), 150);
+        }
+    }
+
+    // Listeners (sin duplicar)
+    btnChat?.addEventListener("click", () => setMode("chat"));
+    btnVoice?.addEventListener("click", () => setMode("voice"));
+
+    // Estado inicial
+    setMode("chat");
+}
+
+function loadElevenWidgetScriptOnce() {
+    if (elevenWidgetLoaded) return;
+    elevenWidgetLoaded = true;
+
+    // Evitar duplicados
+    if (document.querySelector(`script[src="${ELEVENLABS_WIDGET_SCRIPT}"]`)) return;
+
+    const s = document.createElement("script");
+    s.src = ELEVENLABS_WIDGET_SCRIPT;
+    s.async = true;
+    s.type = "text/javascript";
+    document.head.appendChild(s);
+}
+
+/* ------------------------------------------------------------------
    INICIALIZACIÓN DOMContentLoaded
    (MIRA + HINTS + SECCIONES + VIDEO + CONTACTO + SALUDO DE VOZ + NAV)
 ------------------------------------------------------------------ */
@@ -488,6 +653,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // ✅ Nueva: barra de navegación por secciones
     setupSectionNavigator();
+
+    // ✅ Nuevo: modo dual Chat / Voz (ElevenLabs widget)
+    setupMiraModeSwitch();
 
     // 👋 Intento de saludo automático solo si el audio ya está desbloqueado
     setTimeout(() => {
@@ -510,6 +678,10 @@ if (miraToggleBtn && miraChat && miraCloseBtn) {
         if (miraChat.classList.contains("mira-chat-open")) {
             // Solo inicializa mensajes; NO vuelve a saludar por voz aquí.
             initMiraWelcome();
+
+            // ✅ Asegura que el switch exista incluso si el DOM tardó en renderizar
+            setupMiraModeSwitch();
+
             setTimeout(() => miraInput?.focus(), 200);
         }
     });
@@ -553,7 +725,9 @@ function addMiraMessage(htmlText) {
     scrollMiraToBottom();
 
     const spoken = sanitizeForSpeech(stripHtml(htmlText));
-    if (miraVoiceEnabled) speakWithMiraVoice(spoken);
+
+    // ✅ Si estamos en modo Voz (widget), evitamos que tu TTS propio hable encima
+    if (miraVoiceEnabled && !miraTTSMutedByMode) speakWithMiraVoice(spoken);
 }
 
 function scrollMiraToBottom() {
@@ -636,6 +810,9 @@ async function speakWithMiraVoice(text) {
     if (!miraVoiceEnabled) return;
     if (!text) return;
 
+    // ✅ Si estamos en modo “Voz widget”, no reproducimos este TTS para evitar mezcla
+    if (miraTTSMutedByMode) return;
+
     const safeText = sanitizeForSpeech(text);
     if (!safeText) return;
 
@@ -681,6 +858,9 @@ function setupMiraHints() {
     hints.forEach(el => {
         el.addEventListener("mouseenter", () => {
             if (!miraVoiceEnabled) return;
+            // ✅ Evita hints si estás en modo Voz widget (no mezclar voces)
+            if (miraTTSMutedByMode) return;
+
             const hint = sanitizeForSpeech(el.getAttribute("data-mira-hint"));
             speakWithMiraVoice(hint);
         });
@@ -712,7 +892,8 @@ function setupMiraSectionObserver() {
 
             spokenSections.add(id);
             if (messages[id] && miraVoiceEnabled) {
-                speakWithMiraVoice(messages[id]);
+                // ✅ Evita hablar si estás en modo voz widget
+                if (!miraTTSMutedByMode) speakWithMiraVoice(messages[id]);
             }
         });
     }, { threshold: 0.4 });
