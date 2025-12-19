@@ -254,13 +254,11 @@ function setupSectionNavigator() {
 
     if (!nav || !btnPrev || !btnNext || !dotsWrap) return;
 
-    // Orden: hero + secciones + footer (opcional)
     const ordered = [];
 
     const hero = document.getElementById("hero");
     if (hero) ordered.push({ el: hero, id: "hero", label: "Inicio" });
 
-    // Todas las secciones principales
     document.querySelectorAll("main .section").forEach(sec => {
         const id = sec.id || sec.getAttribute("data-mira-section") || "section";
         const h2 = sec.querySelector(".section-header h2");
@@ -268,7 +266,6 @@ function setupSectionNavigator() {
         ordered.push({ el: sec, id, label });
     });
 
-    // Footer como última parada (si existe)
     const footer = document.querySelector("footer.footer");
     if (footer) ordered.push({ el: footer, id: "footer", label: "Final" });
 
@@ -277,7 +274,6 @@ function setupSectionNavigator() {
     let currentIndex = 0;
     let isProgrammatic = false;
 
-    // Crear dots
     dotsWrap.innerHTML = "";
     ordered.forEach((item, idx) => {
         const dot = document.createElement("button");
@@ -295,8 +291,6 @@ function setupSectionNavigator() {
     function setActive(idx) {
         currentIndex = Math.max(0, Math.min(idx, ordered.length - 1));
         dots.forEach((d, i) => d.classList.toggle("active", i === currentIndex));
-
-        // Deshabilitar botones en extremos
         btnPrev.disabled = currentIndex === 0;
         btnNext.disabled = currentIndex === ordered.length - 1;
     }
@@ -308,10 +302,8 @@ function setupSectionNavigator() {
         isProgrammatic = true;
         setActive(idx);
 
-        // Navegación sin necesidad de scroll manual
         target.scrollIntoView({ behavior: "smooth", block: "start" });
 
-        // Evita saltos de observer mientras termina el scroll
         setTimeout(() => {
             isProgrammatic = false;
         }, fromUser ? 700 : 550);
@@ -320,7 +312,6 @@ function setupSectionNavigator() {
     btnPrev.addEventListener("click", () => goTo(currentIndex - 1, true));
     btnNext.addEventListener("click", () => goTo(currentIndex + 1, true));
 
-    // Teclas
     window.addEventListener("keydown", (e) => {
         if (e.key === "ArrowDown" || e.key === "PageDown") goTo(currentIndex + 1, true);
         if (e.key === "ArrowUp" || e.key === "PageUp") goTo(currentIndex - 1, true);
@@ -328,12 +319,10 @@ function setupSectionNavigator() {
         if (e.key === "End") goTo(ordered.length - 1, true);
     });
 
-    // Detectar sección visible para activar dot (sin romper tu observer de MIRA)
     if ("IntersectionObserver" in window) {
         const obs = new IntersectionObserver((entries) => {
             if (isProgrammatic) return;
 
-            // Tomamos la más visible
             let bestIdx = currentIndex;
             let bestRatio = 0;
 
@@ -352,7 +341,6 @@ function setupSectionNavigator() {
         ordered.forEach(item => obs.observe(item.el));
     }
 
-    // Estado inicial
     setActive(0);
 }
 
@@ -406,12 +394,10 @@ function unlockMiraAudio() {
     if (miraAudioUnlocked) return;
     miraAudioUnlocked = true;
 
-    // Pequeño truco para "despertar" el contexto de audio
     const a = new Audio();
     a.muted = true;
     a.play().catch(() => {});
 
-    // Si todavía no saludó por voz, lo hacemos una vez aquí
     if (miraVoiceEnabled && !miraHasWelcomed) {
         setTimeout(() => {
             speakWithMiraVoice(getMiraGreetingText());
@@ -489,8 +475,6 @@ function setupContactForm() {
 
 /* ------------------------------------------------------------------
    ✅ NUEVO: MODO SWITCH (CHAT / VOZ) SIN ROMPER TU CHAT
-   - Crea los elementos si no existen en el HTML
-   - Inserta el widget de ElevenLabs dentro del panel
 ------------------------------------------------------------------ */
 function setupMiraModeSwitch() {
     if (!miraChat) return;
@@ -498,10 +482,8 @@ function setupMiraModeSwitch() {
     const header = miraChat.querySelector(".mira-header");
     if (!header) return;
 
-    // Elementos de chat existentes
     if (!miraMessages || !miraForm || !miraLoading) return;
 
-    // Si ya existe el switch, no duplicar
     let switchBar = document.getElementById("mira-mode-switch");
     let btnChat = document.getElementById("mira-mode-chat");
     let btnVoice = document.getElementById("mira-mode-voice");
@@ -509,11 +491,9 @@ function setupMiraModeSwitch() {
     let chatModeWrap = document.getElementById("mira-chat-mode");
     let elevenContainer = document.getElementById("elevenlabs-container");
 
-    // Crear wrappers si no existen
     if (!chatModeWrap) {
         chatModeWrap = document.createElement("div");
         chatModeWrap.id = "mira-chat-mode";
-        // Insertaremos “chat mode” donde estaban los elementos
     }
 
     if (!voiceModeWrap) {
@@ -522,7 +502,6 @@ function setupMiraModeSwitch() {
         voiceModeWrap.style.display = "none";
     }
 
-    // Crear switch bar si no existe
     if (!switchBar) {
         switchBar = document.createElement("div");
         switchBar.id = "mira-mode-switch";
@@ -542,14 +521,10 @@ function setupMiraModeSwitch() {
         switchBar.appendChild(btnChat);
         switchBar.appendChild(btnVoice);
 
-        // Insertar switch justo debajo del header
         header.insertAdjacentElement("afterend", switchBar);
     }
 
-    // Reubicar elementos del chat dentro de chatModeWrap (solo si aún no están envueltos)
-    // Orden original: miraMessages, miraLoading, miraForm (tal cual tu HTML)
     if (!miraMessages.parentElement || miraMessages.parentElement.id !== "mira-chat-mode") {
-        // Insertar chatModeWrap después del switch (o header si no hay switch)
         if (!chatModeWrap.isConnected) {
             switchBar.insertAdjacentElement("afterend", chatModeWrap);
         }
@@ -559,20 +534,16 @@ function setupMiraModeSwitch() {
         chatModeWrap.appendChild(miraForm);
     }
 
-    // Insertar voiceModeWrap después de chatModeWrap si no existe
     if (!voiceModeWrap.isConnected) {
         chatModeWrap.insertAdjacentElement("afterend", voiceModeWrap);
     }
 
-    // Crear contenedor del widget si no existe
     if (!elevenContainer) {
         elevenContainer = document.createElement("div");
         elevenContainer.id = "elevenlabs-container";
         voiceModeWrap.appendChild(elevenContainer);
     }
 
-    // Crear el elemento del widget (custom element)
-    // Importante: solo si hay Agent ID definido
     if (ELEVENLABS_AGENT_ID && ELEVENLABS_AGENT_ID !== "YOUR_ELEVENLABS_AGENT_ID") {
         if (!elevenContainer.querySelector("elevenlabs-convai")) {
             const widgetEl = document.createElement("elevenlabs-convai");
@@ -581,7 +552,6 @@ function setupMiraModeSwitch() {
         }
         loadElevenWidgetScriptOnce();
     } else {
-        // Si no tiene agent id aún, mostramos aviso dentro del contenedor para que no quede vacío
         if (!elevenContainer.querySelector(".mira-eleven-note")) {
             const note = document.createElement("div");
             note.className = "mira-msg bot mira-eleven-note";
@@ -594,35 +564,26 @@ function setupMiraModeSwitch() {
 
     function setMode(mode) {
         miraMode = mode;
-
-        // Desbloqueamos audio al cambiar modo
         unlockMiraAudio();
 
         const isChat = mode === "chat";
 
-        // Mostrar/ocultar paneles
         chatModeWrap.style.display = isChat ? "" : "none";
         voiceModeWrap.style.display = isChat ? "none" : "";
 
-        // Estado visual de botones
         btnChat?.setAttribute("aria-pressed", isChat ? "true" : "false");
         btnVoice?.setAttribute("aria-pressed", isChat ? "false" : "true");
 
-        // ✅ Muy importante: evitar “doble voz”
-        // Cuando estás en modo Voz (widget), silenciamos el TTS propio SOLO por modo.
         miraTTSMutedByMode = !isChat;
 
-        // Foco al input si vuelve a chat
         if (isChat) {
             setTimeout(() => miraInput?.focus(), 150);
         }
     }
 
-    // Listeners (sin duplicar)
     btnChat?.addEventListener("click", () => setMode("chat"));
     btnVoice?.addEventListener("click", () => setMode("voice"));
 
-    // Estado inicial
     setMode("chat");
 }
 
@@ -630,7 +591,6 @@ function loadElevenWidgetScriptOnce() {
     if (elevenWidgetLoaded) return;
     elevenWidgetLoaded = true;
 
-    // Evitar duplicados
     if (document.querySelector(`script[src="${ELEVENLABS_WIDGET_SCRIPT}"]`)) return;
 
     const s = document.createElement("script");
@@ -642,7 +602,6 @@ function loadElevenWidgetScriptOnce() {
 
 /* ------------------------------------------------------------------
    INICIALIZACIÓN DOMContentLoaded
-   (MIRA + HINTS + SECCIONES + VIDEO + CONTACTO + SALUDO DE VOZ + NAV)
 ------------------------------------------------------------------ */
 document.addEventListener("DOMContentLoaded", () => {
     initMiraWelcome();
@@ -651,13 +610,9 @@ document.addEventListener("DOMContentLoaded", () => {
     initVideoCarousel();
     setupContactForm();
 
-    // ✅ Nueva: barra de navegación por secciones
     setupSectionNavigator();
-
-    // ✅ Nuevo: modo dual Chat / Voz (ElevenLabs widget)
     setupMiraModeSwitch();
 
-    // 👋 Intento de saludo automático solo si el audio ya está desbloqueado
     setTimeout(() => {
         if (miraVoiceEnabled && miraAudioUnlocked && !miraHasWelcomed) {
             speakWithMiraVoice(getMiraGreetingText());
@@ -671,17 +626,12 @@ document.addEventListener("DOMContentLoaded", () => {
 ------------------------------------------------------------------ */
 if (miraToggleBtn && miraChat && miraCloseBtn) {
     miraToggleBtn.addEventListener("click", () => {
-        // Desbloqueamos audio cuando el usuario interactúa
         unlockMiraAudio();
 
         miraChat.classList.toggle("mira-chat-open");
         if (miraChat.classList.contains("mira-chat-open")) {
-            // Solo inicializa mensajes; NO vuelve a saludar por voz aquí.
             initMiraWelcome();
-
-            // ✅ Asegura que el switch exista incluso si el DOM tardó en renderizar
             setupMiraModeSwitch();
-
             setTimeout(() => miraInput?.focus(), 200);
         }
     });
@@ -725,8 +675,6 @@ function addMiraMessage(htmlText) {
     scrollMiraToBottom();
 
     const spoken = sanitizeForSpeech(stripHtml(htmlText));
-
-    // ✅ Si estamos en modo Voz (widget), evitamos que tu TTS propio hable encima
     if (miraVoiceEnabled && !miraTTSMutedByMode) speakWithMiraVoice(spoken);
 }
 
@@ -809,8 +757,6 @@ function sanitizeForSpeech(text) {
 async function speakWithMiraVoice(text) {
     if (!miraVoiceEnabled) return;
     if (!text) return;
-
-    // ✅ Si estamos en modo “Voz widget”, no reproducimos este TTS para evitar mezcla
     if (miraTTSMutedByMode) return;
 
     const safeText = sanitizeForSpeech(text);
@@ -858,7 +804,6 @@ function setupMiraHints() {
     hints.forEach(el => {
         el.addEventListener("mouseenter", () => {
             if (!miraVoiceEnabled) return;
-            // ✅ Evita hints si estás en modo Voz widget (no mezclar voces)
             if (miraTTSMutedByMode) return;
 
             const hint = sanitizeForSpeech(el.getAttribute("data-mira-hint"));
@@ -892,7 +837,6 @@ function setupMiraSectionObserver() {
 
             spokenSections.add(id);
             if (messages[id] && miraVoiceEnabled) {
-                // ✅ Evita hablar si estás en modo voz widget
                 if (!miraTTSMutedByMode) speakWithMiraVoice(messages[id]);
             }
         });
@@ -900,3 +844,97 @@ function setupMiraSectionObserver() {
 
     sections.forEach(sec => obs.observe(sec));
 }
+
+/* ------------------------------------------------------------------
+   ✅ NAVBAR: COMPACTA AL SCROLL
+------------------------------------------------------------------ */
+function setupNavbarScroll() {
+    const navbar = document.querySelector(".navbar");
+    if (!navbar) return;
+
+    const THRESHOLD = 18;
+
+    function update() {
+        if (window.scrollY > THRESHOLD) {
+            navbar.classList.add("navbar--scrolled");
+        } else {
+            navbar.classList.remove("navbar--scrolled");
+        }
+    }
+
+    update();
+    window.addEventListener("scroll", update, { passive: true });
+}
+
+/* ------------------------------------------------------------------
+   ✅ NAVBAR: SECCIÓN ACTIVA AUTOMÁTICA
+------------------------------------------------------------------ */
+function setupNavbarActiveSections() {
+    const navbar = document.querySelector(".navbar");
+    const links = Array.from(document.querySelectorAll(".nav-links a[href^='#']"));
+    if (!navbar || !links.length) return;
+
+    const map = new Map();
+    links.forEach(a => {
+        const id = a.getAttribute("href").slice(1);
+        if (id) map.set(id, a);
+    });
+
+    const sections = Array.from(map.keys())
+        .map(id => document.getElementById(id))
+        .filter(Boolean);
+
+    function clear() {
+        links.forEach(a => {
+            a.classList.remove("active");
+            a.removeAttribute("aria-current");
+        });
+    }
+
+    function setActive(id) {
+        clear();
+        const link = map.get(id);
+        if (link) {
+            link.classList.add("active");
+            link.setAttribute("aria-current", "page");
+        }
+    }
+
+    const headerOffset = () => Math.max(70, navbar.offsetHeight || 80);
+
+    const observer = new IntersectionObserver(entries => {
+        let best = null;
+
+        entries.forEach(e => {
+            if (!e.isIntersecting) return;
+            if (!best || e.intersectionRatio > best.intersectionRatio) {
+                best = e;
+            }
+        });
+
+        if (best?.target?.id) {
+            setActive(best.target.id);
+        }
+    }, {
+        threshold: [0.2, 0.35, 0.5, 0.65],
+        rootMargin: `-${headerOffset()}px 0px -55% 0px`
+    });
+
+    sections.forEach(sec => observer.observe(sec));
+
+    if (location.hash) {
+        setActive(location.hash.replace("#", ""));
+    } else if (sections[0]) {
+        setActive(sections[0].id);
+    }
+}
+
+/* ------------------------------------------------------------------
+   ✅ NUEVO (NO BORRA NADA): ACTIVAR NAVBAR FUNCTIONS
+   - No toca tu DOMContentLoaded existente
+   - Solo asegura que navbar quede activa
+------------------------------------------------------------------ */
+document.addEventListener("DOMContentLoaded", () => {
+    try { setupNavbarScroll(); } catch (e) {}
+    try { setupNavbarActiveSections(); } catch (e) {}
+});
