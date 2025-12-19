@@ -268,64 +268,6 @@
             gap: .4rem;
             text-decoration: none;
         }
-
-        /* ✅ NUEVO: lista con checks (porque esta página la usa) */
-        .check-list {
-            margin-top: .9rem;
-            padding-left: 1.05rem;
-            display: grid;
-            gap: .55rem;
-        }
-        .check-list li {
-            list-style: none;
-            position: relative;
-            color: rgba(242,244,255,0.86);
-            font-size: .92rem;
-            line-height: 1.35;
-        }
-        .check-list li::before {
-            content: "✓";
-            position: absolute;
-            left: -1.05rem;
-            top: 0;
-            color: #38bdf8;
-            font-weight: 700;
-        }
-
-        /* ✅ NUEVO: navbar flotante consistente con el sitio */
-        .navbar.floating-nav {
-            position: fixed;
-            top: 16px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: min(1200px, calc(100% - 28px));
-            z-index: 9999;
-            padding: 14px 18px;
-            background: rgba(7, 10, 26, 0.62);
-            border: 1px solid rgba(255, 255, 255, 0.10);
-            border-radius: 18px;
-            box-shadow: 0 24px 70px rgba(0, 0, 0, 0.65);
-            backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
-        }
-
-        /* ✅ NUEVO: para que el hero no quede debajo del navbar flotante */
-        .track-hero {
-            padding-top: 7.2rem;
-        }
-
-        @media (max-width: 900px) {
-            .navbar.floating-nav {
-                top: 10px;
-                width: calc(100% - 20px);
-                padding: 12px 12px;
-                border-radius: 16px;
-            }
-            .track-hero {
-                padding-top: 7rem;
-                padding-inline: 1rem;
-            }
-        }
     </style>
 </head>
 <body>
@@ -340,15 +282,15 @@
         </div>
     </div>
 
-    <!-- NAVBAR sencilla con regreso al inicio (✅ actualizado a flotante para consistencia) -->
-    <nav class="navbar floating-nav">
+    <!-- NAVBAR sencilla con regreso al inicio -->
+    <nav class="navbar">
         <div class="nav-logo">
             <picture>
                 <img src="assets/img/logo.jpg" alt="Logo Innova Space Education">
             </picture>
             <span class="logo-text-animated">INNOVA SPACE TRACK</span>
         </div>
-        <button class="nav-toggle" id="navToggle" aria-label="Abrir menú">
+        <button class="nav-toggle" id="navToggle">
             <i class="ri-menu-3-line"></i>
         </button>
         <ul class="nav-links" id="navLinks">
@@ -362,7 +304,7 @@
     </nav>
 
     <!-- HERO TRACK -->
-    <header class="track-hero">
+    <header class="track-hero" id="hero">
         <div class="hero-overlay"></div>
 
         <div class="track-hero-inner section">
@@ -743,6 +685,19 @@
         <p>© <span id="year"></span> Innova Space Education SPA · Todos los derechos reservados.</p>
     </footer>
 
+    <!-- ✅ BARRA FIJA DE NAVEGACIÓN POR SECCIONES (SIN SCROLL) -->
+    <div id="section-nav" class="section-nav" aria-label="Navegación de secciones">
+        <button class="section-nav-btn" id="navPrev" title="Sección anterior" aria-label="Sección anterior">
+            <i class="ri-arrow-up-s-line"></i>
+        </button>
+
+        <div class="section-nav-dots" id="navDots" aria-label="Secciones"></div>
+
+        <button class="section-nav-btn" id="navNext" title="Sección siguiente" aria-label="Sección siguiente">
+            <i class="ri-arrow-down-s-line"></i>
+        </button>
+    </div>
+
     <!-- CHATBOT MIRA flotante (mismo de index) -->
     <div id="mira-widget">
         <!-- Botón flotante con SVG inline -->
@@ -892,15 +847,6 @@
                 slides[current].classList.add("active");
                 dots[current].classList.add("active");
 
-                // ✅ NUEVO: si la slide activa es video, no auto-avanzar hasta que el usuario lo cierre/avance
-                const activeVideo = slides[current].querySelector("video");
-                if (activeVideo) {
-                    if (autoTimer) clearInterval(autoTimer);
-                    autoTimer = null;
-                } else if (!autoTimer) {
-                    resetAuto();
-                }
-
                 if (fromUser) {
                     resetAuto();
                 }
@@ -920,23 +866,6 @@
 
             resetAuto();
         });
-    </script>
-
-    <!-- ✅ NUEVO: Navbar mobile toggle (por si main.js no corre en esta página) -->
-    <script>
-        (function () {
-            const navToggle = document.getElementById("navToggle");
-            const navLinks = document.getElementById("navLinks");
-            if (!navToggle || !navLinks) return;
-
-            navToggle.addEventListener("click", () => {
-                navLinks.classList.toggle("nav-open");
-            });
-
-            navLinks.querySelectorAll("a").forEach(a => {
-                a.addEventListener("click", () => navLinks.classList.remove("nav-open"));
-            });
-        })();
     </script>
 </body>
 </html>
