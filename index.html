@@ -28,12 +28,11 @@
         </div>
     </div>
 
-    <!-- HERO (ahora también es una "view") -->
-    <header id="hero" class="view active" data-view="hero">
+    <!-- HERO -->
+    <header id="hero">
         <div class="hero-overlay"></div>
 
-        <!-- NAVBAR: preparada para comportarse como panel flotante fijo -->
-        <nav class="navbar floating-nav" data-nav="floating">
+        <nav class="navbar">
             <div class="nav-logo">
                 <picture>
                     <!-- Logo principal: JPG (puedes cambiarlo por PNG o SVG si quieres) -->
@@ -44,18 +43,13 @@
             <button class="nav-toggle" id="navToggle">
                 <i class="ri-menu-3-line"></i>
             </button>
-
-            <!-- CAMBIO CLAVE:
-                 - ya no usamos href="#..."
-                 - usamos data-view para cambiar secciones sin scroll (lo manejará main.js)
-            -->
             <ul class="nav-links" id="navLinks">
-                <li><a href="#" data-view-link="hero">Inicio</a></li>
-                <li><a href="#" data-view-link="sobre">Sobre la empresa</a></li>
-                <li><a href="#" data-view-link="servicios">Servicios</a></li>
-                <li><a href="#" data-view-link="portafolio">Portafolio</a></li>
-                <li><a href="#" data-view-link="redes">Redes sociales</a></li>
-                <li><a href="#" data-view-link="contacto">Contacto</a></li>
+                <li><a href="#hero">Inicio</a></li>
+                <li><a href="#sobre">Sobre la empresa</a></li>
+                <li><a href="#servicios">Servicios</a></li>
+                <li><a href="#portafolio">Portafolio</a></li>
+                <li><a href="#redes">Redes sociales</a></li>
+                <li><a href="#contacto">Contacto</a></li>
             </ul>
         </nav>
 
@@ -67,31 +61,22 @@
                     ecosistema futurista para transformar colegios, instituciones y
                     proyectos en todo Chile.
                 </p>
-
                 <div class="hero-buttons">
-                    <!-- CAMBIO CLAVE:
-                         - listo para navegación sin scroll (data-view-link)
-                    -->
-                    <a href="#"
+                    <a href="#portafolio"
                        class="btn-primary"
-                       data-view-link="portafolio"
                        data-mira-hint="Este botón le permite ver el portafolio de proyectos creados por Innova Space Education.">
                         <i class="ri-rocket-2-fill"></i> Ver portafolio
                     </a>
-
-                    <a href="#"
+                    <a href="#contacto"
                        class="btn-secondary"
-                       data-view-link="contacto"
                        data-mira-hint="Desde este botón puede agendar una reunión o dejar sus datos para un proyecto.">
                         <i class="ri-calendar-event-fill"></i> Agenda una reunión
                     </a>
                 </div>
-
                 <div class="hero-info">
                     <span><i class="ri-map-pin-2-fill"></i> Vallenar – Antofagasta, Chile</span>
                     <span><i class="ri-mail-fill"></i> contacto@innova-space-edu.cl</span>
                 </div>
-
                 <div class="hero-logos">
                     <!-- Logo empresa -->
                     <picture>
@@ -121,10 +106,9 @@
         </div>
     </header>
 
-    <!-- MAIN: contiene todas las vistas (sin borrar contenido) -->
-    <main id="app" class="app-container">
+    <main>
         <!-- SOBRE LA EMPRESA -->
-        <section id="sobre" class="section view" data-view="sobre" data-mira-section="sobre">
+        <section id="sobre" class="section" data-mira-section="sobre">
             <div class="section-header">
                 <h2>Sobre la empresa</h2>
                 <p>Quiénes somos y qué hacemos</p>
@@ -184,7 +168,7 @@
         </section>
 
         <!-- SERVICIOS -->
-        <section id="servicios" class="section section-dark view" data-view="servicios" data-mira-section="servicios">
+        <section id="servicios" class="section section-dark" data-mira-section="servicios">
             <div class="section-header">
                 <h2>Servicios</h2>
                 <p>Soluciones integrales con diseño futurista</p>
@@ -234,7 +218,7 @@
         </section>
 
         <!-- PORTAFOLIO -->
-        <section id="portafolio" class="section view" data-view="portafolio" data-mira-section="portafolio">
+        <section id="portafolio" class="section" data-mira-section="portafolio">
             <div class="section-header">
                 <h2>Portafolio</h2>
                 <p>Proyectos y plataformas desarrolladas</p>
@@ -289,7 +273,7 @@
                         adicionales, paneles de control y sistemas adaptados a distintas
                         instituciones.
                     </p>
-                    <a href="#" class="portfolio-link" data-view-link="contacto">
+                    <a href="#contacto" class="portfolio-link">
                         Solicitar algo similar
                     </a>
                 </article>
@@ -297,7 +281,7 @@
         </section>
 
         <!-- REDES SOCIALES -->
-        <section id="redes" class="section section-dark view" data-view="redes" data-mira-section="redes">
+        <section id="redes" class="section section-dark" data-mira-section="redes">
             <div class="section-header">
                 <h2>Redes sociales</h2>
                 <p>Conecta con nuestro ecosistema digital</p>
@@ -336,7 +320,7 @@
         </section>
 
         <!-- CONTACTO -->
-        <section id="contacto" class="section view" data-view="contacto" data-mira-section="contacto">
+        <section id="contacto" class="section" data-mira-section="contacto">
             <div class="section-header">
                 <h2>Contacto</h2>
                 <p>Conversemos su próximo proyecto</p>
@@ -394,6 +378,19 @@
     <footer class="footer">
         <p>© <span id="year"></span> Innova Space Education SPA · Todos los derechos reservados.</p>
     </footer>
+
+    <!-- ✅ BARRA FIJA DE NAVEGACIÓN POR SECCIONES (SIN SCROLL) -->
+    <div id="section-nav" class="section-nav" aria-label="Navegación de secciones">
+        <button class="section-nav-btn" id="navPrev" title="Sección anterior" aria-label="Sección anterior">
+            <i class="ri-arrow-up-s-line"></i>
+        </button>
+
+        <div class="section-nav-dots" id="navDots" aria-label="Secciones"></div>
+
+        <button class="section-nav-btn" id="navNext" title="Sección siguiente" aria-label="Sección siguiente">
+            <i class="ri-arrow-down-s-line"></i>
+        </button>
+    </div>
 
     <!-- CHATBOT MIRA flotante -->
     <div id="mira-widget">
