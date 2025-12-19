@@ -9,8 +9,8 @@ const MIRA_TTS_URL = "https://ceo-ai-mira.onrender.com/api/tts";
    - No afecta tu chat actual
    - Solo agrega un “modo” alternativo dentro del panel
 ------------------------------------------------------------------ */
-const ELEVENLABS_WIDGET_SCRIPT = "https://elevenlabs.io/convai-widget/index.js";
-const ELEVENLABS_AGENT_ID = "YOUR_ELEVENLABS_AGENT_ID"; // 👈 CAMBIA ESTO POR TU AGENT ID REAL
+const ELEVENLABS_WIDGET_SCRIPT = "https://unpkg.com/@elevenlabs/convai-widget-embed";
+const ELEVENLABS_AGENT_ID = "agent_4401kcvfm17nedzbz44xtt1fdtxp";
 
 let miraMode = "chat";              // "chat" | "voice"
 let elevenWidgetLoaded = false;
