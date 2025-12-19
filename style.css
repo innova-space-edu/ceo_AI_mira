@@ -1013,6 +1013,69 @@ body {
     justify-content: center;
 }
 
+/* ✅ NUEVO: Botones “Chat / Voz (ElevenLabs)” dentro del widget (sin romper nada) */
+#mira-mode-switch {
+    display: flex;
+    gap: 10px;
+    padding: 10px 12px;
+    align-items: center;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    background: rgba(6, 8, 20, 0.92);
+}
+
+#mira-mode-chat,
+#mira-mode-voice {
+    flex: 1;
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.12);
+    color: #fff;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.86rem;
+    background: rgba(255,255,255,0.03);
+    transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, background .12s ease, opacity .12s ease;
+    user-select: none;
+}
+
+#mira-mode-chat:hover,
+#mira-mode-voice:hover {
+    transform: translateY(-1px);
+    border-color: rgba(53, 226, 255, 0.35);
+    box-shadow: 0 0 18px rgba(53, 226, 255, 0.12);
+}
+
+/* “Activo” usando aria-pressed desde JS (más robusto) */
+#mira-mode-chat[aria-pressed="true"],
+#mira-mode-voice[aria-pressed="true"] {
+    background: radial-gradient(circle at 10% 0%, rgba(53, 226, 255, 0.16), transparent 55%),
+                radial-gradient(circle at 90% 100%, rgba(255, 75, 255, 0.16), transparent 55%),
+                rgba(255,255,255,0.06);
+    border-color: rgba(255,255,255,0.18);
+    box-shadow: 0 0 22px rgba(255, 75, 255, 0.08);
+}
+
+#mira-chat-mode,
+#mira-voice-mode {
+    width: 100%;
+}
+
+/* Contenedor ElevenLabs ajustado al tamaño del chat */
+#elevenlabs-container {
+    width: 100%;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.10);
+    background: rgba(11, 16, 36, 0.55);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.55);
+    padding: 10px;
+}
+
+/* Si el widget interno genera cosas muy grandes, evitamos desbordes */
+#elevenlabs-container * {
+    max-width: 100%;
+}
+
 /* RESPONSIVE */
 
 @media (max-width: 900px) {
@@ -1073,5 +1136,17 @@ body {
     }
     .section-nav-dots {
         max-width: 58vw;
+    }
+
+    /* ✅ Ajuste suave del switch en móvil */
+    #mira-mode-switch {
+        padding: 10px 10px;
+        gap: 8px;
+    }
+    #mira-mode-chat,
+    #mira-mode-voice {
+        font-size: 0.82rem;
+        padding: 9px 10px;
+        border-radius: 12px;
     }
 }
