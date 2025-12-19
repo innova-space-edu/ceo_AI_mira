@@ -477,25 +477,92 @@
                     </button>
                 </div>
             </div>
-            <div class="mira-messages" id="miraMessages">
-                <!-- Mensaje inicial se agrega desde main.js -->
-            </div>
-            <div class="mira-loading" id="miraLoading">
-                <div class="loader-mini"></div>
-                <span>MIRA está pensando...</span>
-            </div>
-            <form id="miraForm" class="mira-input-area">
-                <input type="text"
-                       id="miraInput"
-                       placeholder="Escriba aquí... Ej: ¿Qué hace la empresa?"
-                       autocomplete="off" />
-                <button type="submit">
-                    <i class="ri-send-plane-2-fill"></i>
+
+            <!-- ✅ NUEVO: Selector de modo (Chat / Voz ElevenLabs) -->
+            <div id="mira-mode-switch" style="display:flex; gap:10px; padding:10px 12px; align-items:center; border-bottom: 1px solid rgba(255,255,255,0.08);">
+                <button id="mira-mode-chat" type="button" style="flex:1; padding:10px 12px; border-radius:12px; border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.06); color:#fff; cursor:pointer; font-weight:600;">
+                    💬 Chat
                 </button>
-            </form>
+                <button id="mira-mode-voice" type="button" style="flex:1; padding:10px 12px; border-radius:12px; border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.02); color:#fff; cursor:pointer; font-weight:600;">
+                    🎙️ Voz (ElevenLabs)
+                </button>
+            </div>
+
+            <!-- ✅ CONTENEDOR 1: Tu chat actual (sin cambios) -->
+            <div id="mira-chat-mode">
+                <div class="mira-messages" id="miraMessages">
+                    <!-- Mensaje inicial se agrega desde main.js -->
+                </div>
+                <div class="mira-loading" id="miraLoading">
+                    <div class="loader-mini"></div>
+                    <span>MIRA está pensando...</span>
+                </div>
+                <form id="miraForm" class="mira-input-area">
+                    <input type="text"
+                           id="miraInput"
+                           placeholder="Escriba aquí... Ej: ¿Qué hace la empresa?"
+                           autocomplete="off" />
+                    <button type="submit">
+                        <i class="ri-send-plane-2-fill"></i>
+                    </button>
+                </form>
+            </div>
+
+            <!-- ✅ CONTENEDOR 2: Voz ElevenLabs (nuevo, oculto por defecto) -->
+            <div id="mira-voice-mode" style="display:none; padding: 10px 12px;">
+                <div style="opacity:0.9; font-size: 0.92rem; margin-bottom:10px;">
+                    <i class="ri-mic-fill"></i> Habla con MIRA por voz (ElevenLabs). Presiona “Start a call”.
+                </div>
+
+                <div id="elevenlabs-container">
+                    <elevenlabs-convai agent-id="agent_4401kcvfm17nedzbz44xtt1fdtxp"></elevenlabs-convai>
+                </div>
+            </div>
+
         </div>
     </div>
 
     <script src="main.js" defer></script>
+
+    <!-- ✅ Script del widget ElevenLabs (requerido) -->
+    <script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async type="text/javascript"></script>
+
+    <!-- ✅ NUEVO: Alternar modo Chat / Voz (sin tocar main.js) -->
+    <script defer>
+        document.addEventListener("DOMContentLoaded", () => {
+            const btnChat = document.getElementById("mira-mode-chat");
+            const btnVoice = document.getElementById("mira-mode-voice");
+
+            const chatMode = document.getElementById("mira-chat-mode");
+            const voiceMode = document.getElementById("mira-voice-mode");
+
+            if (!btnChat || !btnVoice || !chatMode || !voiceMode) return;
+
+            // Estado inicial
+            let currentMode = "chat";
+            const setMode = (mode) => {
+                currentMode = mode;
+
+                if (mode === "chat") {
+                    chatMode.style.display = "block";
+                    voiceMode.style.display = "none";
+
+                    btnChat.style.background = "rgba(255,255,255,0.06)";
+                    btnVoice.style.background = "rgba(255,255,255,0.02)";
+                } else {
+                    chatMode.style.display = "none";
+                    voiceMode.style.display = "block";
+
+                    btnChat.style.background = "rgba(255,255,255,0.02)";
+                    btnVoice.style.background = "rgba(255,255,255,0.06)";
+                }
+            };
+
+            btnChat.addEventListener("click", () => setMode("chat"));
+            btnVoice.addEventListener("click", () => setMode("voice"));
+
+            setMode(currentMode);
+        });
+    </script>
 </body>
 </html>
