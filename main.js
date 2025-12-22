@@ -20,40 +20,41 @@ let miraTTSMutedByMode = false;     // silencia tu TTS propio SOLO cuando el mod
    1. LOADER GLOBAL
 ------------------------------------------------------------------ */
 window.addEventListener("load", () => {
-    const loader = document.getElementById("global-loader");
-    const introOverlay = document.getElementById("intro-video-overlay");
-    const introVideo = document.getElementById("intro-video");
+  const loader = document.getElementById("global-loader");
+  const introOverlay = document.getElementById("intro-video-overlay");
+  const introVideo = document.getElementById("intro-video");
 
-    // ✅ Reglas que pediste:
-    // - Se muestra SIEMPRE al abrir la página (primera carga de la sesión/pestaña)
-    // - NO se muestra en recargas (F5) dentro de la misma pestaña
-    const hasSeenIntro = sessionStorage.getItem("introVideoShown") === "true";
+  const hasSeenIntro = sessionStorage.getItem("introVideoShown") === "true";
 
-    if (!hasSeenIntro && introOverlay && introVideo) {
-        sessionStorage.setItem("introVideoShown", "true");
+  // Helpers
+  const showLoader = () => loader?.classList.remove("hidden");
+  const hideLoader = () => loader?.classList.add("hidden");
 
-        const endIntro = () => {
-            introOverlay.classList.add("hidden");
-            loader?.classList.add("hidden");
-        };
+  if (!hasSeenIntro && introOverlay && introVideo) {
+    // Primera vez en esta pestaña: SOLO VIDEO (sin loader)
+    sessionStorage.setItem("introVideoShown", "true");
+    hideLoader();
 
-        // Mostrar intro (y ocultar spinner mientras corre el video)
-        introOverlay.classList.remove("hidden");
-        loader?.classList.add("hidden");
+    const endIntro = () => {
+      introOverlay.classList.add("hidden");
+      hideLoader();
+    };
 
-        introVideo.currentTime = 0;
-        introVideo.play().catch(() => endIntro());
+    introOverlay.classList.remove("hidden");
+    introVideo.currentTime = 0;
 
-        introVideo.addEventListener("ended", endIntro, { once: true });
-        introVideo.addEventListener("error", endIntro, { once: true });
-    } else {
-        // Recarga: solo spinner normal
-        setTimeout(() => loader?.classList.add("hidden"), 1500);
-    }
+    introVideo.play().catch(endIntro);
+    introVideo.addEventListener("ended", endIntro, { once: true });
+    introVideo.addEventListener("error", endIntro, { once: true });
+  } else {
+    // Recarga: SOLO loader
+    if (introOverlay) introOverlay.classList.add("hidden");
+    showLoader();
+    setTimeout(hideLoader, 1500);
+  }
 
-    initStarfield();
+  initStarfield();
 });
-
 
 /* ------------------------------------------------------------------
    2. AÑO EN EL FOOTER
