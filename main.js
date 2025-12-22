@@ -5,9 +5,9 @@ const MIRA_API_URL = "https://ceo-ai-mira.onrender.com/api/mira";
 const MIRA_TTS_URL = "https://ceo-ai-mira.onrender.com/api/tts";
 
 /* ------------------------------------------------------------------
-   ✅ NUEVO: ELEVENLABS CONVAI WIDGET (MODO VOZ)
+   ✅ ELEVENLABS CONVAI WIDGET (MODO VOZ)
    - No afecta tu chat actual
-   - Solo agrega un “modo” alternativo dentro del panel
+   - Solo agrega un "modo" alternativo dentro del panel
 ------------------------------------------------------------------ */
 const ELEVENLABS_WIDGET_SCRIPT = "https://unpkg.com/@elevenlabs/convai-widget-embed";
 const ELEVENLABS_AGENT_ID = "agent_4401kcvfm17nedzbz44xtt1fdtxp";
@@ -17,7 +17,7 @@ let elevenWidgetLoaded = false;
 let miraTTSMutedByMode = false;     // silencia tu TTS propio SOLO cuando el modo voz está activo
 
 /* ------------------------------------------------------------------
-   1. LOADER GLOBAL
+   1. INTRO VIDEO (PRIMERA APERTURA) + LOADER (SOLO RECARGA)
 ------------------------------------------------------------------ */
 window.addEventListener("load", () => {
   const loader = document.getElementById("global-loader");
@@ -31,7 +31,7 @@ window.addEventListener("load", () => {
   const hideLoader = () => loader?.classList.add("hidden");
 
   if (!hasSeenIntro && introOverlay && introVideo) {
-    // Primera vez en esta pestaña: SOLO VIDEO (sin loader)
+    // PRIMERA APERTURA → SOLO VIDEO (sin loader)
     sessionStorage.setItem("introVideoShown", "true");
     hideLoader();
 
@@ -46,8 +46,9 @@ window.addEventListener("load", () => {
     introVideo.play().catch(endIntro);
     introVideo.addEventListener("ended", endIntro, { once: true });
     introVideo.addEventListener("error", endIntro, { once: true });
+
   } else {
-    // Recarga: SOLO loader
+    // RECARGA (F5) → SOLO LOADER
     if (introOverlay) introOverlay.classList.add("hidden");
     showLoader();
     setTimeout(hideLoader, 1500);
@@ -505,7 +506,7 @@ function setupContactForm() {
 }
 
 /* ------------------------------------------------------------------
-   ✅ NUEVO: MODO SWITCH (CHAT / VOZ) SIN ROMPER TU CHAT
+   ✅ MODO SWITCH (CHAT / VOZ) SIN ROMPER TU CHAT
 ------------------------------------------------------------------ */
 function setupMiraModeSwitch() {
     if (!miraChat) return;
@@ -643,6 +644,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     setupSectionNavigator();
     setupMiraModeSwitch();
+
+    // Activar funciones de navbar
+    try { setupNavbarScroll(); } catch (e) {}
+    try { setupNavbarActiveSections(); } catch (e) {}
 
     setTimeout(() => {
         if (miraVoiceEnabled && miraAudioUnlocked && !miraHasWelcomed) {
@@ -959,13 +964,3 @@ function setupNavbarActiveSections() {
         setActive(sections[0].id);
     }
 }
-
-/* ------------------------------------------------------------------
-   ✅ NUEVO (NO BORRA NADA): ACTIVAR NAVBAR FUNCTIONS
-   - No toca tu DOMContentLoaded existente
-   - Solo asegura que navbar quede activa
------------------------------------------------------------------- */
-document.addEventListener("DOMContentLoaded", () => {
-    try { setupNavbarScroll(); } catch (e) {}
-    try { setupNavbarActiveSections(); } catch (e) {}
-});
