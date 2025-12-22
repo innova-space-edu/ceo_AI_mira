@@ -21,9 +21,39 @@ let miraTTSMutedByMode = false;     // silencia tu TTS propio SOLO cuando el mod
 ------------------------------------------------------------------ */
 window.addEventListener("load", () => {
     const loader = document.getElementById("global-loader");
-    setTimeout(() => loader?.classList.add("hidden"), 1500);
+    const introOverlay = document.getElementById("intro-video-overlay");
+    const introVideo = document.getElementById("intro-video");
+
+    // ✅ Reglas que pediste:
+    // - Se muestra SIEMPRE al abrir la página (primera carga de la sesión/pestaña)
+    // - NO se muestra en recargas (F5) dentro de la misma pestaña
+    const hasSeenIntro = sessionStorage.getItem("introVideoShown") === "true";
+
+    if (!hasSeenIntro && introOverlay && introVideo) {
+        sessionStorage.setItem("introVideoShown", "true");
+
+        const endIntro = () => {
+            introOverlay.classList.add("hidden");
+            loader?.classList.add("hidden");
+        };
+
+        // Mostrar intro (y ocultar spinner mientras corre el video)
+        introOverlay.classList.remove("hidden");
+        loader?.classList.add("hidden");
+
+        introVideo.currentTime = 0;
+        introVideo.play().catch(() => endIntro());
+
+        introVideo.addEventListener("ended", endIntro, { once: true });
+        introVideo.addEventListener("error", endIntro, { once: true });
+    } else {
+        // Recarga: solo spinner normal
+        setTimeout(() => loader?.classList.add("hidden"), 1500);
+    }
+
     initStarfield();
 });
+
 
 /* ------------------------------------------------------------------
    2. AÑO EN EL FOOTER
