@@ -15,6 +15,10 @@
     /* ✅ NUEVO: alturas navbar (para centrar y evitar que tape) */
     --navbar-h: 86px;
     --navbar-h-scrolled: 68px;
+
+    /* ✅ NUEVO: container y padding responsive (mejora TODOS los tamaños) */
+    --container: 1200px;
+    --pad-x: clamp(14px, 3vw, 56px);
 }
 
 /* RESET SIMPLE */
@@ -28,6 +32,7 @@
 
 html {
     scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
 }
 
 body {
@@ -42,6 +47,13 @@ body {
     padding-top: var(--navbar-h);
 }
 
+/* ✅ Robustez global multimedia */
+img,
+video {
+    max-width: 100%;
+    height: auto;
+}
+
 /* CANVAS DE ESTRELLAS + NEBULOSA */
 #starsCanvas {
     position: fixed;
@@ -50,6 +62,10 @@ body {
     height: 100vh;
     z-index: -3;
     display: block;
+
+    /* ✅ NUEVO: que se note más (sin tocar tu JS) */
+    opacity: 0.92;
+    filter: contrast(1.18) brightness(1.08) saturate(1.2);
 }
 
 /* GLOBAL LOADER */
@@ -202,7 +218,7 @@ body {
 
     /* ✅ IMPORTANTE: centrado vertical real en el banner */
     height: var(--navbar-h);
-    padding: 0 7%;
+    padding: 0 var(--pad-x);
 
     display: flex;
     align-items: center;
@@ -242,6 +258,9 @@ body {
     letter-spacing: 0.16em;
     text-transform: uppercase;
     color: var(--text-muted);
+
+    /* ✅ NUEVO: evita que el texto se salga en pantallas chicas */
+    min-width: 0;
 }
 
 /* ✅ NUEVO: cuadro/contenedor del logo para centrarlo respecto al banner */
@@ -274,6 +293,13 @@ body {
     background-clip: text;
     color: transparent;
     animation: logo-gradient 8s ease infinite;
+
+    /* ✅ NUEVO: comportamiento seguro en pantallas pequeñas */
+    display: block;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 @keyframes logo-gradient {
@@ -328,10 +354,15 @@ body {
 .hero-content {
     position: relative;
     z-index: 2;
-    height: calc(100vh - 80px);
+    height: calc(100vh - var(--navbar-h));
     display: flex;
     align-items: center;
-    padding: 0 7%;
+
+    /* ✅ NUEVO: container real + padding fluido */
+    padding: 0 var(--pad-x);
+    max-width: var(--container);
+    margin: 0 auto;
+
     gap: 40px;
     flex-wrap: wrap;
 }
@@ -343,17 +374,19 @@ body {
 
 .hero-text h1 {
     font-family: "Orbitron", sans-serif;
-    font-size: clamp(2.4rem, 4vw, 3.4rem);
+    font-size: clamp(1.9rem, 3.8vw, 3.4rem);
     margin-bottom: 14px;
     text-transform: uppercase;
     letter-spacing: 0.12em;
+    line-height: 1.05;
 }
 
 .hero-text p {
-    font-size: 1rem;
+    font-size: clamp(0.95rem, 1.2vw, 1.05rem);
     color: var(--text-muted);
     max-width: 520px;
     margin-bottom: 22px;
+    line-height: 1.55;
 }
 
 .hero-buttons {
@@ -581,6 +614,12 @@ body {
     padding: 80px 7%;
     position: relative;
     z-index: 2;
+}
+
+/* ✅ NUEVO: padding fluido para secciones (sin romper tu estilo) */
+.section {
+    padding-left: var(--pad-x);
+    padding-right: var(--pad-x);
 }
 
 .section-dark {
@@ -1248,7 +1287,7 @@ body {
     body { padding-top: 78px; }
 
     .navbar {
-        padding-inline: 5%;
+        padding-inline: var(--pad-x);
         height: 78px;
     }
 
@@ -1270,9 +1309,10 @@ body {
         display: block;
     }
     .hero-content {
-        padding-inline: 5%;
+        padding-inline: var(--pad-x);
         flex-direction: column;
         justify-content: center;
+        height: calc(100vh - 78px);
     }
     .hero-text {
         text-align: left;
@@ -1281,12 +1321,28 @@ body {
         width: 100%;
         justify-content: flex-start;
     }
+    .video-carousel{
+        max-width: 640px;
+        width: 100%;
+    }
     .sobre-grid,
     .contact-grid {
         grid-template-columns: 1fr;
     }
 }
 
+/* ✅ NUEVO: tablets 8–11" (mejor reflow) */
+@media (max-width: 820px) {
+    .hero-content{
+        gap: 26px;
+        align-items: flex-start;
+    }
+    .hero-buttons{
+        width: 100%;
+    }
+}
+
+/* ✅ NUEVO: móviles 5–6.6" */
 @media (max-width: 600px) {
     #mira-chat {
         width: 100vw;
@@ -1318,6 +1374,22 @@ body {
         font-size: 0.82rem;
         padding: 9px 10px;
         border-radius: 12px;
+    }
+
+    /* ✅ Botones hero uno bajo otro en móvil */
+    .hero-buttons{
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .btn-primary,
+    .btn-secondary{
+        width: 100%;
+        justify-content: center;
+    }
+
+    /* ✅ video mejor en vertical */
+    .video-carousel{
+        aspect-ratio: 16 / 10;
     }
 }
 
