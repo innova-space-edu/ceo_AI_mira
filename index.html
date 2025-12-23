@@ -622,169 +622,208 @@
     <!-- ✅ NUEVO: Movimiento del humanoide mini (SIN tocar main.js) -->
     <!-- ✅ Este bloque va al FINAL, antes de </body> -->
     <script defer>
-        (function miniHumanoidPet() {
-            const el = document.getElementById("mini-humanoid");
-            if (!el) return;
+(function miniRobotRunner() {
+  const el = document.getElementById("mini-humanoid");
+  if (!el) return;
 
-            let x = 20, y = 140;
-            let vx = 0, vy = 0;
+  // Estado
+  let x = 20, y = 140;
+  let vx = 0, vy = 0;
 
-            let tx = window.innerWidth * 0.6;
-            let ty = window.innerHeight * 0.5;
+  let tx = window.innerWidth * 0.6;
+  let ty = window.innerHeight * 0.5;
 
-            let mouseX = tx, mouseY = ty;
-            let lastMouseTs = Date.now();
+  let mouseX = tx, mouseY = ty;
+  let lastMouseTs = Date.now();
 
-            const cfg = {
-                pull: 0.013,
-                jitter: 0.28,
-                damping: 0.90,
-                maxSpeed: 10,
-                edgePadding: 18,
-                retargetMinMs: 700,
-                retargetMaxMs: 2200,
-                curiosityChance: 0.28,
-                curiosityHoldMs: 1400,
-                cursorAvoidRadius: 90,
-                topExtra: 10
-            };
+  // Salto
+  let jumping = false;
+  let jumpT = 0;
+  let jumpDur = 0;
+  let jumpAmp = 0;
 
-            const isMobile = matchMedia("(max-width: 600px)").matches;
-            if (isMobile) {
-                cfg.maxSpeed = 9;
-                cfg.pull = 0.015;
-                cfg.jitter = 0.32;
-                cfg.cursorAvoidRadius = 70;
-            }
+  // Config (ajustado a "corre y salta", no flota)
+  const cfg = {
+    accel: 0.06,          // aceleración hacia el target
+    friction: 0.88,       // fricción (más bajo = más derrape)
+    maxSpeed: 6.6,        // velocidad máxima
+    edgePadding: 18,
+    retargetMinMs: 700,
+    retargetMaxMs: 1700,
 
-            let nextRetargetTs = Date.now() + 800;
-            let curiosityUntil = 0;
+    // influencias de comportamiento
+    mouseInfluence: 0.28,      // 0..1 (más alto lo sigue más)
+    cursorAvoidRadius: 95,     // evita el cursor para no tapar clicks
+    topExtra: 10,
 
-            function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+    // saltos
+    jumpChanceOnRetarget: 0.40,
+    jumpChanceRandom: 0.26,
+    jumpEveryMs: 1500,
+    jumpHeightMin: 14,
+    jumpHeightMax: 44,
+    jumpDurMin: 330,
+    jumpDurMax: 520
+  };
 
-            function getTopSafe() {
-                const cs = getComputedStyle(document.documentElement);
-                const navH = parseFloat(cs.getPropertyValue("--navbar-h")) || 86;
-                const navHS = parseFloat(cs.getPropertyValue("--navbar-h-scrolled")) || 68;
-                return Math.max(navH, navHS) + cfg.topExtra;
-            }
+  const isMobile = matchMedia("(max-width: 600px)").matches;
+  if (isMobile) {
+    cfg.maxSpeed = 6.1;
+    cfg.cursorAvoidRadius = 75;
+    cfg.mouseInfluence = 0.22;
+  }
 
-            function setMouse(cx, cy) {
-                mouseX = cx; mouseY = cy;
-                lastMouseTs = Date.now();
-            }
+  let nextRetargetTs = Date.now() + 800;
 
-            window.addEventListener("mousemove", (e) => setMouse(e.clientX, e.clientY), { passive: true });
-            window.addEventListener("touchstart", (e) => {
-                if (e.touches && e.touches[0]) setMouse(e.touches[0].clientX, e.touches[0].clientY);
-            }, { passive: true });
-            window.addEventListener("touchmove", (e) => {
-                if (e.touches && e.touches[0]) setMouse(e.touches[0].clientX, e.touches[0].clientY);
-            }, { passive: true });
+  function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+  function rand(a, b) { return a + Math.random() * (b - a); }
 
-            function pickRandomTarget() {
-                const w = window.innerWidth;
-                const h = window.innerHeight;
-                const topSafe = getTopSafe();
+  function getTopSafe() {
+    const cs = getComputedStyle(document.documentElement);
+    const navH = parseFloat(cs.getPropertyValue("--navbar-h")) || 86;
+    const navHS = parseFloat(cs.getPropertyValue("--navbar-h-scrolled")) || 68;
+    return Math.max(navH, navHS) + cfg.topExtra;
+  }
 
-                tx = clamp(Math.random() * w, cfg.edgePadding, w - cfg.edgePadding);
-                ty = clamp(Math.random() * h, topSafe, h - cfg.edgePadding);
-            }
+  function setMouse(cx, cy) {
+    mouseX = cx; mouseY = cy;
+    lastMouseTs = Date.now();
+  }
 
-            function pickCuriousTarget() {
-                const w = window.innerWidth;
-                const h = window.innerHeight;
-                const topSafe = getTopSafe();
+  window.addEventListener("mousemove", (e) => setMouse(e.clientX, e.clientY), { passive: true });
+  window.addEventListener("touchstart", (e) => {
+    if (e.touches && e.touches[0]) setMouse(e.touches[0].clientX, e.touches[0].clientY);
+  }, { passive: true });
+  window.addEventListener("touchmove", (e) => {
+    if (e.touches && e.touches[0]) setMouse(e.touches[0].clientX, e.touches[0].clientY);
+  }, { passive: true });
 
-                const ang = Math.random() * Math.PI * 2;
-                const r = cfg.cursorAvoidRadius + 40 + Math.random() * 80;
+  function pickRandomTarget() {
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    const topSafe = getTopSafe();
 
-                tx = clamp(mouseX + Math.cos(ang) * r, cfg.edgePadding, w - cfg.edgePadding);
-                ty = clamp(mouseY + Math.sin(ang) * r, topSafe, h - cfg.edgePadding);
-            }
+    const rx = clamp(Math.random() * w, cfg.edgePadding, w - cfg.edgePadding);
+    const ry = clamp(Math.random() * h, topSafe, h - cfg.edgePadding);
 
-            function retarget() {
-                const recentlyMoved = (Date.now() - lastMouseTs) < 2000;
-                const goCurious = recentlyMoved && (Math.random() < cfg.curiosityChance);
+    // Mezcla con mouse (lo sigue “de lejos”)
+    const mx = clamp(mouseX, cfg.edgePadding, w - cfg.edgePadding);
+    const my = clamp(mouseY, topSafe, h - cfg.edgePadding);
 
-                if (goCurious) {
-                    curiosityUntil = Date.now() + cfg.curiosityHoldMs;
-                    pickCuriousTarget();
-                } else {
-                    pickRandomTarget();
-                }
+    tx = rx * (1 - cfg.mouseInfluence) + mx * cfg.mouseInfluence;
+    ty = ry * (1 - cfg.mouseInfluence) + my * cfg.mouseInfluence;
+  }
 
-                nextRetargetTs = Date.now() + (cfg.retargetMinMs + Math.random() * (cfg.retargetMaxMs - cfg.retargetMinMs));
-            }
+  function retarget() {
+    pickRandomTarget();
+    nextRetargetTs = Date.now() + rand(cfg.retargetMinMs, cfg.retargetMaxMs);
 
-            function avoidCursor() {
-                const dx = x - mouseX;
-                const dy = y - mouseY;
-                const d = Math.hypot(dx, dy);
+    // chance de salto cuando cambia objetivo
+    if (Math.random() < cfg.jumpChanceOnRetarget) startJump();
+  }
 
-                if (d > 0 && d < cfg.cursorAvoidRadius) {
-                    const strength = (cfg.cursorAvoidRadius - d) / cfg.cursorAvoidRadius;
-                    vx += (dx / d) * (0.9 * strength);
-                    vy += (dy / d) * (0.9 * strength);
+  function avoidCursor() {
+    const dx = x - mouseX;
+    const dy = y - mouseY;
+    const d = Math.hypot(dx, dy);
 
-                    if (d < cfg.cursorAvoidRadius * 0.55) {
-                        pickCuriousTarget();
-                        nextRetargetTs = Date.now() + 400;
-                    }
-                }
-            }
+    if (d > 0 && d < cfg.cursorAvoidRadius) {
+      const strength = (cfg.cursorAvoidRadius - d) / cfg.cursorAvoidRadius;
+      vx += (dx / d) * (1.4 * strength);
+      vy += (dy / d) * (1.4 * strength);
+    }
+  }
 
-            function step() {
-                const w = window.innerWidth;
-                const h = window.innerHeight;
-                const topSafe = getTopSafe();
+  function startJump() {
+    if (jumping) return;
+    jumping = true;
+    el.classList.add("is-jumping");
 
-                if (Date.now() > nextRetargetTs) retarget();
+    jumpT = 0;
+    jumpDur = rand(cfg.jumpDurMin, cfg.jumpDurMax);
+    jumpAmp = rand(cfg.jumpHeightMin, cfg.jumpHeightMax);
 
-                const dx = tx - x;
-                const dy = ty - y;
+    // quitar clase al final
+    setTimeout(() => el.classList.remove("is-jumping"), jumpDur + 40);
+    setTimeout(() => (jumping = false), jumpDur + 60);
+  }
 
-                vx += dx * cfg.pull;
-                vy += dy * cfg.pull;
+  // Saltos random cada cierto tiempo
+  setInterval(() => {
+    if (!jumping && Math.random() < cfg.jumpChanceRandom) startJump();
+  }, cfg.jumpEveryMs);
 
-                vx += (Math.random() - 0.5) * cfg.jitter;
-                vy += (Math.random() - 0.5) * cfg.jitter;
+  // Loop
+  let last = performance.now();
 
-                avoidCursor();
+  function step(now) {
+    const dt = Math.min(34, now - last);
+    last = now;
 
-                vx = clamp(vx, -cfg.maxSpeed, cfg.maxSpeed);
-                vy = clamp(vy, -cfg.maxSpeed, cfg.maxSpeed);
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    const topSafe = getTopSafe();
 
-                vx *= cfg.damping;
-                vy *= cfg.damping;
+    if (Date.now() > nextRetargetTs) retarget();
 
-                x += vx;
-                y += vy;
+    // Vector al target
+    const dx = tx - x;
+    const dy = ty - y;
 
-                const minX = cfg.edgePadding;
-                const maxX = w - cfg.edgePadding;
-                const minY = topSafe;
-                const maxY = h - cfg.edgePadding;
+    vx += dx * cfg.accel;
+    vy += dy * cfg.accel;
 
-                if (x < minX) { x = minX; vx *= -0.65; }
-                if (x > maxX) { x = maxX; vx *= -0.65; }
-                if (y < minY) { y = minY; vy *= -0.65; }
-                if (y > maxY) { y = maxY; vy *= -0.65; }
+    avoidCursor();
 
-                const rot = clamp(vx * 1.6, -16, 16);
-                const tilt = clamp(-vy * 0.22, -6, 6);
+    // Limitar velocidad
+    vx = clamp(vx, -cfg.maxSpeed, cfg.maxSpeed);
+    vy = clamp(vy, -cfg.maxSpeed, cfg.maxSpeed);
 
-                const speed = Math.hypot(vx, vy);
-                el.classList.toggle("is-active", speed > 2.8);
+    // Fricción
+    vx *= cfg.friction;
+    vy *= cfg.friction;
 
-                el.style.transform = `translate3d(${x}px, ${y}px, 0) rotate(${rot}deg) translateY(${tilt}px)`;
+    x += vx * (dt / 16.7);
+    y += vy * (dt / 16.7);
 
-                requestAnimationFrame(step);
-            }
+    // Límites pantalla
+    const minX = cfg.edgePadding;
+    const maxX = w - cfg.edgePadding;
+    const minY = topSafe;
+    const maxY = h - cfg.edgePadding;
 
-            retarget();
-            requestAnimationFrame(step);
-        })();
-    </script>
+    if (x < minX) { x = minX; vx *= -0.55; }
+    if (x > maxX) { x = maxX; vx *= -0.55; }
+    if (y < minY) { y = minY; vy *= -0.55; }
+    if (y > maxY) { y = maxY; vy *= -0.55; }
+
+    // ¿Está corriendo?
+    const speed = Math.hypot(vx, vy);
+    el.classList.toggle("is-running", speed > 0.9);
+
+    // salto: offset vertical con arco (sin “vuelo”)
+    let jumpOffset = 0;
+    if (jumping) {
+      jumpT += dt;
+      const p = clamp(jumpT / jumpDur, 0, 1);
+      jumpOffset = Math.sin(Math.PI * p) * jumpAmp; // arco
+    }
+
+    // girito leve por movimiento
+    const rot = clamp(vx * 1.4, -14, 14);
+
+    // voltear según dirección
+    const face = (vx < -0.08) ? -1 : 1;
+
+    el.style.transform =
+      `translate3d(${x}px, ${y - jumpOffset}px, 0) rotate(${rot}deg) scaleX(${face})`;
+
+    requestAnimationFrame(step);
+  }
+
+  retarget();
+  requestAnimationFrame(step);
+})();
+</script>
 </body>
 </html>
