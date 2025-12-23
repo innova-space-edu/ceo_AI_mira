@@ -1465,3 +1465,168 @@ video {
         height: 62px;
     }
 }
+/* =========================================================
+   🧍 HUMANOIDE MINI (mascota flotante)
+   - NO INTERFIERE: pointer-events:none
+   - Movimiento suave por JS
+========================================================= */
+
+#mini-humanoid {
+  position: fixed;
+  left: 20px;
+  top: 140px; /* bajo navbar */
+  width: 58px;
+  height: 78px;
+  z-index: 9800;
+  pointer-events: none; /* ✅ NO bloquea clics */
+  user-select: none;
+  -webkit-user-select: none;
+  will-change: transform;
+  transform: translate3d(0,0,0);
+  filter: drop-shadow(0 14px 20px rgba(0,0,0,0.55));
+  opacity: 0.98;
+}
+
+#mini-humanoid .h-body{
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 18px;
+  overflow: visible;
+}
+
+/* Cabeza */
+#mini-humanoid .h-head{
+  position: absolute;
+  left: 50%;
+  top: 0;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 40px;
+  border-radius: 14px;
+  background:
+    radial-gradient(circle at 35% 25%, rgba(255,255,255,0.35), transparent 55%),
+    radial-gradient(circle at 70% 70%, rgba(53,226,255,0.18), transparent 60%),
+    linear-gradient(145deg, rgba(38, 52, 118, 0.92), rgba(10, 12, 28, 0.92));
+  border: 1px solid rgba(255,255,255,0.14);
+  box-shadow:
+    0 10px 24px rgba(0,0,0,0.45),
+    0 0 20px rgba(53,226,255,0.12);
+}
+
+/* Visor */
+#mini-humanoid .h-visor{
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  top: 14px;
+  height: 16px;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 25% 50%, rgba(53,226,255,0.35), transparent 60%),
+    linear-gradient(120deg, rgba(10, 14, 36, 0.92), rgba(35, 10, 52, 0.92));
+  border: 1px solid rgba(255,255,255,0.14);
+  box-shadow: inset 0 0 18px rgba(0,0,0,0.42);
+}
+
+#mini-humanoid .h-eye{
+  position: absolute;
+  top: 5px;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(255,255,255,1), rgba(53,226,255,0.75), rgba(255,75,255,0.18));
+  box-shadow: 0 0 14px rgba(53,226,255,0.55);
+}
+#mini-humanoid .h-eye.left{ left: 10px; }
+#mini-humanoid .h-eye.right{ right: 10px; }
+
+/* Torso */
+#mini-humanoid .h-torso{
+  position: absolute;
+  left: 50%;
+  top: 34px;
+  transform: translateX(-50%);
+  width: 42px;
+  height: 34px;
+  border-radius: 14px;
+  background:
+    radial-gradient(circle at 35% 20%, rgba(255,255,255,0.20), transparent 55%),
+    radial-gradient(circle at 70% 75%, rgba(255,75,255,0.12), transparent 60%),
+    linear-gradient(145deg, rgba(18, 20, 44, 0.92), rgba(7, 8, 18, 0.92));
+  border: 1px solid rgba(255,255,255,0.12);
+  box-shadow: 0 12px 26px rgba(0,0,0,0.45);
+}
+
+#mini-humanoid .h-core{
+  position: absolute;
+  left: 50%;
+  top: 12px;
+  transform: translateX(-50%);
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(255,255,255,0.95), rgba(53,226,255,0.55), rgba(255,75,255,0.18));
+  box-shadow: 0 0 20px rgba(53,226,255,0.55);
+}
+
+/* Brazos */
+#mini-humanoid .h-arm{
+  position: absolute;
+  top: 40px;
+  width: 16px;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.10);
+  box-shadow: inset 0 0 10px rgba(255,255,255,0.06);
+}
+#mini-humanoid .h-arm.left{ left: 0px; transform-origin: right center; }
+#mini-humanoid .h-arm.right{ right: 0px; transform-origin: left center; }
+
+/* Piernas mini */
+#mini-humanoid .h-leg{
+  position: absolute;
+  bottom: 4px;
+  width: 10px;
+  height: 18px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.10);
+}
+#mini-humanoid .h-leg.left{ left: 18px; }
+#mini-humanoid .h-leg.right{ right: 18px; }
+
+/* Brillo tipo propulsor suave */
+#mini-humanoid .h-thruster{
+  position: absolute;
+  left: 50%;
+  bottom: -6px;
+  transform: translateX(-50%);
+  width: 26px;
+  height: 14px;
+  border-radius: 999px;
+  background: radial-gradient(circle at 50% 0%, rgba(53,226,255,0.30), transparent 65%);
+  opacity: 0.7;
+}
+
+/* “Animación de vida” cuando se mueve rápido */
+#mini-humanoid.is-active .h-thruster{ opacity: 1; }
+#mini-humanoid.is-active .h-arm.left{ animation: armWave 0.35s ease-in-out infinite alternate; }
+#mini-humanoid.is-active .h-arm.right{ animation: armWave 0.35s ease-in-out infinite alternate-reverse; }
+@keyframes armWave{
+  from{ transform: rotate(-6deg) translateY(0); }
+  to{ transform: rotate(10deg) translateY(-1px); }
+}
+
+/* Mobile */
+@media (max-width: 600px){
+  #mini-humanoid{ width: 46px; height: 64px; top: 110px; }
+  #mini-humanoid .h-head{ width: 34px; height: 34px; }
+  #mini-humanoid .h-torso{ width: 36px; height: 30px; }
+}
+
+/* Accesibilidad: reduce motion */
+@media (prefers-reduced-motion: reduce){
+  #mini-humanoid{ display:none; }
+}
