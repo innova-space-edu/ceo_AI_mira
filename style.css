@@ -93,18 +93,19 @@ body {
         transform: rotate(360deg);
     }
 }
+
 /* INTRO VIDEO (solo primera carga de la sesión) */
 .intro-overlay {
     position: fixed;
     inset: 0;
-    background: radial-gradient(circle at 20% 0%, #0f1535 0, #050814 40%, #000000 100%);
+    background: #000; /* ✅ fondo negro */
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 24px;
     z-index: 10001;
-    padding: 24px;
+    padding: 0;       /* ✅ sin margen */
     transition: opacity 0.6s ease;
+    overflow: hidden;
 }
 
 .intro-overlay.hidden {
@@ -112,36 +113,53 @@ body {
     pointer-events: none;
 }
 
+/* ✅ Video libre, grande, sin cuadro */
 .intro-video {
-    max-width: 520px;
-    width: 90vw;
-    border-radius: var(--radius-lg);
-    border: 2px solid var(--accent);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
+    width: 96vw;
+    height: 96vh;
+    max-width: none;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    object-fit: contain; /* ✅ se ve completo sin recorte */
+    background: #000;
 }
 
+/* ✅ Texto abajo de todo */
 .intro-message {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 22px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    color: var(--text-main);
+    gap: 6px;
     text-align: center;
+    padding: 0 16px;
+    z-index: 2;
+    color: #fff;
 }
 
 .intro-message p {
-    font-size: 1.1rem;
+    font-size: 1.05rem;
     font-weight: 600;
+    color: #fff;
+    text-shadow: 0 0 18px rgba(53, 226, 255, 0.25);
 }
 
 .intro-message small {
-    color: var(--text-muted);
+    color: rgba(255,255,255,0.72);
+    font-size: 0.9rem;
 }
 
-/* Responsive: apilar en móvil */
+/* Responsive: apilar en móvil (ya no es necesario apilar, pero lo dejo compatible) */
 @media (max-width: 720px) {
-    .intro-overlay {
-        flex-direction: column;
-        gap: 14px;
+    .intro-message {
+        bottom: 16px;
+    }
+    .intro-video {
+        width: 100vw;
+        height: 100vh;
     }
 }
 
