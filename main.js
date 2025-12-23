@@ -969,3 +969,182 @@ document.addEventListener("DOMContentLoaded", () => {
     try { setupNavbarScroll(); } catch (e) {}
     try { setupNavbarActiveSections(); } catch (e) {}
 });
+/* =========================================================
+   🧍 HUMANOIDE MINI (mascota flotante)
+   - Movimiento suave aleatorio por pantalla
+   - Curiosidad ocasional hacia cursor
+   - Mantiene distancia del cursor (no se pone encima)
+========================================================= */
+(function miniHumanoidPet(){
+  const el = document.getElementById("mini-humanoid");
+  if(!el) return;
+
+  let x = 20, y = 140;
+  let vx = 0, vy = 0;
+
+  let tx = window.innerWidth * 0.6;
+  let ty = window.innerHeight * 0.5;
+
+  let mouseX = tx, mouseY = ty;
+  let lastMouseTs = Date.now();
+
+  const cfg = {
+    pull: 0.013,          // suavidad al target
+    jitter: 0.28,         // vida leve
+    damping: 0.90,
+    maxSpeed: 10,
+    edgePadding: 18,
+    retargetMinMs: 700,
+    retargetMaxMs: 2200,
+    curiosityChance: 0.28,
+    curiosityHoldMs: 1400,
+    cursorAvoidRadius: 90,  // ✅ distancia mínima del cursor
+    topExtra: 10
+  };
+
+  const isMobile = matchMedia("(max-width: 600px)").matches;
+  if(isMobile){
+    cfg.maxSpeed = 9;
+    cfg.pull = 0.015;
+    cfg.jitter = 0.32;
+    cfg.cursorAvoidRadius = 70;
+  }
+
+  let nextRetargetTs = Date.now() + 800;
+  let curiosityUntil = 0;
+
+  function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
+
+  function getTopSafe(){
+    const cs = getComputedStyle(document.documentElement);
+    const navH = parseFloat(cs.getPropertyValue("--navbar-h")) || 86;
+    const navHS = parseFloat(cs.getPropertyValue("--navbar-h-scrolled")) || 68;
+    return Math.max(navH, navHS) + cfg.topExtra;
+  }
+
+  function setMouse(cx, cy){
+    mouseX = cx; mouseY = cy;
+    lastMouseTs = Date.now();
+  }
+
+  window.addEventListener("mousemove", (e)=> setMouse(e.clientX, e.clientY), {passive:true});
+  window.addEventListener("touchstart", (e)=> {
+    if(e.touches && e.touches[0]) setMouse(e.touches[0].clientX, e.touches[0].clientY);
+  }, {passive:true});
+  window.addEventListener("touchmove", (e)=> {
+    if(e.touches && e.touches[0]) setMouse(e.touches[0].clientX, e.touches[0].clientY);
+  }, {passive:true});
+
+  function pickRandomTarget(){
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    const topSafe = getTopSafe();
+
+    tx = clamp(Math.random() * w, cfg.edgePadding, w - cfg.edgePadding);
+    ty = clamp(Math.random() * h, topSafe, h - cfg.edgePadding);
+  }
+
+  function pickCuriousTarget(){
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    const topSafe = getTopSafe();
+
+    // apuntar “cerca” del cursor, pero manteniendo distancia
+    const ang = Math.random() * Math.PI * 2;
+    const r = cfg.cursorAvoidRadius + 40 + Math.random()*80;
+
+    tx = clamp(mouseX + Math.cos(ang)*r, cfg.edgePadding, w - cfg.edgePadding);
+    ty = clamp(mouseY + Math.sin(ang)*r, topSafe, h - cfg.edgePadding);
+  }
+
+  function retarget(){
+    const recentlyMoved = (Date.now() - lastMouseTs) < 2000;
+    const goCurious = recentlyMoved && (Math.random() < cfg.curiosityChance);
+
+    if(goCurious){
+      curiosityUntil = Date.now() + cfg.curiosityHoldMs;
+      pickCuriousTarget();
+    }else{
+      pickRandomTarget();
+    }
+
+    nextRetargetTs = Date.now() + (cfg.retargetMinMs + Math.random()*(cfg.retargetMaxMs - cfg.retargetMinMs));
+  }
+
+  function avoidCursor(){
+    const dx = x - mouseX;
+    const dy = y - mouseY;
+    const d = Math.hypot(dx, dy);
+
+    if(d > 0 && d < cfg.cursorAvoidRadius){
+      // empuje suave lejos del cursor
+      const strength = (cfg.cursorAvoidRadius - d) / cfg.cursorAvoidRadius;
+      vx += (dx / d) * (0.9 * strength);
+      vy += (dy / d) * (0.9 * strength);
+
+      // si está demasiado encima, re-target inmediato a un lugar cercano pero no encima
+      if(d < cfg.cursorAvoidRadius * 0.55){
+        pickCuriousTarget();
+        nextRetargetTs = Date.now() + 400;
+      }
+    }
+  }
+
+  function step(){
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    const topSafe = getTopSafe();
+
+    if(Date.now() > nextRetargetTs) retarget();
+
+    // atracción al target
+    const dx = tx - x;
+    const dy = ty - y;
+
+    vx += dx * cfg.pull;
+    vy += dy * cfg.pull;
+
+    // vida
+    vx += (Math.random() - 0.5) * cfg.jitter;
+    vy += (Math.random() - 0.5) * cfg.jitter;
+
+    // evita el cursor (para no “molestar”)
+    avoidCursor();
+
+    // clamp speed + damping
+    vx = clamp(vx, -cfg.maxSpeed, cfg.maxSpeed);
+    vy = clamp(vy, -cfg.maxSpeed, cfg.maxSpeed);
+
+    vx *= cfg.damping;
+    vy *= cfg.damping;
+
+    x += vx;
+    y += vy;
+
+    // límites
+    const minX = cfg.edgePadding;
+    const maxX = w - cfg.edgePadding;
+    const minY = topSafe;
+    const maxY = h - cfg.edgePadding;
+
+    if(x < minX){ x = minX; vx *= -0.65; }
+    if(x > maxX){ x = maxX; vx *= -0.65; }
+    if(y < minY){ y = minY; vy *= -0.65; }
+    if(y > maxY){ y = maxY; vy *= -0.65; }
+
+    // orientación suave
+    const rot = clamp(vx * 1.6, -16, 16);
+    const tilt = clamp(-vy * 0.22, -6, 6);
+
+    const speed = Math.hypot(vx, vy);
+    el.classList.toggle("is-active", speed > 2.8);
+
+    el.style.transform = `translate3d(${x}px, ${y}px, 0) rotate(${rot}deg) translateY(${tilt}px)`;
+
+    requestAnimationFrame(step);
+  }
+
+  // start
+  retarget();
+  requestAnimationFrame(step);
+})();
