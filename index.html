@@ -27,6 +27,7 @@
             <p>Cargando universo educativo...</p>
         </div>
     </div>
+
     <!-- Intro video (solo en la primera carga de la sesión) -->
     <div id="intro-video-overlay" class="intro-overlay hidden">
         <video id="intro-video"
@@ -42,6 +43,7 @@
             <small>Preparando tu experiencia futurista...</small>
         </div>
     </div>
+
     <!-- HERO -->
     <header id="hero">
         <div class="hero-overlay"></div>
@@ -54,7 +56,7 @@
                 </picture>
                 <span class="logo-text-animated">INNOVA SPACE EDUCATION SPA</span>
             </div>
-            <button class="nav-toggle" id="navToggle">
+            <button class="nav-toggle" id="navToggle" aria-label="Abrir menú">
                 <i class="ri-menu-3-line"></i>
             </button>
             <ul class="nav-links" id="navLinks">
@@ -67,57 +69,55 @@
             </ul>
         </nav>
 
-<div class="hero-content">
-    <div class="hero-text">
-        <h1>INNOVA SPACE EDUCATION SPA</h1>
+        <!-- ✅ HERO CONTENT (CORREGIDO: .hero-media dentro de .hero-content) -->
+        <div class="hero-content">
+            <div class="hero-text">
+                <h1>INNOVA SPACE EDUCATION SPA</h1>
 
-        <p>
-            Educación, tecnología e inteligencia artificial unidas en un
-            ecosistema futurista para transformar colegios, instituciones y
-            proyectos en todo Chile.
-        </p>
+                <p>
+                    Educación, tecnología e inteligencia artificial unidas en un
+                    ecosistema futurista para transformar colegios, instituciones y
+                    proyectos en todo Chile.
+                </p>
 
-        <div class="hero-buttons">
-            <a href="#portafolio"
-               class="btn-primary"
-               data-mira-hint="Este botón le permite ver el portafolio de proyectos creados por Innova Space.">
-                <i class="ri-rocket-2-fill"></i> Ver portafolio
-            </a>
+                <div class="hero-buttons">
+                    <a href="#portafolio"
+                       class="btn-primary"
+                       data-mira-hint="Este botón le permite ver el portafolio de proyectos creados por Innova Space.">
+                        <i class="ri-rocket-2-fill"></i> Ver portafolio
+                    </a>
 
-            <a href="#contacto"
-               class="btn-secondary"
-               data-mira-hint="Desde este botón puede agendar una reunión o dejar sus datos para un proyecto.">
-                <i class="ri-calendar-event-fill"></i> Agenda una reunión
-            </a>
-        </div>
+                    <a href="#contacto"
+                       class="btn-secondary"
+                       data-mira-hint="Desde este botón puede agendar una reunión o dejar sus datos para un proyecto.">
+                        <i class="ri-calendar-event-fill"></i> Agenda una reunión
+                    </a>
+                </div>
 
-        <div class="hero-info">
-            <span>
-                <i class="ri-map-pin-2-fill"></i> Vallenar – Antofagasta, Chile
-            </span>
-            <span>
-                <i class="ri-mail-fill"></i> contacto@innova-space-edu.cl
-            </span>
-        </div>
+                <div class="hero-info">
+                    <span>
+                        <i class="ri-map-pin-2-fill"></i> Vallenar – Antofagasta, Chile
+                    </span>
+                    <span>
+                        <i class="ri-mail-fill"></i> contacto@innova-space-edu.cl
+                    </span>
+                </div>
 
-        <div class="hero-logos">
-            <picture class="logo-mercado-publico">
-                <img src="assets/img/logo-mercado-publico.png"
-                     alt="Logo Mercado Público">
-            </picture>
-        </div>
-    </div>
-</div>
+                <div class="hero-logos">
+                    <!-- ✅ SOLO Mercado Público (empresa eliminada aquí como pediste) -->
+                    <picture class="logo-mercado-publico">
+                        <img src="assets/img/logo-mercado-publico.png" alt="Logo Mercado Público">
+                    </picture>
+                </div>
+            </div>
 
             <!-- BLOQUE DE CARRUSEL DE VIDEOS (solo videos) -->
             <div class="hero-media">
                 <div class="video-carousel"
                      data-mira-hint="Este carrusel muestra videos de proyectos y experiencias desarrolladas por Innova Space">
-                    <video id="carouselVideo"
-                           autoplay
-                           muted
-                           playsinline>
-                        <!-- La fuente del video se establece dinámicamente desde main.js -->
+                    <video id="carouselVideo" autoplay muted playsinline>
+                        <!-- ✅ Fallback (si main.js no setea src a tiempo, igual se ve algo) -->
+                        <source src="assets/media/video7.mp4" type="video/mp4" />
                         Tu navegador no soporta la reproducción de video.
                     </video>
                 </div>
@@ -569,12 +569,20 @@
 
                     btnChat.style.background = "rgba(255,255,255,0.06)";
                     btnVoice.style.background = "rgba(255,255,255,0.02)";
+
+                    // Accesibilidad visual/estado
+                    btnChat.setAttribute("aria-pressed", "true");
+                    btnVoice.setAttribute("aria-pressed", "false");
                 } else {
                     chatMode.style.display = "none";
                     voiceMode.style.display = "block";
 
                     btnChat.style.background = "rgba(255,255,255,0.02)";
                     btnVoice.style.background = "rgba(255,255,255,0.06)";
+
+                    // Accesibilidad visual/estado
+                    btnChat.setAttribute("aria-pressed", "false");
+                    btnVoice.setAttribute("aria-pressed", "true");
                 }
             };
 
