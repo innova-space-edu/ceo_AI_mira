@@ -11,6 +11,10 @@
     --radius-lg: 20px;
     --radius-md: 14px;
     --radius-pill: 999px;
+
+    /* ✅ NUEVO: alturas navbar (para centrar y evitar que tape) */
+    --navbar-h: 86px;
+    --navbar-h-scrolled: 68px;
 }
 
 /* RESET SIMPLE */
@@ -35,7 +39,7 @@ body {
     overflow-x: hidden;
 
     /* ✅ Compensación navbar fija */
-    padding-top: 86px;
+    padding-top: var(--navbar-h);
 }
 
 /* CANVAS DE ESTRELLAS + NEBULOSA */
@@ -196,7 +200,10 @@ body {
     width: 100%;
     z-index: 9500;
 
-    padding: 20px 7%;
+    /* ✅ IMPORTANTE: centrado vertical real en el banner */
+    height: var(--navbar-h);
+    padding: 0 7%;
+
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -218,6 +225,7 @@ body {
     overflow: visible;
 
     transition:
+        height 0.22s ease,
         padding 0.22s ease,
         background 0.22s ease,
         box-shadow 0.22s ease,
@@ -227,7 +235,7 @@ body {
 
 .nav-logo {
     display: flex;
-    align-items: center;
+    align-items: center; /* ✅ centra logo y texto en altura */
     gap: 10px;
     font-family: "Orbitron", sans-serif;
     font-size: 0.78rem;
@@ -236,10 +244,19 @@ body {
     color: var(--text-muted);
 }
 
+/* ✅ NUEVO: cuadro/contenedor del logo para centrarlo respecto al banner */
+.nav-logo picture {
+    width: 64px;          /* coincide con el alto del logo */
+    height: 64px;
+    display: flex;
+    align-items: center;  /* ✅ centrado vertical dentro del recuadro */
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+/* (mantengo tus reglas originales, pero las vuelvo más robustas) */
 .nav-logo picture,
 .nav-logo img {
-    width: 40px;
-    height: 40px;
     object-fit: contain;
     filter: drop-shadow(0 0 10px rgba(53, 226, 255, 0.9));
 }
@@ -496,11 +513,12 @@ body {
     gap: 18px; /* override del gap 10px */
 }
 
-/* Logo en navbar más grande y visible */
+/* ✅ Logo en navbar más grande y visible (SIN TAPAR TEXTO) */
 .nav-logo img {
-    width: auto;         /* override */
+    width: 64px;         /* ✅ fijo para evitar auto raro */
     height: 64px;        /* ✅ nuevo tamaño */
     object-fit: contain;
+    display: block;
     filter: drop-shadow(0 0 14px rgba(53, 226, 255, 0.65));
     transition: transform 0.3s ease;
 }
@@ -519,6 +537,9 @@ body {
         0 0 6px rgba(53, 226, 255, 0.5),
         0 0 14px rgba(53, 226, 255, 0.35);
     white-space: nowrap;
+
+    /* ✅ NUEVO: evita que el logo lo tape por alineación rara */
+    line-height: 1;
 }
 
 /* Mercado Público: más grande (solo esa clase) */
@@ -537,7 +558,12 @@ body {
 
 /* Responsive: que navbar no se rompa en móvil */
 @media (max-width: 768px) {
+    .nav-logo picture {
+        width: 48px;
+        height: 48px;
+    }
     .nav-logo img {
+        width: 48px;
         height: 48px;
     }
     .logo-text-animated {
@@ -1223,6 +1249,7 @@ body {
 
     .navbar {
         padding-inline: 5%;
+        height: 78px;
     }
 
     .nav-links {
@@ -1324,8 +1351,8 @@ body {
 
 /* Estado scrolleado: más compacta + un poco más sólida */
 .navbar.navbar--scrolled {
-    padding-top: 12px !important;
-    padding-bottom: 12px !important;
+    /* ✅ compacta por altura real (mejor que padding) */
+    height: var(--navbar-h-scrolled);
 
     background: linear-gradient(
         120deg,
@@ -1363,7 +1390,6 @@ body {
 /* Ajustes responsive (navbar compacta en móvil) */
 @media (max-width: 900px) {
     .navbar.navbar--scrolled {
-        padding-top: 10px !important;
-        padding-bottom: 10px !important;
+        height: 62px;
     }
 }
