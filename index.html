@@ -16,6 +16,7 @@
 
     <link rel="stylesheet" href="style.css" />
 </head>
+
 <body>
     <!-- Canvas de fondo (nebulosa + estrellas) -->
     <canvas id="starsCanvas"></canvas>
@@ -51,14 +52,15 @@
         <nav class="navbar">
             <div class="nav-logo">
                 <picture>
-                    <!-- Logo principal: JPG (puedes cambiarlo por PNG o SVG si quieres) -->
                     <img src="assets/img/logo1.jpg" alt="Logo Innova Space Education">
                 </picture>
                 <span class="logo-text-animated">INNOVA SPACE EDUCATION</span>
             </div>
-            <button class="nav-toggle" id="navToggle" aria-label="Abrir menú">
+
+            <button class="nav-toggle" id="navToggle" aria-label="Abrir menú" aria-expanded="false">
                 <i class="ri-menu-3-line"></i>
             </button>
+
             <ul class="nav-links" id="navLinks">
                 <li><a href="#hero">Inicio</a></li>
                 <li><a href="#sobre">Sobre la empresa</a></li>
@@ -69,7 +71,7 @@
             </ul>
         </nav>
 
-        <!-- ✅ HERO CONTENT (CORREGIDO: .hero-media dentro de .hero-content) -->
+        <!-- HERO CONTENT -->
         <div class="hero-content">
             <div class="hero-text">
                 <h1>INNOVA SPACE EDUCATION SPA</h1>
@@ -95,34 +97,27 @@
                 </div>
 
                 <div class="hero-info">
-                    <span>
-                        <i class="ri-map-pin-2-fill"></i> Vallenar – Antofagasta, Chile
-                    </span>
-                    <span>
-                        <i class="ri-mail-fill"></i> contacto@innova-space-edu.cl
-                    </span>
+                    <span><i class="ri-map-pin-2-fill"></i> Vallenar – Antofagasta, Chile</span>
+                    <span><i class="ri-mail-fill"></i> contacto@innova-space-edu.cl</span>
                 </div>
 
                 <div class="hero-logos">
-                    <!-- ✅ SOLO Mercado Público (empresa eliminada aquí como pediste) -->
                     <picture class="logo-mercado-publico">
                         <img src="assets/img/logo-mercado-publico.png" alt="Logo Mercado Público">
                     </picture>
                 </div>
             </div>
 
-            <!-- BLOQUE DE CARRUSEL DE VIDEOS (solo videos) -->
+            <!-- CARRUSEL DE VIDEOS -->
             <div class="hero-media">
                 <div class="video-carousel"
                      data-mira-hint="Este carrusel muestra videos de proyectos y experiencias desarrolladas por Innova Space">
                     <video id="carouselVideo" autoplay muted playsinline>
-                        <!-- ✅ Fallback (si main.js no setea src a tiempo, igual se ve algo) -->
                         <source src="assets/media/video7.mp4" type="video/mp4" />
                         Tu navegador no soporta la reproducción de video.
                     </video>
                 </div>
             </div>
-            <!-- FIN CARRUSEL VIDEO -->
         </div>
     </header>
 
@@ -133,6 +128,7 @@
                 <h2>Sobre la empresa</h2>
                 <p>Quiénes somos y qué hacemos</p>
             </div>
+
             <div class="sobre-grid">
                 <div class="sobre-text">
                     <h3>Innovación, educación y tecnología</h3>
@@ -148,6 +144,7 @@
                         espacios educativos para instituciones y organizaciones, uniendo
                         IA, diseño web y gestión digital.
                     </p>
+
                     <div class="sobre-cards">
                         <div class="sobre-card">
                             <h4>Misión</h4>
@@ -168,6 +165,7 @@
                         </div>
                     </div>
                 </div>
+
                 <div class="sobre-panel">
                     <h4>Datos de la empresa</h4>
                     <ul>
@@ -193,6 +191,7 @@
                 <h2>Servicios</h2>
                 <p>Soluciones integrales con diseño futurista</p>
             </div>
+
             <div class="services-grid">
                 <article class="service-card"
                          data-mira-hint="Aquí puede conocer el trabajo de Innova Space Education con inteligencia artificial aplicada a la educación y la gestión.">
@@ -204,6 +203,7 @@
                         datos educativos o administrativos.
                     </p>
                 </article>
+
                 <article class="service-card"
                          data-mira-hint="Esta tarjeta describe el servicio de creación de páginas web futuristas e interactivas.">
                     <i class="ri-macbook-fill service-icon"></i>
@@ -214,6 +214,7 @@
                         datos, paneles y APIs externas.
                     </p>
                 </article>
+
                 <article class="service-card"
                          data-mira-hint="Remodelación y diseño de espacios institucionales con enfoque temático, innovador y futurista.">
                     <i class="ri-share-fill service-icon"></i>
@@ -224,14 +225,15 @@
                         identidad institucional y mejoran la experiencia de aprendizaje.
                     </p>
                 </article>
+
                 <article class="service-card"
                          data-mira-hint="En esta sección se indican los proyectos educativos interactivos y actividades para colegios.">
                     <i class="ri-flask-fill service-icon"></i>
                     <h3>Proyectos educativos interactivos</h3>
                     <p>
                         Herramientas y experiencias interactivas para Matemáticas,
-                        Ciencias y Tecnología. Soporte para pantallas interactivas, tecnologías AR-VR y ferias
-                        científicas.
+                        Ciencias y Tecnología. Soporte para pantallas interactivas,
+                        tecnologías AR-VR y ferias científicas.
                     </p>
                 </article>
             </div>
@@ -243,6 +245,7 @@
                 <h2>Portafolio</h2>
                 <p>Proyectos y plataformas desarrolladas</p>
             </div>
+
             <div class="portfolio-grid">
                 <article class="portfolio-card">
                     <h3>Innova Space Track</h3>
@@ -259,6 +262,7 @@
                         Ver demo
                     </a>
                 </article>
+
                 <article class="portfolio-card">
                     <h3>MIRA - Asistente Virtual</h3>
                     <p>
@@ -273,19 +277,18 @@
                         Ver proyecto
                     </a>
                 </article>
+
                 <article class="portfolio-card">
                     <h3>Plataforma Innova Space Education</h3>
                     <p>
                         Sitio educativo con IA integrada, contenido interactivo y diseño
                         espacial para estudiantes de distintos niveles.
                     </p>
-                    <a href="#"
-                       class="portfolio-link"
-                       target="_blank"
-                       rel="noopener">
+                    <a href="#" class="portfolio-link" target="_blank" rel="noopener">
                         Ver sitio
                     </a>
                 </article>
+
                 <article class="portfolio-card">
                     <h3>Otros proyectos personalizados</h3>
                     <p>
@@ -306,6 +309,7 @@
                 <h2>Redes sociales</h2>
                 <p>Conecta con nuestro ecosistema digital</p>
             </div>
+
             <div class="social-grid">
                 <a href="https://www.instagram.com/innovaspacemc/"
                    class="social-card"
@@ -315,24 +319,18 @@
                     <i class="ri-instagram-line"></i>
                     <span>Instagram</span>
                 </a>
-                <a href="#"
-                   class="social-card"
-                   target="_blank"
-                   rel="noopener">
+
+                <a href="#" class="social-card" target="_blank" rel="noopener">
                     <i class="ri-facebook-circle-line"></i>
                     <span>Facebook</span>
                 </a>
-                <a href="#"
-                   class="social-card"
-                   target="_blank"
-                   rel="noopener">
+
+                <a href="#" class="social-card" target="_blank" rel="noopener">
                     <i class="ri-twitter-x-line"></i>
                     <span>X (Twitter)</span>
                 </a>
-                <a href="#"
-                   class="social-card"
-                   target="_blank"
-                   rel="noopener">
+
+                <a href="#" class="social-card" target="_blank" rel="noopener">
                     <i class="ri-youtube-line"></i>
                     <span>YouTube</span>
                 </a>
@@ -345,30 +343,34 @@
                 <h2>Contacto</h2>
                 <p>Conversemos su próximo proyecto</p>
             </div>
+
             <div class="contact-grid">
                 <form id="contactForm" class="contact-form" autocomplete="off">
                     <div class="form-group">
                         <label for="nombre">Nombre completo</label>
                         <input type="text" id="nombre" name="nombre" placeholder="Tu nombre" required />
                     </div>
+
                     <div class="form-group">
                         <label for="correo">Correo electrónico</label>
                         <input type="email" id="correo" name="correo" placeholder="tucorreo@ejemplo.com" required />
                     </div>
+
                     <div class="form-group">
                         <label for="institucion">Institución / Empresa</label>
-                        <input type="text" id="institucion" name="institucion"
-                               placeholder="Colegio, empresa, pyme, etc." />
+                        <input type="text" id="institucion" name="institucion" placeholder="Colegio, empresa, pyme, etc." />
                     </div>
+
                     <div class="form-group">
                         <label for="ciudad">Ciudad</label>
                         <input type="text" id="ciudad" name="ciudad" placeholder="Vallenar, Antofagasta, etc." />
                     </div>
+
                     <div class="form-group">
                         <label for="mensaje">Mensaje</label>
-                        <textarea id="mensaje" name="mensaje" rows="4"
-                                  placeholder="Cuéntenos qué necesita" required></textarea>
+                        <textarea id="mensaje" name="mensaje" rows="4" placeholder="Cuéntenos qué necesita" required></textarea>
                     </div>
+
                     <button type="submit"
                             class="btn-primary btn-full"
                             data-mira-hint="Este botón envía el formulario de contacto para coordinar una reunión.">
@@ -387,8 +389,7 @@
                     <p><i class="ri-time-fill"></i> Atención a instituciones y proyectos por agenda.</p>
                     <p>
                         Podemos conectar sus sistemas actuales, crear nuevas plataformas
-                        o diseñar proyectos educativos con IA y desarrollo web a la
-                        medida.
+                        o diseñar proyectos educativos con IA y desarrollo web a la medida.
                     </p>
                 </div>
             </div>
@@ -399,7 +400,7 @@
         <p>© <span id="year"></span> Innova Space Edu SPA · Todos los derechos reservados.</p>
     </footer>
 
-    <!-- ✅ BARRA FIJA DE NAVEGACIÓN POR SECCIONES (SIN SCROLL) -->
+    <!-- BARRA FIJA DE NAVEGACIÓN POR SECCIONES -->
     <div id="section-nav" class="section-nav" aria-label="Navegación de secciones">
         <button class="section-nav-btn" id="navPrev" title="Sección anterior" aria-label="Sección anterior">
             <i class="ri-arrow-up-s-line"></i>
@@ -416,7 +417,6 @@
     <div id="mira-widget">
         <!-- Botón flotante con SVG inline -->
         <button id="mira-toggle" aria-label="Abrir asistente MIRA">
-            <!-- SVG del logo MIRA (sin fondo) -->
             <svg width="110" height="110" viewBox="0 0 110 110" xmlns="http://www.w3.org/2000/svg">
                 <defs>
                     <linearGradient id="rainbow" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -439,6 +439,7 @@
                                      repeatCount="indefinite" />
                         </stop>
                     </linearGradient>
+
                     <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
                         <feGaussianBlur stdDeviation="2.5" result="coloredBlur" />
                         <feMerge>
@@ -447,14 +448,12 @@
                         </feMerge>
                     </filter>
                 </defs>
-                <circle
-                    cx="55"
-                    cy="55"
-                    r="44"
-                    stroke="url(#rainbow)"
-                    stroke-width="8"
-                    fill="none"
-                    filter="url(#glow)">
+
+                <circle cx="55" cy="55" r="44"
+                        stroke="url(#rainbow)"
+                        stroke-width="8"
+                        fill="none"
+                        filter="url(#glow)">
                     <animate attributeName="r" values="44;49;44" dur="1.4s" repeatCount="indefinite" />
                     <animate attributeName="stroke-width" values="8;12;8" dur="1.4s" repeatCount="indefinite" />
                     <animate attributeName="stroke-opacity" values="0.7;1;0.7" dur="1.4s" repeatCount="indefinite" />
@@ -466,7 +465,6 @@
         <div id="mira-chat" class="mira-chat-closed">
             <div class="mira-header">
                 <div class="mira-header-info">
-                    <!-- Mismo SVG, versión pequeña -->
                     <svg width="32" height="32" viewBox="0 0 110 110" xmlns="http://www.w3.org/2000/svg">
                         <defs>
                             <linearGradient id="rainbow-mini" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -475,19 +473,14 @@
                                 <stop offset="100%" stop-color="#35e835" />
                             </linearGradient>
                         </defs>
-                        <circle
-                            cx="55"
-                            cy="55"
-                            r="44"
-                            stroke="url(#rainbow-mini)"
-                            stroke-width="8"
-                            fill="none" />
+                        <circle cx="55" cy="55" r="44" stroke="url(#rainbow-mini)" stroke-width="8" fill="none" />
                     </svg>
                     <div>
                         <h4>MIRA · Asistente IA</h4>
                         <span>Futuristic AI · Voz femenina</span>
                     </div>
                 </div>
+
                 <div class="mira-header-actions">
                     <button id="mira-voice-toggle" title="Activar/Desactivar voz">
                         <i class="ri-volume-up-fill"></i>
@@ -498,25 +491,30 @@
                 </div>
             </div>
 
-            <!-- ✅ NUEVO: Selector de modo (Chat / Voz ElevenLabs) -->
-            <div id="mira-mode-switch" style="display:flex; gap:10px; padding:10px 12px; align-items:center; border-bottom: 1px solid rgba(255,255,255,0.08);">
-                <button id="mira-mode-chat" type="button" style="flex:1; padding:10px 12px; border-radius:12px; border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.06); color:#fff; cursor:pointer; font-weight:600;">
+            <!-- Selector modo (Chat/Voz) -->
+            <div id="mira-mode-switch"
+                 style="display:flex; gap:10px; padding:10px 12px; align-items:center; border-bottom: 1px solid rgba(255,255,255,0.08);">
+                <button id="mira-mode-chat" type="button"
+                        style="flex:1; padding:10px 12px; border-radius:12px; border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.06); color:#fff; cursor:pointer; font-weight:600;"
+                        aria-pressed="true">
                     💬 Chat
                 </button>
-                <button id="mira-mode-voice" type="button" style="flex:1; padding:10px 12px; border-radius:12px; border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.02); color:#fff; cursor:pointer; font-weight:600;">
+                <button id="mira-mode-voice" type="button"
+                        style="flex:1; padding:10px 12px; border-radius:12px; border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.02); color:#fff; cursor:pointer; font-weight:600;"
+                        aria-pressed="false">
                     🎙️ Voz
                 </button>
             </div>
 
-            <!-- ✅ CONTENEDOR 1: Tu chat actual (sin cambios) -->
+            <!-- CONTENEDOR CHAT -->
             <div id="mira-chat-mode">
-                <div class="mira-messages" id="miraMessages">
-                    <!-- Mensaje inicial se agrega desde main.js -->
-                </div>
+                <div class="mira-messages" id="miraMessages"></div>
+
                 <div class="mira-loading" id="miraLoading">
                     <div class="loader-mini"></div>
                     <span>MIRA está pensando...</span>
                 </div>
+
                 <form id="miraForm" class="mira-input-area">
                     <input type="text"
                            id="miraInput"
@@ -528,7 +526,7 @@
                 </form>
             </div>
 
-            <!-- ✅ CONTENEDOR 2: Voz ElevenLabs (nuevo, oculto por defecto) -->
+            <!-- CONTENEDOR VOZ -->
             <div id="mira-voice-mode" style="display:none; padding: 10px 12px;">
                 <div style="opacity:0.9; font-size: 0.92rem; margin-bottom:10px;">
                     <i class="ri-mic-fill"></i> Habla con MIRA por voz (ElevenLabs). Presiona “Start a call”.
@@ -538,59 +536,13 @@
                     <elevenlabs-convai agent-id="agent_4401kcvfm17nedzbz44xtt1fdtxp"></elevenlabs-convai>
                 </div>
             </div>
-
         </div>
     </div>
 
-    <!-- ✅ Tu JS principal -->
+    <!-- JS principal -->
     <script src="main.js" defer></script>
 
-    <!-- ✅ Script del widget ElevenLabs (requerido) -->
+    <!-- Widget ElevenLabs -->
     <script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async type="text/javascript"></script>
-
-    <!-- ✅ Alternar modo Chat / Voz (sin tocar main.js) -->
-    <script defer>
-        document.addEventListener("DOMContentLoaded", () => {
-            const btnChat = document.getElementById("mira-mode-chat");
-            const btnVoice = document.getElementById("mira-mode-voice");
-
-            const chatMode = document.getElementById("mira-chat-mode");
-            const voiceMode = document.getElementById("mira-voice-mode");
-
-            if (!btnChat || !btnVoice || !chatMode || !voiceMode) return;
-
-            // Estado inicial
-            let currentMode = "chat";
-            const setMode = (mode) => {
-                currentMode = mode;
-
-                if (mode === "chat") {
-                    chatMode.style.display = "block";
-                    voiceMode.style.display = "none";
-
-                    btnChat.style.background = "rgba(255,255,255,0.06)";
-                    btnVoice.style.background = "rgba(255,255,255,0.02)";
-
-                    // Accesibilidad visual/estado
-                    btnChat.setAttribute("aria-pressed", "true");
-                    btnVoice.setAttribute("aria-pressed", "false");
-                } else {
-                    chatMode.style.display = "none";
-                    voiceMode.style.display = "block";
-
-                    btnChat.style.background = "rgba(255,255,255,0.02)";
-                    btnVoice.style.background = "rgba(255,255,255,0.06)";
-
-                    // Accesibilidad visual/estado
-                    btnChat.setAttribute("aria-pressed", "false");
-                    btnVoice.setAttribute("aria-pressed", "true");
-                }
-            };
-
-            btnChat.addEventListener("click", () => setMode("chat"));
-            btnVoice.addEventListener("click", () => setMode("voice"));
-
-            setMode(currentMode);
-        });
 </body>
 </html>
