@@ -12,11 +12,11 @@
     --radius-md: 14px;
     --radius-pill: 999px;
 
-    /* ✅ NUEVO: alturas navbar (para centrar y evitar que tape) */
+    /* ✅ Alturas navbar */
     --navbar-h: 86px;
     --navbar-h-scrolled: 68px;
 
-    /* ✅ NUEVO: container y padding responsive (mejora TODOS los tamaños) */
+    /* ✅ Container + padding responsive */
     --container: 1200px;
     --pad-x: clamp(14px, 3vw, 56px);
 }
@@ -47,6 +47,11 @@ body {
     padding-top: var(--navbar-h);
 }
 
+/* ✅ Cuando la navbar se compacta, compensamos la altura (sin tocar JS) */
+body.has-scrolled {
+    padding-top: var(--navbar-h-scrolled);
+}
+
 /* ✅ Robustez global multimedia */
 img,
 video {
@@ -63,7 +68,7 @@ video {
     z-index: -3;
     display: block;
 
-    /* ✅ NUEVO: que se note más (sin tocar tu JS) */
+    /* ✅ se note más */
     opacity: 0.92;
     filter: contrast(1.18) brightness(1.08) saturate(1.2);
 }
@@ -118,12 +123,12 @@ video {
 .intro-overlay {
     position: fixed;
     inset: 0;
-    background: #000; /* ✅ fondo negro */
+    background: #000;
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 10001;
-    padding: 0;       /* ✅ sin margen */
+    padding: 0;
     transition: opacity 0.6s ease;
     overflow: hidden;
 }
@@ -141,11 +146,11 @@ video {
     border: none;
     border-radius: 0;
     box-shadow: none;
-    object-fit: contain; /* ✅ se ve completo sin recorte */
+    object-fit: contain;
     background: #000;
 }
 
-/* ✅ Texto abajo de todo */
+/* ✅ Texto abajo */
 .intro-message {
     position: absolute;
     left: 0;
@@ -172,7 +177,7 @@ video {
     font-size: 0.9rem;
 }
 
-/* Responsive: apilar en móvil (ya no es necesario apilar, pero lo dejo compatible) */
+/* Responsive intro */
 @media (max-width: 720px) {
     .intro-message {
         bottom: 16px;
@@ -207,7 +212,7 @@ video {
 }
 
 /* =========================================================
-   ✅ NAVBAR (BASE) + (DINÁMICA al scroll al final del archivo)
+   ✅ NAVBAR
 ========================================================= */
 .navbar {
     position: fixed;
@@ -216,7 +221,6 @@ video {
     width: 100%;
     z-index: 9500;
 
-    /* ✅ IMPORTANTE: centrado vertical real en el banner */
     height: var(--navbar-h);
     padding: 0 var(--pad-x);
 
@@ -224,7 +228,6 @@ video {
     align-items: center;
     justify-content: space-between;
 
-    /* Fondo elegante base */
     background: linear-gradient(
         120deg,
         rgba(18, 24, 60, 0.72),
@@ -236,7 +239,6 @@ video {
 
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 
-    /* Importante para ::before glow */
     isolation: isolate;
     overflow: visible;
 
@@ -251,36 +253,41 @@ video {
 
 .nav-logo {
     display: flex;
-    align-items: center; /* ✅ centra logo y texto en altura */
-    gap: 10px;
+    align-items: center;
+    gap: 18px;
     font-family: "Orbitron", sans-serif;
     font-size: 0.78rem;
     letter-spacing: 0.16em;
     text-transform: uppercase;
     color: var(--text-muted);
-
-    /* ✅ NUEVO: evita que el texto se salga en pantallas chicas */
     min-width: 0;
 }
 
-/* ✅ NUEVO: cuadro/contenedor del logo para centrarlo respecto al banner */
+/* ✅ contenedor para centrar logo */
 .nav-logo picture {
-    width: 64px;          /* coincide con el alto del logo */
+    width: 64px;
     height: 64px;
     display: flex;
-    align-items: center;  /* ✅ centrado vertical dentro del recuadro */
+    align-items: center;
     justify-content: center;
     flex-shrink: 0;
 }
 
-/* (mantengo tus reglas originales, pero las vuelvo más robustas) */
-.nav-logo picture,
+/* ✅ logo grande y estable */
 .nav-logo img {
+    width: 64px;
+    height: 64px;
     object-fit: contain;
-    filter: drop-shadow(0 0 10px rgba(53, 226, 255, 0.9));
+    display: block;
+    filter: drop-shadow(0 0 14px rgba(53, 226, 255, 0.65));
+    transition: transform 0.3s ease;
 }
 
-/* Texto de logo con gradiente animado */
+.nav-logo img:hover {
+    transform: scale(1.06);
+}
+
+/* Texto animado */
 .logo-text-animated {
     background: linear-gradient(120deg,
         #4ae4ff,
@@ -294,7 +301,14 @@ video {
     color: transparent;
     animation: logo-gradient 8s ease infinite;
 
-    /* ✅ NUEVO: comportamiento seguro en pantallas pequeñas */
+    font-size: 1.25rem;
+    font-weight: 600;
+    letter-spacing: 2.2px;
+    text-shadow:
+        0 0 6px rgba(53, 226, 255, 0.5),
+        0 0 14px rgba(53, 226, 255, 0.35);
+    line-height: 1;
+
     display: block;
     min-width: 0;
     overflow: hidden;
@@ -358,7 +372,6 @@ video {
     display: flex;
     align-items: center;
 
-    /* ✅ NUEVO: container real + padding fluido */
     padding: 0 var(--pad-x);
     max-width: var(--container);
     margin: 0 auto;
@@ -396,7 +409,7 @@ video {
     margin-bottom: 18px;
 }
 
-/* COLUMNA DEL VIDEO EN EL HERO */
+/* COLUMNA DEL VIDEO */
 .hero-media {
     flex: 1 1 320px;
     display: flex;
@@ -426,7 +439,6 @@ video {
     box-shadow: 0 30px 80px rgba(0, 0, 0, 1);
 }
 
-/* Video interno */
 .video-carousel video {
     width: 100%;
     height: 100%;
@@ -436,7 +448,6 @@ video {
     background: #000;
 }
 
-/* Brillo animado suave en el borde */
 .video-carousel::after {
     content: "";
     position: absolute;
@@ -453,7 +464,7 @@ video {
     100% { opacity: 0.9; }
 }
 
-/* BOTONES GALAXIA DINÁMICOS */
+/* BOTONES */
 .btn-primary,
 .btn-secondary {
     display: inline-flex;
@@ -535,61 +546,20 @@ video {
     filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.7));
 }
 
-/* =========================================================
-   ✅ CAMBIO PEDIDO: Opción 2 Navbar (logo más grande + texto legible)
-   + ✅ Mercado Público más grande (solo ese logo)
-   (Sin borrar nada: solo overrides seguros)
-========================================================= */
-
-/* Navbar: más aire entre logo y texto */
-.nav-logo {
-    gap: 18px; /* override del gap 10px */
-}
-
-/* ✅ Logo en navbar más grande y visible (SIN TAPAR TEXTO) */
-.nav-logo img {
-    width: 64px;         /* ✅ fijo para evitar auto raro */
-    height: 64px;        /* ✅ nuevo tamaño */
-    object-fit: contain;
-    display: block;
-    filter: drop-shadow(0 0 14px rgba(53, 226, 255, 0.65));
-    transition: transform 0.3s ease;
-}
-
-.nav-logo img:hover {
-    transform: scale(1.06);
-}
-
-/* Texto del logo: más legible y protagonista */
-.logo-text-animated {
-    font-size: 1.25rem;      /* ✅ más grande */
-    font-weight: 600;        /* ✅ más peso */
-    letter-spacing: 2.2px;   /* ✅ más “futurista” */
-    color: #eaf6ff;
-    text-shadow:
-        0 0 6px rgba(53, 226, 255, 0.5),
-        0 0 14px rgba(53, 226, 255, 0.35);
-    white-space: nowrap;
-
-    /* ✅ NUEVO: evita que el logo lo tape por alineación rara */
-    line-height: 1;
-}
-
-/* Mercado Público: más grande (solo esa clase) */
+/* Mercado Público más grande */
 .logo-mercado-publico img {
-    height: 56px; /* ✅ más visible */
+    height: 56px;
     width: auto;
     object-fit: contain;
     filter: drop-shadow(0 0 10px rgba(0, 180, 255, 0.35));
     transition: transform 0.3s ease, filter 0.3s ease;
 }
-
 .logo-mercado-publico img:hover {
     transform: scale(1.08);
     filter: drop-shadow(0 0 16px rgba(0, 180, 255, 0.55));
 }
 
-/* Responsive: que navbar no se rompa en móvil */
+/* Responsive navbar */
 @media (max-width: 768px) {
     .nav-logo picture {
         width: 48px;
@@ -603,7 +573,6 @@ video {
         font-size: 0.95rem;
         letter-spacing: 1.4px;
     }
-
     .logo-mercado-publico img {
         height: 44px;
     }
@@ -614,10 +583,7 @@ video {
     padding: 80px 7%;
     position: relative;
     z-index: 2;
-}
 
-/* ✅ NUEVO: padding fluido para secciones (sin romper tu estilo) */
-.section {
     padding-left: var(--pad-x);
     padding-right: var(--pad-x);
 }
@@ -918,7 +884,7 @@ video {
     background: #040615;
 }
 
-/* ✅ CHECK LIST (usado en innova-space-track.html) */
+/* CHECK LIST */
 .check-list {
     list-style: none;
     margin-top: 12px;
@@ -1026,34 +992,24 @@ video {
     gap: 8px;
 }
 
-/* Botón flotante */
+/* ✅ Botón flotante: tu HTML usa SVG 110x110 */
 #mira-toggle {
-    width: 60px;
-    height: 60px;
+    width: 110px;
+    height: 110px;
     border-radius: 999px;
     border: none;
-    background: radial-gradient(circle at 30% 0, #ffffff 0, #ffe6ff 18%, #ff4bff 40%, #28104a 70%);
-    box-shadow: 0 0 25px rgba(255, 75, 255, 0.9);
+    background: transparent;
+    box-shadow: 0 0 25px rgba(255, 75, 255, 0.65);
     cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: grid;
+    place-items: center;
     padding: 0;
     transition: transform 0.15s ease, box-shadow 0.15s ease;
-    overflow: hidden;
+    overflow: visible;
 }
-
-#mira-toggle picture,
-#mira-toggle img {
-    width: 70%;
-    height: 70%;
-    object-fit: contain;
-    filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.9));
-}
-
 #mira-toggle:hover {
     transform: translateY(-2px) scale(1.02);
-    box-shadow: 0 0 35px rgba(255, 75, 255, 1);
+    box-shadow: 0 0 35px rgba(255, 75, 255, 0.85);
 }
 
 /* Ventana chat */
@@ -1074,6 +1030,13 @@ video {
     transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
+/* ✅ tu HTML parte con esta clase */
+#mira-chat.mira-chat-closed {
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.8) translateY(10px);
+}
+
 #mira-chat.mira-chat-open {
     opacity: 1;
     pointer-events: auto;
@@ -1092,15 +1055,6 @@ video {
     display: flex;
     align-items: center;
     gap: 8px;
-}
-
-.mira-header-info picture,
-.mira-header-info img {
-    width: 32px;
-    height: 32px;
-    border-radius: 999px;
-    object-fit: cover;
-    box-shadow: 0 0 12px rgba(255, 255, 255, 0.5);
 }
 
 .mira-header-info h4 {
@@ -1161,7 +1115,7 @@ video {
     border-bottom-left-radius: 4px;
 }
 
-/* Loader mini para el chat */
+/* Loader mini */
 .mira-loading {
     display: none;
     align-items: center;
@@ -1219,7 +1173,7 @@ video {
     justify-content: center;
 }
 
-/* ✅ NUEVO: Botones “Chat / Voz (ElevenLabs)” dentro del widget (sin romper nada) */
+/* Botones Chat / Voz (ElevenLabs) */
 #mira-mode-switch {
     display: flex;
     gap: 10px;
@@ -1251,7 +1205,6 @@ video {
     box-shadow: 0 0 18px rgba(53, 226, 255, 0.12);
 }
 
-/* “Activo” usando aria-pressed desde JS (más robusto) */
 #mira-mode-chat[aria-pressed="true"],
 #mira-mode-voice[aria-pressed="true"] {
     background: radial-gradient(circle at 10% 0%, rgba(53, 226, 255, 0.16), transparent 55%),
@@ -1266,7 +1219,6 @@ video {
     width: 100%;
 }
 
-/* Contenedor ElevenLabs ajustado al tamaño del chat */
 #elevenlabs-container {
     width: 100%;
     border-radius: 14px;
@@ -1277,7 +1229,6 @@ video {
     padding: 10px;
 }
 
-/* Si el widget interno genera cosas muy grandes, evitamos desbordes */
 #elevenlabs-container * {
     max-width: 100%;
 }
@@ -1331,7 +1282,6 @@ video {
     }
 }
 
-/* ✅ NUEVO: tablets 8–11" (mejor reflow) */
 @media (max-width: 820px) {
     .hero-content{
         gap: 26px;
@@ -1342,7 +1292,6 @@ video {
     }
 }
 
-/* ✅ NUEVO: móviles 5–6.6" */
 @media (max-width: 600px) {
     #mira-chat {
         width: 100vw;
@@ -1364,7 +1313,15 @@ video {
         max-width: 58vw;
     }
 
-    /* ✅ Ajuste suave del switch en móvil */
+    #mira-toggle{
+        width: 88px;
+        height: 88px;
+    }
+    #mira-toggle svg{
+        width: 88px;
+        height: 88px;
+    }
+
     #mira-mode-switch {
         padding: 10px 10px;
         gap: 8px;
@@ -1376,7 +1333,6 @@ video {
         border-radius: 12px;
     }
 
-    /* ✅ Botones hero uno bajo otro en móvil */
     .hero-buttons{
         flex-direction: column;
         align-items: stretch;
@@ -1387,7 +1343,6 @@ video {
         justify-content: center;
     }
 
-    /* ✅ video mejor en vertical */
     .video-carousel{
         aspect-ratio: 16 / 10;
     }
@@ -1395,10 +1350,7 @@ video {
 
 /* =========================================================
    ✅ NAVBAR DINÁMICA (compacta al scroll + glow animado)
-   + link activo por sección
 ========================================================= */
-
-/* Glow dinámico (capa visual) */
 .navbar::before {
     content: "";
     position: absolute;
@@ -1415,54 +1367,42 @@ video {
     z-index: 0;
 }
 
-/* Para que el contenido de la navbar quede encima del glow */
 .navbar > * {
     position: relative;
     z-index: 1;
 }
 
-/* Estado scrolleado: más compacta + un poco más sólida */
 .navbar.navbar--scrolled {
-    /* ✅ compacta por altura real (mejor que padding) */
     height: var(--navbar-h-scrolled);
-
     background: linear-gradient(
         120deg,
         rgba(12, 16, 40, 0.90),
         rgba(40, 12, 70, 0.88)
     );
-
     border-bottom: 1px solid rgba(255, 255, 255, 0.10);
     box-shadow: 0 14px 50px rgba(0, 0, 0, 0.78);
 }
 
-/* Glow más intenso al scrollear */
 .navbar.navbar--scrolled::before {
     opacity: 0.85;
     transform: translateY(0);
 }
 
-/* ✅ Link activo (sección actual) */
+/* Link activo */
 .nav-links a.active,
 .nav-links a[aria-current="page"] {
     color: #ffffff;
 }
-
-/* Subrayado visible del activo */
 .nav-links a.active::after,
 .nav-links a[aria-current="page"]::after {
     width: 100%;
 }
-
-/* Un “halo” sutil en el link activo */
 .nav-links a.active {
     text-shadow: 0 0 16px rgba(53, 226, 255, 0.25);
 }
 
-/* Ajustes responsive (navbar compacta en móvil) */
 @media (max-width: 900px) {
     .navbar.navbar--scrolled {
         height: 62px;
     }
 }
-
