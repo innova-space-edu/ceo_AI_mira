@@ -914,6 +914,7 @@ function setupNavbarScroll() {
     const THRESHOLD = 18;
 
     function update() {
+       document.body.classList.toggle("has-scrolled", window.scrollY > THRESHOLD);
         if (window.scrollY > THRESHOLD) {
             navbar.classList.add("navbar--scrolled");
         } else {
