@@ -6,15 +6,13 @@ const MIRA_TTS_URL = "https://ceo-ai-mira.onrender.com/api/tts";
 
 /* ------------------------------------------------------------------
    ✅ NUEVO: ELEVENLABS CONVAI WIDGET (MODO VOZ)
-   - No afecta tu chat actual
-   - Solo agrega un “modo” alternativo dentro del panel
 ------------------------------------------------------------------ */
 const ELEVENLABS_WIDGET_SCRIPT = "https://unpkg.com/@elevenlabs/convai-widget-embed";
 const ELEVENLABS_AGENT_ID = "agent_4401kcvfm17nedzbz44xtt1fdtxp";
 
-let miraMode = "chat";              // "chat" | "voice"
+let miraMode = "chat";
 let elevenWidgetLoaded = false;
-let miraTTSMutedByMode = false;     // silencia tu TTS propio SOLO cuando el modo voz está activo
+let miraTTSMutedByMode = false;
 
 /* ------------------------------------------------------------------
    1. LOADER GLOBAL
@@ -26,12 +24,10 @@ window.addEventListener("load", () => {
 
   const hasSeenIntro = sessionStorage.getItem("introVideoShown") === "true";
 
-  // Helpers
   const showLoader = () => loader?.classList.remove("hidden");
   const hideLoader = () => loader?.classList.add("hidden");
 
   if (!hasSeenIntro && introOverlay && introVideo) {
-    // Primera vez en esta pestaña: SOLO VIDEO (sin loader)
     sessionStorage.setItem("introVideoShown", "true");
     hideLoader();
 
@@ -42,12 +38,10 @@ window.addEventListener("load", () => {
 
     introOverlay.classList.remove("hidden");
     introVideo.currentTime = 0;
-
     introVideo.play().catch(endIntro);
     introVideo.addEventListener("ended", endIntro, { once: true });
     introVideo.addEventListener("error", endIntro, { once: true });
   } else {
-    // Recarga: SOLO loader
     if (introOverlay) introOverlay.classList.add("hidden");
     showLoader();
     setTimeout(hideLoader, 1500);
@@ -57,28 +51,62 @@ window.addEventListener("load", () => {
 });
 
 /* ------------------------------------------------------------------
-   2. AÑO EN EL FOOTER
+   2. AÑO EN FOOTER
 ------------------------------------------------------------------ */
 document.addEventListener("DOMContentLoaded", () => {
-    const yearSpan = document.getElementById("year");
-    if (yearSpan) yearSpan.textContent = new Date().getFullYear();
+  const yearSpan = document.getElementById("year");
+  if (yearSpan) yearSpan.textContent = new Date().getFullYear();
 });
 
 /* ------------------------------------------------------------------
-   3. NAVBAR MOBILE
+   3. NAVBAR MOBILE (CORREGIDO – SOLO TELÉFONOS)
 ------------------------------------------------------------------ */
-const navToggle = document.getElementById("navToggle");
-const navLinks = document.getElementById("navLinks");
+document.addEventListener("DOMContentLoaded", () => {
+  const navToggle = document.getElementById("navToggle");
+  const navLinks = document.getElementById("navLinks");
+  if (!navToggle || !navLinks) return;
 
-if (navToggle && navLinks) {
-    navToggle.addEventListener("click", () => {
-        navLinks.classList.toggle("nav-open");
-    });
+  const isPhone = () => window.matchMedia("(max-width: 480px)").matches;
 
-    navLinks.querySelectorAll("a").forEach(link => {
-        link.addEventListener("click", () => navLinks.classList.remove("nav-open"));
+  const openMenu = () => {
+    navLinks.classList.add("nav-open");
+    navToggle.setAttribute("aria-expanded", "true");
+    if (isPhone()) {
+      document.body.style.overflow = "hidden";
+      document.body.classList.add("menu-open");
+    }
+  };
+
+  const closeMenu = () => {
+    navLinks.classList.remove("nav-open");
+    navToggle.setAttribute("aria-expanded", "false");
+    document.body.style.overflow = "";
+    document.body.classList.remove("menu-open");
+  };
+
+  navToggle.addEventListener("click", (e) => {
+    e.stopPropagation();
+    navLinks.classList.contains("nav-open") ? closeMenu() : openMenu();
+  });
+
+  navLinks.querySelectorAll("a").forEach(link => {
+    link.addEventListener("click", () => {
+      if (isPhone()) closeMenu();
     });
-}
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!isPhone()) return;
+    if (!navLinks.classList.contains("nav-open")) return;
+    if (!navLinks.contains(e.target) && !navToggle.contains(e.target)) {
+      closeMenu();
+    }
+  });
+
+  window.addEventListener("resize", () => {
+    if (!isPhone()) closeMenu();
+  });
+});
 
 /* ------------------------------------------------------------------
    4. FONDO ANIMADO: ESTRELLAS + NEBULOSA + FUGACES
