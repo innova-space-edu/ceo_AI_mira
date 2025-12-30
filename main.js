@@ -717,31 +717,51 @@ if (miraForm && miraInput) {
 }
 
 function addUserMessage(text) {
-    if (!miraMessages) return;
-    const div = document.createElement("div");
-    div.className = "mira-msg user";
-    div.innerText = text;
-    miraMessages.appendChild(div);
-    scrollMiraToBottom();
+  if (!miraMessages) return;
+
+  const div = document.createElement("div");
+  div.className = "mira-msg user";
+  div.innerText = text;
+
+  miraMessages.appendChild(div);
+  scrollMiraToBottom();
+
+  // ✅ evita que el foco "salte" y mantén visible el input
+  setTimeout(() => miraInput?.focus({ preventScroll: true }), 0);
 }
 
 function addMiraMessage(htmlText) {
-    if (!miraMessages) return;
-    const div = document.createElement("div");
-    div.className = "mira-msg bot";
-    div.innerHTML = htmlText;
-    miraMessages.appendChild(div);
-    scrollMiraToBottom();
+  if (!miraMessages) return;
 
-    const spoken = sanitizeForSpeech(stripHtml(htmlText));
-    if (miraVoiceEnabled && !miraTTSMutedByMode) speakWithMiraVoice(spoken);
+  const div = document.createElement("div");
+  div.className = "mira-msg bot";
+  div.innerHTML = htmlText;
+
+  miraMessages.appendChild(div);
+  scrollMiraToBottom();
+
+  // ✅ vuelve a enfocar input sin mover la pantalla
+  setTimeout(() => {
+    if (miraMode === "chat") miraInput?.focus({ preventScroll: true });
+  }, 0);
+
+  const spoken = sanitizeForSpeech(stripHtml(htmlText));
+  if (miraVoiceEnabled && !miraTTSMutedByMode) speakWithMiraVoice(spoken);
 }
 
 function scrollMiraToBottom() {
-    if (!miraMessages) return;
-    miraMessages.scrollTop = miraMessages.scrollHeight;
-}
+  if (!miraMessages) return;
 
+  // ✅ usa el contenedor scrolleable real (por si cambiaste el DOM con el switch chat/voz)
+  const scroller = miraMessages.closest(".mira-messages") || miraMessages;
+
+  // ✅ espera a que el navegador renderice el nuevo mensaje
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      scroller.scrollTop = scroller.scrollHeight;
+    });
+  });
+}
 /* ------------------------------------------------------------------
    RESPUESTAS – BACKEND + FALLBACK
 ------------------------------------------------------------------ */
