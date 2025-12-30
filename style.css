@@ -1015,14 +1015,23 @@ video {
 /* Ventana chat */
 #mira-chat {
     width: 320px;
+
+    /* ✅ FIX: tamaño fijo (evita que “crezca” con mensajes) */
+    height: 460px;
     max-height: 460px;
+
     background: rgba(5, 8, 20, 0.98);
     border-radius: 18px;
     border: 1px solid rgba(255, 255, 255, 0.08);
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9);
+
     display: flex;
     flex-direction: column;
     overflow: hidden;
+
+    /* ✅ FIX flex (evita overflow raro en Chrome) */
+    min-height: 0;
+
     transform-origin: bottom right;
     opacity: 0;
     pointer-events: none;
@@ -1043,12 +1052,17 @@ video {
     transform: scale(1) translateY(0);
 }
 
+/* ✅ FIX: header sticky arriba */
 .mira-header {
     padding: 10px 10px 10px 12px;
     background: linear-gradient(120deg, #1a1036, #3e124f);
     display: flex;
     align-items: center;
     justify-content: space-between;
+
+    position: sticky;
+    top: 0;
+    z-index: 6;
 }
 
 .mira-header-info {
@@ -1083,14 +1097,18 @@ video {
     color: var(--text-muted);
 }
 
+/* ✅ Solo el historial scrollea */
 .mira-messages {
     flex: 1;
-    padding: 8px 10px;
+    padding: 8px 10px 78px; /* ✅ FIX: espacio para input */
     overflow-y: auto;
     display: flex;
     flex-direction: column;
     gap: 6px;
     scroll-behavior: smooth;
+
+    /* ✅ FIX: flex overflow en algunos browsers */
+    min-height: 0;
 }
 
 .mira-msg {
@@ -1143,6 +1161,11 @@ video {
     padding: 6px 6px 6px 10px;
     gap: 4px;
     background: rgba(6, 8, 20, 0.98);
+
+    /* ✅ FIX: sticky abajo */
+    position: sticky;
+    bottom: 0;
+    z-index: 6;
 }
 
 .mira-input-area input {
@@ -1181,6 +1204,11 @@ video {
     align-items: center;
     border-bottom: 1px solid rgba(255,255,255,0.08);
     background: rgba(6, 8, 20, 0.92);
+
+    /* ✅ FIX: sticky bajo el header */
+    position: sticky;
+    top: 44px; /* ✅ Ajuste fino (si tu header cambia, sube/baja este valor) */
+    z-index: 6;
 }
 
 #mira-mode-chat,
@@ -1295,7 +1323,10 @@ video {
 @media (max-width: 600px) {
     #mira-chat {
         width: 100vw;
-        max-height: 70vh;
+
+        /* ✅ FIX: móvil con teclado (dvh) */
+        height: 70dvh;
+        max-height: 70dvh;
     }
     #mira-widget {
         right: 12px;
@@ -1325,6 +1356,9 @@ video {
     #mira-mode-switch {
         padding: 10px 10px;
         gap: 8px;
+
+        /* ✅ En móvil el header suele crecer, dejamos sticky igual */
+        top: 44px;
     }
     #mira-mode-chat,
     #mira-mode-voice {
