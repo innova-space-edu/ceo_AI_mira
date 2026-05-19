@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <title>Documentos de empresa | Innova Space Education</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description"
+          content="Biblioteca de documentos oficiales de Innova Space Edu SPA para vista previa y descarga en PDF." />
+
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Poppins:wght@300;400;500;600;700&display=swap"
+          rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css" />
+</head>
+
+<body class="documentos-page">
+    <canvas id="starsCanvas"></canvas>
+
+    <div id="global-loader">
+        <div class="loader-content">
+            <div class="loader-galaxy"></div>
+            <p>Cargando biblioteca de documentos...</p>
+        </div>
+    </div>
+
+    <header id="hero" class="documents-hero">
+        <div class="hero-overlay"></div>
+
+        <nav class="navbar">
+            <div class="nav-logo">
+                <picture>
+                    <img src="assets/img/logo1.jpg" alt="Logo Innova Space Education">
+                </picture>
+                <span class="logo-text-animated">INNOVA SPACE EDUCATION</span>
+            </div>
+
+            <button class="nav-toggle" id="navToggle" aria-label="Abrir menú" aria-expanded="false">
+                <i class="ri-menu-3-line"></i>
+            </button>
+
+            <ul class="nav-links" id="navLinks">
+                <li><a href="index.html#hero">Inicio</a></li>
+                <li><a href="index.html#sobre">Sobre la empresa</a></li>
+                <li><a href="index.html#servicios">Servicios</a></li>
+                <li><a href="index.html#contacto">Contacto</a></li>
+            </ul>
+        </nav>
+
+        <div class="documents-hero-content">
+            <div class="documents-kicker">
+                <i class="ri-folder-shield-2-fill"></i>
+                Biblioteca corporativa
+            </div>
+            <h1>Documentos de empresa</h1>
+            <p>
+                Revise los documentos oficiales de Innova Space Edu SPA en vista previa
+                y descárguelos en formato PDF cuando sea necesario.
+            </p>
+            <div class="documents-hero-actions">
+                <a href="#biblioteca-documentos" class="btn-primary">
+                    <i class="ri-file-search-fill"></i> Ver documentos
+                </a>
+                <a href="index.html#sobre" class="btn-secondary">
+                    <i class="ri-arrow-left-line"></i> Volver a la empresa
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section id="biblioteca-documentos" class="section" data-mira-section="documentos">
+            <div class="section-header">
+                <h2>Biblioteca de documentos</h2>
+                <p>Seleccione un archivo para verlo en vista previa o descargarlo en PDF</p>
+            </div>
+
+            <div class="documents-layout">
+                <div class="documents-list">
+                    <article class="document-card" data-pdf="assets/documentos/01_Programa_Integridad_Compliance_InnovaSpace_2026.pdf" data-title="Programa de Integridad y Compliance InnovaSpace 2026">
+                        <div class="document-card-top">
+                            <span class="document-badge">Integridad</span>
+                            <i class="ri-file-pdf-2-fill document-icon"></i>
+                        </div>
+                        <h3>Programa de Integridad y Compliance InnovaSpace 2026</h3>
+                        <p>Documento base del programa de integridad, prevención y cumplimiento corporativo.</p>
+                        <div class="document-actions">
+                            <button type="button" class="btn-secondary document-preview-btn">
+                                <i class="ri-eye-fill"></i> Vista previa
+                            </button>
+                            <a href="assets/documentos/01_Programa_Integridad_Compliance_InnovaSpace_2026.pdf" download class="btn-primary document-download-btn">
+                                <i class="ri-download-cloud-2-fill"></i> Descargar PDF
+                            </a>
+                        </div>
+                    </article>
+                    <article class="document-card" data-pdf="assets/documentos/02_Manual_Politicas_Terminos_Condiciones_InnovaSpace_2026.pdf" data-title="Manual de Políticas, Términos y Condiciones InnovaSpace 2026">
+                        <div class="document-card-top">
+                            <span class="document-badge">Políticas</span>
+                            <i class="ri-file-pdf-2-fill document-icon"></i>
+                        </div>
+                        <h3>Manual de Políticas, Términos y Condiciones InnovaSpace 2026</h3>
+                        <p>Manual corporativo con políticas internas, condiciones de uso y lineamientos institucionales.</p>
+                        <div class="document-actions">
+                            <button type="button" class="btn-secondary document-preview-btn">
+                                <i class="ri-eye-fill"></i> Vista previa
+                            </button>
+                            <a href="assets/documentos/02_Manual_Politicas_Terminos_Condiciones_InnovaSpace_2026.pdf" download class="btn-primary document-download-btn">
+                                <i class="ri-download-cloud-2-fill"></i> Descargar PDF
+                            </a>
+                        </div>
+                    </article>
+                    <article class="document-card" data-pdf="assets/documentos/03_Respaldo_Difusion_Programa_Integridad_InnovaSpace_2026.pdf" data-title="Respaldo de Difusión del Programa de Integridad InnovaSpace 2026">
+                        <div class="document-card-top">
+                            <span class="document-badge">Difusión</span>
+                            <i class="ri-file-pdf-2-fill document-icon"></i>
+                        </div>
+                        <h3>Respaldo de Difusión del Programa de Integridad InnovaSpace 2026</h3>
+                        <p>Respaldo para acreditar la difusión del programa de integridad de la empresa.</p>
+                        <div class="document-actions">
+                            <button type="button" class="btn-secondary document-preview-btn">
+                                <i class="ri-eye-fill"></i> Vista previa
+                            </button>
+                            <a href="assets/documentos/03_Respaldo_Difusion_Programa_Integridad_InnovaSpace_2026.pdf" download class="btn-primary document-download-btn">
+                                <i class="ri-download-cloud-2-fill"></i> Descargar PDF
+                            </a>
+                        </div>
+                    </article>
+                    <article class="document-card" data-pdf="assets/documentos/04_Anexo_6_Cumplimiento_Programa_Integridad_INIA_Totoral.pdf" data-title="Anexo 6: Cumplimiento Programa de Integridad INIA Totoral">
+                        <div class="document-card-top">
+                            <span class="document-badge">Anexo</span>
+                            <i class="ri-file-pdf-2-fill document-icon"></i>
+                        </div>
+                        <h3>Anexo 6: Cumplimiento Programa de Integridad INIA Totoral</h3>
+                        <p>Anexo de cumplimiento para procesos de licitación, cotizaciones o antecedentes institucionales.</p>
+                        <div class="document-actions">
+                            <button type="button" class="btn-secondary document-preview-btn">
+                                <i class="ri-eye-fill"></i> Vista previa
+                            </button>
+                            <a href="assets/documentos/04_Anexo_6_Cumplimiento_Programa_Integridad_INIA_Totoral.pdf" download class="btn-primary document-download-btn">
+                                <i class="ri-download-cloud-2-fill"></i> Descargar PDF
+                            </a>
+                        </div>
+                    </article>
+                    <article class="document-card" data-pdf="assets/documentos/05_Checklist_Publicacion_Web_Mercado_Publico_InnovaSpace_2026.pdf" data-title="Checklist de Publicación Web y Mercado Público InnovaSpace 2026">
+                        <div class="document-card-top">
+                            <span class="document-badge">Checklist</span>
+                            <i class="ri-file-pdf-2-fill document-icon"></i>
+                        </div>
+                        <h3>Checklist de Publicación Web y Mercado Público InnovaSpace 2026</h3>
+                        <p>Lista de verificación para publicación, respaldo y revisión de documentos de empresa.</p>
+                        <div class="document-actions">
+                            <button type="button" class="btn-secondary document-preview-btn">
+                                <i class="ri-eye-fill"></i> Vista previa
+                            </button>
+                            <a href="assets/documentos/05_Checklist_Publicacion_Web_Mercado_Publico_InnovaSpace_2026.pdf" download class="btn-primary document-download-btn">
+                                <i class="ri-download-cloud-2-fill"></i> Descargar PDF
+                            </a>
+                        </div>
+                    </article>
+                    <article class="document-card document-placeholder">
+                        <div class="document-card-top">
+                            <span class="document-badge">Espacio 1</span>
+                            <i class="ri-upload-cloud-2-fill document-icon"></i>
+                        </div>
+                        <h3>Espacio disponible para nuevo material 1</h3>
+                        <p>Sube aquí un nuevo PDF corporativo cuando lo tengas listo. Guarda el archivo en <code>assets/documentos/</code> y reemplaza este espacio.</p>
+                        <div class="document-actions">
+                            <button type="button" class="btn-secondary" disabled>
+                                <i class="ri-time-fill"></i> Pendiente
+                            </button>
+                        </div>
+                    </article>
+                    <article class="document-card document-placeholder">
+                        <div class="document-card-top">
+                            <span class="document-badge">Espacio 2</span>
+                            <i class="ri-upload-cloud-2-fill document-icon"></i>
+                        </div>
+                        <h3>Espacio disponible para nuevo material 2</h3>
+                        <p>Sube aquí un nuevo PDF corporativo cuando lo tengas listo. Guarda el archivo en <code>assets/documentos/</code> y reemplaza este espacio.</p>
+                        <div class="document-actions">
+                            <button type="button" class="btn-secondary" disabled>
+                                <i class="ri-time-fill"></i> Pendiente
+                            </button>
+                        </div>
+                    </article>
+                    <article class="document-card document-placeholder">
+                        <div class="document-card-top">
+                            <span class="document-badge">Espacio 3</span>
+                            <i class="ri-upload-cloud-2-fill document-icon"></i>
+                        </div>
+                        <h3>Espacio disponible para nuevo material 3</h3>
+                        <p>Sube aquí un nuevo PDF corporativo cuando lo tengas listo. Guarda el archivo en <code>assets/documentos/</code> y reemplaza este espacio.</p>
+                        <div class="document-actions">
+                            <button type="button" class="btn-secondary" disabled>
+                                <i class="ri-time-fill"></i> Pendiente
+                            </button>
+                        </div>
+                    </article>
+                </div>
+
+                <aside class="documents-preview-panel" aria-label="Vista previa de documentos PDF">
+                    <div class="preview-header">
+                        <div>
+                            <span>Vista previa</span>
+                            <h3 id="previewTitle">Programa de Integridad y Compliance InnovaSpace 2026</h3>
+                        </div>
+                        <a id="previewDownload" href="assets/documentos/01_Programa_Integridad_Compliance_InnovaSpace_2026.pdf" download class="btn-primary preview-download">
+                            <i class="ri-download-cloud-2-fill"></i> Descargar
+                        </a>
+                    </div>
+
+                    <div class="pdf-preview-frame">
+                        <iframe id="pdfPreview"
+                                src="assets/documentos/01_Programa_Integridad_Compliance_InnovaSpace_2026.pdf"
+                                title="Vista previa PDF: Programa de Integridad y Compliance InnovaSpace 2026"
+                                loading="lazy">
+                        </iframe>
+                    </div>
+
+                    <p class="preview-note">
+                        Si el navegador móvil no muestra el PDF dentro de la página, use el botón de descarga o ábralo en una pestaña nueva.
+                    </p>
+                </aside>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>© <span id="year"></span> Innova Space Edu SPA · Documentos disponibles para revisión y descarga.</p>
+    </footer>
+
+    <div id="section-nav" class="section-nav" aria-label="Navegación de secciones">
+        <button class="section-nav-btn" id="navPrev" title="Sección anterior" aria-label="Sección anterior">
+            <i class="ri-arrow-up-s-line"></i>
+        </button>
+        <div class="section-nav-dots" id="navDots" aria-label="Secciones"></div>
+        <button class="section-nav-btn" id="navNext" title="Sección siguiente" aria-label="Sección siguiente">
+            <i class="ri-arrow-down-s-line"></i>
+        </button>
+    </div>
+
+    <script src="main.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const cards = document.querySelectorAll(".document-card[data-pdf]");
+            const iframe = document.getElementById("pdfPreview");
+            const title = document.getElementById("previewTitle");
+            const download = document.getElementById("previewDownload");
+            const previewPanel = document.querySelector(".documents-preview-panel");
+
+            function setPreview(card) {
+                const pdf = card.dataset.pdf;
+                const docTitle = card.dataset.title;
+                if (!pdf || !iframe || !title || !download) return;
+
+                iframe.src = pdf;
+                iframe.title = "Vista previa PDF: " + docTitle;
+                title.textContent = docTitle;
+                download.href = pdf;
+                download.setAttribute("download", pdf.split("/").pop());
+
+                cards.forEach(item => item.classList.remove("is-selected"));
+                card.classList.add("is-selected");
+
+                if (window.matchMedia("(max-width: 980px)").matches) {
+                    previewPanel?.scrollIntoView({ behavior: "smooth", block: "start" });
+                }
+            }
+
+            cards.forEach((card, index) => {
+                const btn = card.querySelector(".document-preview-btn");
+                btn?.addEventListener("click", () => setPreview(card));
+                card.addEventListener("dblclick", () => setPreview(card));
+                if (index === 0) card.classList.add("is-selected");
+            });
+        });
+    </script>
+</body>
+</html>
