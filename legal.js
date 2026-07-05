@@ -12,7 +12,8 @@ document.addEventListener("DOMContentLoaded", () => {
             </summary>
             <div class="legal-panel">
                 <h3>Condiciones generales</h3>
-                <p>Información comercial y condiciones de aceptación de proyectos de Innova Space Edu SpA.</p>
+                <p>Información comercial de Innova Space Edu SpA para organizar servicios, proyectos, entregas y respaldos escritos.</p>
+                <p>Los trabajos se coordinan con documentos de respaldo, comunicaciones por correo y evidencias de avance.</p>
             </div>
         </details>
     `;
