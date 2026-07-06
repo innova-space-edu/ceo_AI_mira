@@ -196,6 +196,7 @@ summary {
     -webkit-tap-highlight-color: transparent;
 }
 
+#starsCanvas,
 .hero-overlay,
 .navbar::before,
 .service-card::before,
@@ -210,9 +211,37 @@ summary {
 }
 
 @media (max-width: 900px) {
+    /* En celular el video de intro puede quedar encima y bloquear todos los botones. */
+    #intro-video-overlay,
+    .intro-overlay,
+    #global-loader {
+        display: none !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+        z-index: -1 !important;
+    }
+
+    body,
+    header,
+    main,
+    footer,
+    section,
+    .section,
+    .hero-content,
+    .hero-text,
+    .hero-buttons,
+    .portfolio-card,
+    .social-grid,
+    .contact-grid,
+    .footer {
+        pointer-events: auto !important;
+    }
+
     .navbar {
         z-index: 9800;
         overflow: visible;
+        pointer-events: auto !important;
     }
 
     .nav-toggle {
@@ -275,27 +304,34 @@ summary {
         z-index: 9803;
     }
 
-    .hero-content,
-    .hero-buttons,
     .btn-primary,
     .btn-secondary,
     .portfolio-link,
     .social-card,
     .contact-form button,
+    .contact-form input,
+    .contact-form textarea,
     #mira-toggle,
     .legal-toggle-btn {
         position: relative;
+        z-index: 10;
         pointer-events: auto !important;
     }
 
-    body.menu-open .section-nav {
-        opacity: 0.22;
+    /* Evita que la barra inferior capture toques sobre botones del contenido. */
+    .section-nav {
+        display: none !important;
         pointer-events: none !important;
     }
 
-    body.menu-open #mira-widget {
+    /* El contenedor flotante de MIRA no debe tapar la pantalla; solo sus controles internos reciben toque. */
+    #mira-widget {
         pointer-events: none !important;
-        opacity: 0.45;
+    }
+
+    #mira-toggle,
+    #mira-chat.mira-chat-open {
+        pointer-events: auto !important;
     }
 }
 
@@ -331,9 +367,5 @@ summary {
         padding: 16px;
         font-size: 0.98rem;
         letter-spacing: 0.06em;
-    }
-
-    .section-nav {
-        display: none !important;
     }
 }
