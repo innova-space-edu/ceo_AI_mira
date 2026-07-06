@@ -186,7 +186,7 @@
 }
 
 /* =========================================================
-   Correcciones móviles generales
+   Correcciones generales de clics / toques
    ========================================================= */
 a,
 button,
@@ -211,17 +211,6 @@ summary {
 }
 
 @media (max-width: 900px) {
-    /* En celular el video de intro puede quedar encima y bloquear todos los botones. */
-    #intro-video-overlay,
-    .intro-overlay,
-    #global-loader {
-        display: none !important;
-        opacity: 0 !important;
-        visibility: hidden !important;
-        pointer-events: none !important;
-        z-index: -1 !important;
-    }
-
     body,
     header,
     main,
@@ -318,13 +307,11 @@ summary {
         pointer-events: auto !important;
     }
 
-    /* Evita que la barra inferior capture toques sobre botones del contenido. */
     .section-nav {
         display: none !important;
         pointer-events: none !important;
     }
 
-    /* El contenedor flotante de MIRA no debe tapar la pantalla; solo sus controles internos reciben toque. */
     #mira-widget {
         pointer-events: none !important;
     }
@@ -332,6 +319,19 @@ summary {
     #mira-toggle,
     #mira-chat.mira-chat-open {
         pointer-events: auto !important;
+    }
+}
+
+/* Solo celular: se elimina el video de intro para que no bloquee la pantalla táctil. */
+@media (max-width: 767px) {
+    #intro-video-overlay,
+    .intro-overlay,
+    #global-loader {
+        display: none !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+        z-index: -1 !important;
     }
 }
 
