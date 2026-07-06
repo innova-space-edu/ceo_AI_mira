@@ -1,7 +1,4 @@
-/* =========================================================
-   Condiciones de trabajo y aceptación de proyectos
-   Ruta: /legal.css
-   ========================================================= */
+/* Condiciones de trabajo y aceptación de proyectos */
 .footer-legal {
     max-width: 1180px;
     margin: 18px auto 0;
@@ -56,14 +53,15 @@
     margin-top: 16px;
     border-radius: 22px;
     border: 1px solid rgba(255, 255, 255, 0.08);
-    background:
-        radial-gradient(circle at 0 0, rgba(53, 226, 255, 0.12), transparent 58%),
-        radial-gradient(circle at 100% 100%, rgba(255, 75, 255, 0.10), transparent 58%),
-        rgba(7, 10, 26, 0.96);
+    background: radial-gradient(circle at 0 0, rgba(53, 226, 255, 0.12), transparent 58%), radial-gradient(circle at 100% 100%, rgba(255, 75, 255, 0.10), transparent 58%), rgba(7, 10, 26, 0.96);
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.58);
     padding: clamp(16px, 3vw, 28px);
     color: var(--text-muted);
     text-align: left;
+}
+
+.legal-panel > :first-child {
+    margin-top: 0 !important;
 }
 
 .legal-panel h3 {
@@ -72,7 +70,12 @@
     letter-spacing: 0.08em;
     text-transform: uppercase;
     font-size: clamp(1rem, 2vw, 1.28rem);
-    margin-bottom: 10px;
+    line-height: 1.28;
+    margin: 0 0 26px 0;
+}
+
+.legal-panel > p:first-of-type {
+    margin-top: 8px;
 }
 
 .legal-panel h4 {
@@ -128,9 +131,6 @@
     opacity: 0.85;
 }
 
-/* =========================================================
-   Modo ventana semi-completa para el desplegable legal
-   ========================================================= */
 .legal-disclosure[open]::before {
     content: "";
     position: fixed;
@@ -179,15 +179,16 @@
     position: sticky;
     top: -1px;
     z-index: 2;
-    margin: calc(-1 * clamp(18px, 3vw, 34px)) calc(-1 * clamp(18px, 3vw, 34px)) 18px;
-    padding: 20px clamp(18px, 3vw, 34px);
-    background: linear-gradient(120deg, rgba(10, 15, 38, 0.98), rgba(38, 12, 62, 0.96));
+    margin: calc(-1 * clamp(18px, 3vw, 34px)) calc(-1 * clamp(18px, 3vw, 34px)) 36px;
+    padding: 24px clamp(18px, 3vw, 34px) 30px;
+    background: linear-gradient(120deg, rgba(10, 15, 38, 0.99), rgba(38, 12, 62, 0.98));
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-/* =========================================================
-   Correcciones generales de clics / toques
-   ========================================================= */
+.legal-disclosure[open] > .legal-panel h3 + p {
+    margin-top: 0;
+}
+
 a,
 button,
 [role="button"],
@@ -211,19 +212,7 @@ summary {
 }
 
 @media (max-width: 900px) {
-    body,
-    header,
-    main,
-    footer,
-    section,
-    .section,
-    .hero-content,
-    .hero-text,
-    .hero-buttons,
-    .portfolio-card,
-    .social-grid,
-    .contact-grid,
-    .footer {
+    body, header, main, footer, section, .section, .hero-content, .hero-text, .hero-buttons, .portfolio-card, .social-grid, .contact-grid, .footer {
         pointer-events: auto !important;
     }
 
@@ -293,15 +282,7 @@ summary {
         z-index: 9803;
     }
 
-    .btn-primary,
-    .btn-secondary,
-    .portfolio-link,
-    .social-card,
-    .contact-form button,
-    .contact-form input,
-    .contact-form textarea,
-    #mira-toggle,
-    .legal-toggle-btn {
+    .btn-primary, .btn-secondary, .portfolio-link, .social-card, .contact-form button, .contact-form input, .contact-form textarea, #mira-toggle, .legal-toggle-btn {
         position: relative;
         z-index: 10;
         pointer-events: auto !important;
@@ -322,7 +303,6 @@ summary {
     }
 }
 
-/* Solo celular: se elimina el video de intro para que no bloquee la pantalla táctil. */
 @media (max-width: 767px) {
     #intro-video-overlay,
     .intro-overlay,
@@ -363,8 +343,8 @@ summary {
     }
 
     .legal-disclosure[open] > .legal-panel h3 {
-        margin: -16px -16px 16px;
-        padding: 16px;
+        margin: -16px -16px 26px;
+        padding: 18px 16px 24px;
         font-size: 0.98rem;
         letter-spacing: 0.06em;
     }
