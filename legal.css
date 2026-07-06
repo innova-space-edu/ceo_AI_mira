@@ -196,6 +196,19 @@ summary {
     -webkit-tap-highlight-color: transparent;
 }
 
+.hero-overlay,
+.navbar::before,
+.service-card::before,
+#global-loader.hidden,
+.intro-overlay.hidden {
+    pointer-events: none !important;
+}
+
+#global-loader.hidden,
+.intro-overlay.hidden {
+    display: none !important;
+}
+
 @media (max-width: 900px) {
     .navbar {
         z-index: 9800;
@@ -214,6 +227,7 @@ summary {
         cursor: pointer;
         position: relative;
         z-index: 9802;
+        pointer-events: auto !important;
     }
 
     .nav-links {
@@ -224,7 +238,6 @@ summary {
         width: auto;
         max-height: calc(100dvh - 104px);
         overflow-y: auto;
-        display: flex !important;
         flex-direction: column;
         gap: 4px;
         padding: 12px;
@@ -232,18 +245,21 @@ summary {
         background: rgba(4, 6, 20, 0.98);
         border: 1px solid rgba(255, 255, 255, 0.12);
         box-shadow: 0 24px 70px rgba(0, 0, 0, 0.72);
-        opacity: 0;
-        visibility: hidden;
-        pointer-events: none;
-        transform: translateY(-8px);
-        transition: opacity 0.16s ease, transform 0.16s ease, visibility 0.16s ease;
         z-index: 9801;
     }
 
+    .nav-links:not(.nav-open) {
+        display: none !important;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none !important;
+    }
+
     .nav-links.nav-open {
+        display: flex !important;
         opacity: 1;
         visibility: visible;
-        pointer-events: auto;
+        pointer-events: auto !important;
         transform: translateY(0);
     }
 
@@ -254,15 +270,31 @@ summary {
         padding: 10px 8px;
         border-radius: 12px;
         color: #ffffff;
+        pointer-events: auto !important;
+        position: relative;
+        z-index: 9803;
+    }
+
+    .hero-content,
+    .hero-buttons,
+    .btn-primary,
+    .btn-secondary,
+    .portfolio-link,
+    .social-card,
+    .contact-form button,
+    #mira-toggle,
+    .legal-toggle-btn {
+        position: relative;
+        pointer-events: auto !important;
     }
 
     body.menu-open .section-nav {
         opacity: 0.22;
-        pointer-events: none;
+        pointer-events: none !important;
     }
 
     body.menu-open #mira-widget {
-        pointer-events: none;
+        pointer-events: none !important;
         opacity: 0.45;
     }
 }
@@ -299,5 +331,9 @@ summary {
         padding: 16px;
         font-size: 0.98rem;
         letter-spacing: 0.06em;
+    }
+
+    .section-nav {
+        display: none !important;
     }
 }
