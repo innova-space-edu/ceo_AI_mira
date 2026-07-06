@@ -13,6 +13,14 @@
     padding-top: 14px;
 }
 
+.legal-disclosure summary {
+    list-style: none;
+}
+
+.legal-disclosure summary::-webkit-details-marker {
+    display: none;
+}
+
 .legal-toggle-btn {
     width: fit-content;
     margin: 0 auto;
@@ -30,7 +38,7 @@
     font-weight: 600;
     letter-spacing: 0.02em;
     box-shadow: 0 0 22px rgba(53, 226, 255, 0.10);
-    transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, color 0.18s ease;
+    transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, color 0.18s ease, background 0.18s ease;
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
 }
@@ -44,140 +52,52 @@
     outline: none;
 }
 
-body.legal-modal-open {
-    overflow: hidden;
-}
-
-.legal-modal-backdrop {
-    position: fixed;
-    inset: 0;
-    z-index: 12000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: clamp(14px, 3vw, 34px);
-    background: rgba(1, 3, 12, 0.72);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.18s ease;
-}
-
-.legal-modal-backdrop.is-open {
-    opacity: 1;
-    pointer-events: auto;
-}
-
-.legal-modal-panel {
-    width: min(1120px, 100%);
-    height: min(82dvh, 820px);
-    max-height: 82dvh;
-    border-radius: 26px;
-    border: 1px solid rgba(255, 255, 255, 0.10);
+.legal-panel {
+    margin-top: 16px;
+    border-radius: 22px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
     background:
-        radial-gradient(circle at 0 0, rgba(53, 226, 255, 0.16), transparent 58%),
-        radial-gradient(circle at 100% 100%, rgba(255, 75, 255, 0.14), transparent 58%),
-        rgba(7, 10, 26, 0.98);
-    box-shadow: 0 28px 90px rgba(0, 0, 0, 0.82);
+        radial-gradient(circle at 0 0, rgba(53, 226, 255, 0.12), transparent 58%),
+        radial-gradient(circle at 100% 100%, rgba(255, 75, 255, 0.10), transparent 58%),
+        rgba(7, 10, 26, 0.96);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.58);
+    padding: clamp(16px, 3vw, 28px);
     color: var(--text-muted);
-    overflow: hidden;
-    transform: translateY(10px) scale(0.985);
-    transition: transform 0.18s ease;
+    text-align: left;
 }
 
-.legal-modal-backdrop.is-open .legal-modal-panel {
-    transform: translateY(0) scale(1);
-}
-
-.legal-modal-header {
-    position: sticky;
-    top: 0;
-    z-index: 2;
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 18px;
-    padding: 20px clamp(16px, 3vw, 30px);
-    background: linear-gradient(120deg, rgba(10, 15, 38, 0.98), rgba(38, 12, 62, 0.96));
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.legal-modal-header h3 {
+.legal-panel h3 {
     color: var(--text-main);
     font-family: "Orbitron", sans-serif;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    font-size: clamp(1rem, 2vw, 1.35rem);
-    margin: 0 0 5px;
+    font-size: clamp(1rem, 2vw, 1.28rem);
+    margin-bottom: 10px;
 }
 
-.legal-modal-header p {
-    margin: 0;
-    font-size: 0.84rem;
-    line-height: 1.5;
-}
-
-.legal-close-btn {
-    flex: 0 0 auto;
-    width: 42px;
-    height: 42px;
-    border-radius: 999px;
-    border: 1px solid rgba(255,255,255,0.14);
-    background: rgba(255,255,255,0.05);
+.legal-panel h4 {
     color: #ffffff;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.3rem;
-    touch-action: manipulation;
-}
-
-.legal-close-btn:hover,
-.legal-close-btn:focus-visible {
-    border-color: rgba(53, 226, 255, 0.55);
-    box-shadow: 0 0 18px rgba(53, 226, 255, 0.18);
-    outline: none;
-}
-
-.legal-modal-body {
-    height: calc(100% - 88px);
-    overflow-y: auto;
-    padding: clamp(16px, 3vw, 30px);
-    scrollbar-width: thin;
-}
-
-.legal-panel h4,
-.legal-modal-body h4 {
-    color: #ffffff;
-    margin: 20px 0 8px;
+    margin: 18px 0 8px;
     font-size: 0.98rem;
 }
 
 .legal-panel p,
-.legal-panel li,
-.legal-modal-body p,
-.legal-modal-body li {
-    line-height: 1.62;
+.legal-panel li {
+    line-height: 1.6;
     font-size: 0.9rem;
 }
 
 .legal-panel ul,
-.legal-panel ol,
-.legal-modal-body ul,
-.legal-modal-body ol {
+.legal-panel ol {
     padding-left: 20px;
     margin: 8px 0 0;
 }
 
-.legal-panel li,
-.legal-modal-body li {
+.legal-panel li {
     margin-bottom: 8px;
 }
 
-.legal-panel strong,
-.legal-modal-body strong {
+.legal-panel strong {
     color: #f2f4ff;
     font-weight: 600;
 }
@@ -209,11 +129,69 @@ body.legal-modal-open {
 }
 
 /* =========================================================
+   Modo ventana semi-completa para el desplegable legal
+   ========================================================= */
+.legal-disclosure[open]::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 11998;
+    background: rgba(1, 3, 12, 0.76);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.legal-disclosure[open] > .legal-toggle-btn {
+    position: fixed;
+    top: max(16px, env(safe-area-inset-top));
+    right: max(16px, env(safe-area-inset-right));
+    z-index: 12001;
+    background: rgba(8, 12, 30, 0.96);
+    border-color: rgba(255, 255, 255, 0.18);
+    color: #ffffff;
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.65), 0 0 24px rgba(53, 226, 255, 0.16);
+}
+
+.legal-disclosure[open] > .legal-toggle-btn::after {
+    content: "Cerrar";
+    margin-left: 8px;
+    color: #ffffff;
+}
+
+.legal-disclosure[open] > .legal-panel {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    z-index: 12000;
+    width: min(1120px, calc(100vw - 32px));
+    height: min(82dvh, 820px);
+    max-height: 82dvh;
+    margin: 0;
+    overflow-y: auto;
+    padding: clamp(18px, 3vw, 34px);
+    transform: translate(-50%, -50%);
+    border-radius: 26px;
+    box-shadow: 0 28px 90px rgba(0, 0, 0, 0.82);
+    scrollbar-width: thin;
+}
+
+.legal-disclosure[open] > .legal-panel h3 {
+    position: sticky;
+    top: -1px;
+    z-index: 2;
+    margin: calc(-1 * clamp(18px, 3vw, 34px)) calc(-1 * clamp(18px, 3vw, 34px)) 18px;
+    padding: 20px clamp(18px, 3vw, 34px);
+    background: linear-gradient(120deg, rgba(10, 15, 38, 0.98), rgba(38, 12, 62, 0.96));
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* =========================================================
    Correcciones móviles generales
    ========================================================= */
 a,
 button,
-[role="button"] {
+[role="button"],
+summary {
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
 }
@@ -295,29 +273,31 @@ button,
         text-align: center;
     }
 
-    .legal-modal-backdrop {
-        padding: 10px;
-        align-items: flex-end;
+    .legal-disclosure[open] > .legal-toggle-btn {
+        top: auto;
+        right: 10px;
+        left: 10px;
+        bottom: max(12px, env(safe-area-inset-bottom));
+        width: calc(100% - 20px);
+        justify-content: center;
     }
 
-    .legal-modal-panel {
+    .legal-disclosure[open] > .legal-panel {
         width: 100%;
         height: 88dvh;
         max-height: 88dvh;
+        top: auto;
+        bottom: 0;
+        left: 0;
+        transform: none;
         border-radius: 22px 22px 0 0;
+        padding: 16px 16px 78px;
     }
 
-    .legal-modal-header {
+    .legal-disclosure[open] > .legal-panel h3 {
+        margin: -16px -16px 16px;
         padding: 16px;
-    }
-
-    .legal-modal-header h3 {
         font-size: 0.98rem;
         letter-spacing: 0.06em;
-    }
-
-    .legal-modal-body {
-        height: calc(100% - 86px);
-        padding: 16px;
     }
 }
