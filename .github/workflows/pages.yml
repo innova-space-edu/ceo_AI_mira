@@ -26,7 +26,7 @@ jobs:
         run: |
           mkdir -p _site
           cp -R assets _site/assets
-          cp documentos.html index.html innova-space-track.html legal.css legal.js main.js speak.js style.css _site/
+          cp documentos.html index.html innova-space-track.html innova-measure-ai.html innova-measure-ai.css innova-measure-ai.js legal.css legal.js main.js speak.js style.css _site/
           touch _site/.nojekyll
 
       - uses: actions/upload-pages-artifact@v3
