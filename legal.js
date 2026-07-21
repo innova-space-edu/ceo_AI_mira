@@ -139,3 +139,214 @@ document.addEventListener("DOMContentLoaded", () => {
 
     footer.appendChild(legalWrap);
 });
+
+// Categoría "Aplicaciones web" dentro del portafolio.
+document.addEventListener("DOMContentLoaded", () => {
+    const portfolio = document.querySelector("#portafolio");
+    if (!portfolio || document.querySelector("#aplicaciones-web")) return;
+
+    const style = document.createElement("style");
+    style.id = "web-applications-styles";
+    style.textContent = `
+        .web-applications-block {
+            max-width: 1180px;
+            margin: 44px auto 0;
+            padding-top: 34px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .web-applications-heading {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 22px;
+            margin-bottom: 20px;
+        }
+        .web-applications-heading span {
+            display: inline-block;
+            color: var(--accent);
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-bottom: 7px;
+        }
+        .web-applications-heading h3 {
+            font-family: "Orbitron", sans-serif;
+            font-size: clamp(1.25rem, 2.3vw, 1.85rem);
+            letter-spacing: 0.06em;
+            margin-bottom: 6px;
+        }
+        .web-applications-heading p {
+            max-width: 720px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+        .web-applications-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.35fr) minmax(260px, 0.65fr);
+            gap: 18px;
+        }
+        .web-application-card {
+            position: relative;
+            overflow: hidden;
+            min-height: 290px;
+            padding: clamp(20px, 3vw, 30px);
+            border-radius: 24px;
+            border: 1px solid rgba(53, 226, 255, 0.18);
+            background: radial-gradient(circle at 100% 0%, rgba(53, 226, 255, 0.17), transparent 42%), radial-gradient(circle at 0% 100%, rgba(166, 101, 255, 0.15), transparent 45%), rgba(8, 13, 34, 0.94);
+            box-shadow: var(--shadow-soft);
+        }
+        .web-application-card.secondary {
+            border-color: rgba(255, 255, 255, 0.08);
+            background: rgba(11, 16, 38, 0.9);
+        }
+        .web-app-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        .web-app-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 9px;
+            border-radius: 999px;
+            color: var(--accent);
+            background: rgba(53, 226, 255, 0.08);
+            border: 1px solid rgba(53, 226, 255, 0.14);
+            font-size: 0.68rem;
+            font-weight: 600;
+        }
+        .web-application-card h4 {
+            font-size: clamp(1.2rem, 2vw, 1.55rem);
+            margin-bottom: 10px;
+        }
+        .web-application-card > p {
+            max-width: 700px;
+            color: var(--text-muted);
+            font-size: 0.88rem;
+            line-height: 1.65;
+        }
+        .web-app-features {
+            list-style: none;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 9px 16px;
+            margin: 20px 0 24px;
+        }
+        .web-app-features li {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            color: #cbd3f4;
+            font-size: 0.78rem;
+        }
+        .web-app-features i { color: var(--accent); margin-top: 2px; }
+        .web-app-open {
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            padding: 11px 16px;
+            border-radius: 12px;
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.86rem;
+            background: linear-gradient(120deg, #22c7e6, #7868ff);
+            box-shadow: 0 14px 34px rgba(54, 133, 255, 0.24);
+            transition: transform 0.18s ease, box-shadow 0.18s ease;
+        }
+        .web-app-open:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 18px 40px rgba(54, 133, 255, 0.3);
+        }
+        .web-app-icon {
+            width: 52px;
+            height: 52px;
+            display: grid;
+            place-items: center;
+            margin-bottom: 18px;
+            border-radius: 15px;
+            color: var(--accent);
+            font-size: 1.5rem;
+            background: rgba(53, 226, 255, 0.09);
+            border: 1px solid rgba(53, 226, 255, 0.16);
+        }
+        @media (max-width: 820px) {
+            .web-applications-heading { align-items: flex-start; flex-direction: column; }
+            .web-applications-grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 560px) {
+            .web-app-features { grid-template-columns: 1fr; }
+            .web-application-card { min-height: auto; }
+        }
+    `;
+    document.head.appendChild(style);
+
+    const block = document.createElement("div");
+    block.id = "aplicaciones-web";
+    block.className = "web-applications-block";
+    block.innerHTML = `
+        <div class="web-applications-heading">
+            <div>
+                <span>Nueva categoría</span>
+                <h3>Aplicaciones web</h3>
+                <p>
+                    Plataformas funcionales desarrolladas por Innova Space Education para resolver procesos
+                    educativos, técnicos, administrativos y de gestión mediante interfaces web modernas.
+                </p>
+            </div>
+        </div>
+
+        <div class="web-applications-grid">
+            <article class="web-application-card">
+                <div class="web-app-badges">
+                    <span class="web-app-badge"><i class="ri-flask-line"></i> MVP beta</span>
+                    <span class="web-app-badge"><i class="ri-camera-3-line"></i> Cámara móvil</span>
+                    <span class="web-app-badge"><i class="ri-brain-line"></i> Preparada para IA</span>
+                </div>
+
+                <h4>Innova Measure AI</h4>
+                <p>
+                    Aplicación para organizar obras y medir acopios de arena, ripio, tierra, mineral u otros
+                    materiales. Incluye captura guiada, estimación de volumen y tonelaje, historial y la
+                    arquitectura prevista para fotogrametría 3D e inteligencia artificial.
+                </p>
+
+                <ul class="web-app-features">
+                    <li><i class="ri-checkbox-circle-line"></i> Gestión de proyectos y ubicaciones</li>
+                    <li><i class="ri-checkbox-circle-line"></i> Captura desde la cámara del teléfono</li>
+                    <li><i class="ri-checkbox-circle-line"></i> Estimación geométrica de respaldo</li>
+                    <li><i class="ri-checkbox-circle-line"></i> Volumen, tonelaje y nivel de confianza</li>
+                    <li><i class="ri-checkbox-circle-line"></i> Historial local y exportación de datos</li>
+                    <li><i class="ri-checkbox-circle-line"></i> Hoja de ruta para motor 3D automático</li>
+                </ul>
+
+                <a class="web-app-open"
+                   href="innova-measure-ai.html"
+                   target="_blank"
+                   rel="noopener"
+                   data-mira-hint="Abre Innova Measure AI, la aplicación experimental para medición volumétrica de acopios.">
+                    <i class="ri-external-link-line"></i>
+                    Abrir aplicación
+                </a>
+            </article>
+
+            <article class="web-application-card secondary">
+                <div class="web-app-icon"><i class="ri-apps-2-add-line"></i></div>
+                <h4>Ecosistema en crecimiento</h4>
+                <p>
+                    Esta sección reunirá las aplicaciones web creadas por la empresa, con acceso directo a
+                    demostraciones, herramientas de gestión y soluciones conectadas con inteligencia artificial.
+                </p>
+                <a class="portfolio-link" href="#contacto">Solicitar una aplicación</a>
+            </article>
+        </div>
+    `;
+
+    const portfolioGrid = portfolio.querySelector(".portfolio-grid");
+    if (portfolioGrid) portfolioGrid.insertAdjacentElement("afterend", block);
+    else portfolio.appendChild(block);
+});
