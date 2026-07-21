@@ -1,3 +1,13 @@
+// Carga el controlador que impide voces simultáneas de MIRA.
+(() => {
+    if (document.querySelector('script[data-mira-voice-controller]')) return;
+    const script = document.createElement("script");
+    script.src = "mira-voice-controller.js?v=20260721-1";
+    script.async = false;
+    script.dataset.miraVoiceController = "true";
+    document.head.appendChild(script);
+})();
+
 // =========================================================
 // Condiciones de trabajo y aceptación de proyectos
 // Ruta: /legal.js
