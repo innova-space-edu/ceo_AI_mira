@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Innova Measure AI: captura guiada y gestión de mediciones volumétricas de acopios.">
+  <title>Innova Measure AI | Innova Space Education</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet">
+  <link rel="stylesheet" href="innova-measure-ai.css">
+</head>
+<body>
+  <canvas id="spaceCanvas" aria-hidden="true"></canvas>
+
+  <header class="topbar">
+    <a class="brand" href="index.html#aplicaciones-web" aria-label="Volver al sitio principal">
+      <span class="brand-mark"><i class="ri-radar-line"></i></span>
+      <span>
+        <strong>INNOVA MEASURE AI</strong>
+        <small>Innova Space Education</small>
+      </span>
+    </a>
+
+    <div class="top-actions">
+      <span class="status-pill"><span></span>MVP operativo</span>
+      <a class="ghost-button" href="index.html#portafolio">
+        <i class="ri-arrow-left-line"></i> Volver
+      </a>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-copy">
+        <span class="eyebrow"><i class="ri-sparkling-2-line"></i> Medición volumétrica asistida</span>
+        <h1>Convierte fotografías de un acopio en una medición organizada.</h1>
+        <p>
+          Este MVP permite gestionar obras, capturar imágenes desde el teléfono, estimar volumen y tonelaje,
+          guardar mediciones y preparar el flujo que más adelante conectará el motor de fotogrametría e IA.
+        </p>
+        <div class="hero-actions">
+          <button class="primary-button" type="button" data-go-view="new-measurement">
+            <i class="ri-camera-3-line"></i> Nueva medición
+          </button>
+          <button class="secondary-button" type="button" data-go-view="technology">
+            <i class="ri-node-tree"></i> Ver tecnología
+          </button>
+        </div>
+        <div class="hero-note">
+          <i class="ri-information-line"></i>
+          La estimación actual usa dimensiones manuales como respaldo. La reconstrucción 3D automática se conectará
+          mediante un servicio Python con COLMAP, Open3D y segmentación por IA.
+        </div>
+      </div>
+
+      <div class="hero-visual" aria-label="Visualización tridimensional de un acopio">
+        <div class="scan-ring scan-ring-one"></div>
+        <div class="scan-ring scan-ring-two"></div>
+        <div class="pile-model">
+          <span class="mesh-line mesh-a"></span>
+          <span class="mesh-line mesh-b"></span>
+          <span class="mesh-line mesh-c"></span>
+          <span class="mesh-line mesh-d"></span>
+        </div>
+        <div class="scan-label label-one">Cobertura 360°</div>
+        <div class="scan-label label-two">Escala calibrada</div>
+        <div class="scan-label label-three">Volumen + tonelaje</div>
+      </div>
+    </section>
+
+    <section class="metrics" aria-label="Resumen general">
+      <article class="metric-card">
+        <span class="metric-icon"><i class="ri-building-4-line"></i></span>
+        <div><strong id="statProjects">0</strong><span>Proyectos</span></div>
+      </article>
+      <article class="metric-card">
+        <span class="metric-icon"><i class="ri-ruler-2-line"></i></span>
+        <div><strong id="statMeasurements">0</strong><span>Mediciones</span></div>
+      </article>
+      <article class="metric-card">
+        <span class="metric-icon"><i class="ri-shape-2-line"></i></span>
+        <div><strong id="statVolume">0,00 m³</strong><span>Volumen registrado</span></div>
+      </article>
+      <article class="metric-card">
+        <span class="metric-icon"><i class="ri-scales-3-line"></i></span>
+        <div><strong id="statTonnes">0,00 t</strong><span>Tonelaje estimado</span></div>
+      </article>
+    </section>
+
+    <section class="workspace" id="workspace">
+      <aside class="sidebar" aria-label="Módulos de la aplicación">
+        <div class="sidebar-title">
+          <span>Centro de medición</span>
+          <small>Versión beta 0.1</small>
+        </div>
+
+        <nav class="module-nav">
+          <button class="module-button active" type="button" data-view="dashboard">
+            <i class="ri-dashboard-3-line"></i><span>Resumen</span>
+          </button>
+          <button class="module-button" type="button" data-view="projects">
+            <i class="ri-building-line"></i><span>Proyectos</span>
+          </button>
+          <button class="module-button" type="button" data-view="new-measurement">
+            <i class="ri-camera-lens-line"></i><span>Nueva medición</span>
+          </button>
+          <button class="module-button" type="button" data-view="history">
+            <i class="ri-history-line"></i><span>Historial</span>
+          </button>
+          <button class="module-button" type="button" data-view="technology">
+            <i class="ri-cpu-line"></i><span>Motor 3D e IA</span>
+          </button>
+        </nav>
+
+        <div class="sidebar-callout">
+          <i class="ri-shield-check-line"></i>
+          <strong>Datos del MVP</strong>
+          <p>Se guardan en este navegador. No se envían todavía a una base de datos.</p>
+        </div>
+      </aside>
+
+      <div class="content-panel">
+        <section class="app-view active" data-view-panel="dashboard">
+          <div class="panel-heading">
+            <div>
+              <span class="panel-kicker">Vista general</span>
+              <h2>Panel de mediciones</h2>
+              <p>Controla el avance desde la captura hasta el informe.</p>
+            </div>
+            <button class="primary-button compact" type="button" data-go-view="new-measurement">
+              <i class="ri-add-line"></i> Medir acopio
+            </button>
+          </div>
+
+          <div class="workflow-grid">
+            <article class="workflow-card">
+              <span>01</span><i class="ri-map-pin-add-line"></i>
+              <h3>Crear proyecto</h3>
+              <p>Registra la obra, faena o ubicación donde se encuentran los materiales.</p>
+            </article>
+            <article class="workflow-card">
+              <span>02</span><i class="ri-camera-3-line"></i>
+              <h3>Capturar imágenes</h3>
+              <p>Recorre el acopio y toma fotografías desde distintos ángulos.</p>
+            </article>
+            <article class="workflow-card">
+              <span>03</span><i class="ri-focus-3-line"></i>
+              <h3>Calibrar escala</h3>
+              <p>Incluye un marcador o referencia con una medida conocida.</p>
+            </article>
+            <article class="workflow-card">
+              <span>04</span><i class="ri-box-3-line"></i>
+              <h3>Procesar volumen</h3>
+              <p>Obtén volumen, tonelaje, confianza y un registro para el informe.</p>
+            </article>
+          </div>
+
+          <div class="split-grid">
+            <article class="data-card">
+              <div class="card-heading">
+                <div><span class="panel-kicker">Actividad</span><h3>Últimas mediciones</h3></div>
+                <button class="text-button" type="button" data-go-view="history">Ver todo</button>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead><tr><th>Acopio</th><th>Proyecto</th><th>Volumen</th><th>Estado</th></tr></thead>
+                  <tbody id="dashboardMeasurements"></tbody>
+                </table>
+              </div>
+              <div class="empty-state" id="dashboardEmpty">
+                <i class="ri-ruler-line"></i>
+                <strong>Aún no hay mediciones</strong>
+                <p>Crea un proyecto y realiza la primera captura.</p>
+              </div>
+            </article>
+
+            <article class="data-card readiness-card">
+              <div class="card-heading"><div><span class="panel-kicker">Preparación</span><h3>Estado del sistema</h3></div></div>
+              <ul class="readiness-list">
+                <li class="ready"><i class="ri-checkbox-circle-fill"></i><span><strong>Gestión de proyectos</strong><small>Operativa en el navegador</small></span></li>
+                <li class="ready"><i class="ri-checkbox-circle-fill"></i><span><strong>Captura con cámara</strong><small>Disponible bajo HTTPS</small></span></li>
+                <li class="ready"><i class="ri-checkbox-circle-fill"></i><span><strong>Cálculo geométrico</strong><small>Estimación manual de respaldo</small></span></li>
+                <li class="pending"><i class="ri-time-fill"></i><span><strong>Fotogrametría automática</strong><small>Servicio Python pendiente</small></span></li>
+                <li class="pending"><i class="ri-time-fill"></i><span><strong>Supabase e informes</strong><small>Siguiente integración</small></span></li>
+              </ul>
+            </article>
+          </div>
+        </section>
+
+        <section class="app-view" data-view-panel="projects">
+          <div class="panel-heading">
+            <div>
+              <span class="panel-kicker">Organización</span>
+              <h2>Proyectos y ubicaciones</h2>
+              <p>Separa las mediciones por obra, terreno, planta o faena.</p>
+            </div>
+            <button class="primary-button compact" type="button" id="openProjectDialog">
+              <i class="ri-add-line"></i> Nuevo proyecto
+            </button>
+          </div>
+          <div class="project-grid" id="projectGrid"></div>
+          <div class="empty-state large" id="projectEmpty">
+            <i class="ri-building-2-line"></i>
+            <strong>No hay proyectos registrados</strong>
+            <p>Crea el primero para comenzar a medir acopios.</p>
+            <button class="secondary-button compact" type="button" data-open-project>
+              <i class="ri-add-line"></i> Crear proyecto
+            </button>
+          </div>
+        </section>
+
+        <section class="app-view" data-view-panel="new-measurement">
+          <div class="panel-heading">
+            <div>
+              <span class="panel-kicker">Captura guiada</span>
+              <h2>Nueva medición</h2>
+              <p>Completa la identificación, captura y procesamiento de respaldo.</p>
+            </div>
+            <span class="beta-chip"><i class="ri-flask-line"></i> Modo MVP</span>
+          </div>
+
+          <div class="stepper" aria-label="Pasos de medición">
+            <div class="step active"><span>1</span><strong>Datos</strong></div>
+            <div class="step"><span>2</span><strong>Captura</strong></div>
+            <div class="step"><span>3</span><strong>Procesamiento</strong></div>
+            <div class="step"><span>4</span><strong>Resultado</strong></div>
+          </div>
+
+          <form id="measurementForm" class="measurement-layout">
+            <div class="measurement-main">
+              <article class="form-card">
+                <div class="card-heading">
+                  <div><span class="panel-kicker">Paso 1</span><h3>Identificación del acopio</h3></div>
+                  <i class="ri-file-list-3-line section-symbol"></i>
+                </div>
+
+                <div class="form-grid">
+                  <label class="field">
+                    <span>Proyecto *</span>
+                    <select id="measurementProject" required>
+                      <option value="">Selecciona un proyecto</option>
+                    </select>
+                  </label>
+                  <label class="field">
+                    <span>Nombre del acopio *</span>
+                    <input id="pileName" type="text" placeholder="Ej: Acopio arena norte" required>
+                  </label>
+                  <label class="field">
+                    <span>Material *</span>
+                    <select id="materialSelect" required>
+                      <option value="Arena" data-density="1.60">Arena</option>
+                      <option value="Ripio" data-density="1.70">Ripio</option>
+                      <option value="Grava" data-density="1.75">Grava</option>
+                      <option value="Tierra" data-density="1.45">Tierra</option>
+                      <option value="Escombros" data-density="1.20">Escombros</option>
+                      <option value="Mineral" data-density="2.20">Mineral</option>
+                      <option value="Otro" data-density="1.50">Otro</option>
+                    </select>
+                  </label>
+                  <label class="field">
+                    <span>Densidad estimada (t/m³) *</span>
+                    <input id="densityInput" type="number" min="0.10" max="5" step="0.01" value="1.60" required>
+                    <small>Debe confirmarse según humedad y compactación.</small>
+                  </label>
+                  <label class="field">
+                    <span>Modelo geométrico de respaldo</span>
+                    <select id="shapeSelect">
+                      <option value="ellipsoid">Montículo elipsoidal</option>
+                      <option value="cone">Montículo cónico</option>
+                      <option value="trapezoid">Acopio irregular compacto</option>
+                      <option value="loose">Acopio irregular suelto</option>
+                    </select>
+                  </label>
+                  <label class="field">
+                    <span>Marcador de escala</span>
+                    <select id="markerSize">
+                      <option value="0.50">ArUco 50 cm</option>
+                      <option value="1.00">Regla de 1 metro</option>
+                      <option value="2.00">Dos conos a 2 metros</option>
+                      <option value="custom">Referencia personalizada</option>
+                    </select>
+                  </label>
+                </div>
+
+                <div class="dimensions-block">
+                  <div>
+                    <span class="panel-kicker">Respaldo manual</span>
+                    <h4>Dimensiones aproximadas</h4>
+                    <p>Estas medidas permiten probar el flujo mientras conectamos la fotogrametría.</p>
+                  </div>
+                  <div class="dimension-grid">
+                    <label class="field"><span>Largo (m)</span><input id="lengthInput" type="number" min="0.10" step="0.01" value="6.00" required></label>
+                    <label class="field"><span>Ancho (m)</span><input id="widthInput" type="number" min="0.10" step="0.01" value="4.00" required></label>
+                    <label class="field"><span>Altura (m)</span><input id="heightInput" type="number" min="0.10" step="0.01" value="2.00" required></label>
+                  </div>
+                </div>
+              </article>
+
+              <article class="form-card">
+                <div class="card-heading">
+                  <div><span class="panel-kicker">Paso 2</span><h3>Captura alrededor del acopio</h3></div>
+                  <span class="photo-counter"><strong id="photoCount">0</strong>/16 fotos recomendadas</span>
+                </div>
+
+                <div class="capture-grid">
+                  <div class="camera-stage">
+                    <video id="cameraPreview" autoplay muted playsinline></video>
+                    <div class="camera-placeholder" id="cameraPlaceholder">
+                      <i class="ri-camera-lens-line"></i>
+                      <strong>Cámara sin iniciar</strong>
+                      <p>Usa el teléfono en posición horizontal y mantén el acopio completo dentro del encuadre.</p>
+                    </div>
+                    <div class="camera-guide"><span></span><span></span><span></span><span></span></div>
+                  </div>
+
+                  <div class="capture-controls">
+                    <button class="primary-button" type="button" id="startCamera">
+                      <i class="ri-camera-line"></i> Iniciar cámara
+                    </button>
+                    <button class="secondary-button" type="button" id="capturePhoto" disabled>
+                      <i class="ri-camera-3-line"></i> Capturar foto
+                    </button>
+                    <button class="ghost-button wide" type="button" id="stopCamera" disabled>
+                      <i class="ri-stop-circle-line"></i> Detener cámara
+                    </button>
+                    <label class="upload-button">
+                      <i class="ri-image-add-line"></i> Subir fotografías
+                      <input id="photoUpload" type="file" accept="image/*" multiple>
+                    </label>
+                    <button class="text-button danger" type="button" id="clearPhotos">
+                      <i class="ri-delete-bin-6-line"></i> Limpiar capturas
+                    </button>
+                  </div>
+                </div>
+
+                <canvas id="captureCanvas" hidden></canvas>
+                <div class="photo-gallery" id="photoGallery"></div>
+
+                <div class="coverage-panel">
+                  <div>
+                    <span class="panel-kicker">Control de cobertura</span>
+                    <h4>Confirma los ángulos capturados</h4>
+                  </div>
+                  <div class="coverage-checks">
+                    <label><input type="checkbox" class="coverage-check" value="frontal"><span><i class="ri-checkbox-blank-circle-line"></i> Frontal</span></label>
+                    <label><input type="checkbox" class="coverage-check" value="derecha"><span><i class="ri-checkbox-blank-circle-line"></i> Derecha</span></label>
+                    <label><input type="checkbox" class="coverage-check" value="posterior"><span><i class="ri-checkbox-blank-circle-line"></i> Posterior</span></label>
+                    <label><input type="checkbox" class="coverage-check" value="izquierda"><span><i class="ri-checkbox-blank-circle-line"></i> Izquierda</span></label>
+                    <label><input type="checkbox" id="markerVisible"><span><i class="ri-focus-2-line"></i> Marcador visible</span></label>
+                  </div>
+                </div>
+              </article>
+
+              <article class="form-card process-card">
+                <div>
+                  <span class="panel-kicker">Paso 3</span>
+                  <h3>Procesamiento de demostración</h3>
+                  <p>Calcula una estimación geométrica y evalúa la calidad de la captura.</p>
+                </div>
+                <button class="primary-button process-button" type="submit">
+                  <i class="ri-magic-line"></i> Procesar medición
+                </button>
+              </article>
+            </div>
+
+            <aside class="measurement-tips">
+              <article class="tip-card">
+                <i class="ri-route-line"></i>
+                <h3>Recorrido recomendado</h3>
+                <ol>
+                  <li>Ubica el marcador junto al acopio.</li>
+                  <li>Aléjate hasta verlo completamente.</li>
+                  <li>Camina lentamente alrededor.</li>
+                  <li>Toma fotografías con 60–80 % de superposición.</li>
+                  <li>Evita personas y maquinaria en movimiento.</li>
+                </ol>
+              </article>
+              <article class="tip-card warning">
+                <i class="ri-sun-cloudy-line"></i>
+                <h3>Condiciones de captura</h3>
+                <p>Evita sombras muy duras, oscuridad, reflejos intensos y fotografías borrosas.</p>
+              </article>
+              <article class="tip-card">
+                <i class="ri-shield-check-line"></i>
+                <h3>Uso responsable</h3>
+                <p>El MVP es experimental. No debe utilizarse todavía para certificaciones contractuales o topográficas.</p>
+              </article>
+            </aside>
+          </form>
+
+          <article class="result-panel" id="resultPanel" hidden>
+            <div class="panel-heading result-heading">
+              <div>
+                <span class="panel-kicker">Paso 4</span>
+                <h2>Resultado de la medición</h2>
+                <p id="resultSubtitle">Estimación disponible.</p>
+              </div>
+              <span class="confidence-badge" id="confidenceBadge">0 % confianza</span>
+            </div>
+
+            <div class="result-grid">
+              <div class="model-card">
+                <canvas id="modelCanvas" width="720" height="460"></canvas>
+                <div class="model-overlay">
+                  <span><i class="ri-drag-move-2-line"></i> Modelo visual de referencia</span>
+                  <span id="modelDimensions">0 × 0 × 0 m</span>
+                </div>
+              </div>
+              <div class="result-metrics">
+                <article><span>Volumen estimado</span><strong id="resultVolume">0,00 m³</strong></article>
+                <article><span>Tonelaje estimado</span><strong id="resultTonnes">0,00 t</strong></article>
+                <article><span>Rango probable</span><strong id="resultRange">0,00 – 0,00 m³</strong></article>
+                <article><span>Fotografías</span><strong id="resultPhotos">0</strong></article>
+                <div class="quality-list" id="qualityList"></div>
+              </div>
+            </div>
+
+            <div class="result-actions">
+              <button class="primary-button" type="button" id="saveMeasurement">
+                <i class="ri-save-3-line"></i> Guardar medición
+              </button>
+              <button class="secondary-button" type="button" id="printResult">
+                <i class="ri-file-pdf-2-line"></i> Generar ficha
+              </button>
+              <button class="ghost-button" type="button" id="newMeasurement">
+                <i class="ri-refresh-line"></i> Nueva captura
+              </button>
+            </div>
+          </article>
+        </section>
+
+        <section class="app-view" data-view-panel="history">
+          <div class="panel-heading">
+            <div>
+              <span class="panel-kicker">Registro</span>
+              <h2>Historial de mediciones</h2>
+              <p>Consulta resultados almacenados en este dispositivo.</p>
+            </div>
+            <button class="secondary-button compact" type="button" id="exportData">
+              <i class="ri-download-cloud-2-line"></i> Exportar JSON
+            </button>
+          </div>
+          <article class="data-card">
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr><th>Fecha</th><th>Proyecto</th><th>Acopio</th><th>Material</th><th>Volumen</th><th>Tonelaje</th><th>Confianza</th><th></th></tr>
+                </thead>
+                <tbody id="historyTable"></tbody>
+              </table>
+            </div>
+            <div class="empty-state" id="historyEmpty">
+              <i class="ri-history-line"></i>
+              <strong>Historial vacío</strong>
+              <p>Las mediciones guardadas aparecerán aquí.</p>
+            </div>
+          </article>
+        </section>
+
+        <section class="app-view" data-view-panel="technology">
+          <div class="panel-heading">
+            <div>
+              <span class="panel-kicker">Arquitectura prevista</span>
+              <h2>Motor 3D e inteligencia artificial</h2>
+              <p>Componentes que transformarán las fotografías en una medición automática.</p>
+            </div>
+          </div>
+
+          <div class="architecture-flow">
+            <article><span>01</span><i class="ri-camera-3-line"></i><h3>Captura</h3><p>PWA móvil, cámara, GPS opcional y control de calidad.</p></article>
+            <i class="ri-arrow-right-line flow-arrow"></i>
+            <article><span>02</span><i class="ri-cloud-line"></i><h3>Procesamiento</h3><p>Cola de trabajos y almacenamiento temporal de imágenes.</p></article>
+            <i class="ri-arrow-right-line flow-arrow"></i>
+            <article><span>03</span><i class="ri-bubble-chart-line"></i><h3>Reconstrucción 3D</h3><p>COLMAP, nube de puntos, malla y escala real.</p></article>
+            <i class="ri-arrow-right-line flow-arrow"></i>
+            <article><span>04</span><i class="ri-brain-line"></i><h3>IA</h3><p>Segmentación del acopio, limpieza y evaluación de cobertura.</p></article>
+            <i class="ri-arrow-right-line flow-arrow"></i>
+            <article><span>05</span><i class="ri-box-3-line"></i><h3>Resultado</h3><p>Volumen, densidad, tonelaje, confianza e informe.</p></article>
+          </div>
+
+          <div class="technology-grid">
+            <article class="tech-card">
+              <span class="tech-status ready">Incluido</span>
+              <i class="ri-layout-4-line"></i>
+              <h3>Interfaz web móvil</h3>
+              <p>Captura, proyectos, mediciones, resultados y almacenamiento local del MVP.</p>
+            </article>
+            <article class="tech-card">
+              <span class="tech-status next">Siguiente</span>
+              <i class="ri-database-2-line"></i>
+              <h3>Supabase</h3>
+              <p>Autenticación, obras, acopios, fotografías, resultados y políticas RLS.</p>
+            </article>
+            <article class="tech-card">
+              <span class="tech-status planned">Planificado</span>
+              <i class="ri-shape-line"></i>
+              <h3>Fotogrametría</h3>
+              <p>Structure-from-Motion, Multi-View Stereo y generación de mallas.</p>
+            </article>
+            <article class="tech-card">
+              <span class="tech-status planned">Planificado</span>
+              <i class="ri-focus-3-line"></i>
+              <h3>Segmentación IA</h3>
+              <p>Selección automática del material, suelo y objetos que deben excluirse.</p>
+            </article>
+            <article class="tech-card">
+              <span class="tech-status planned">Planificado</span>
+              <i class="ri-file-chart-line"></i>
+              <h3>Informes verificables</h3>
+              <p>Registro fotográfico, metodología, rango de error y firma del responsable.</p>
+            </article>
+            <article class="tech-card">
+              <span class="tech-status research">Validación</span>
+              <i class="ri-test-tube-line"></i>
+              <h3>Pruebas metrológicas</h3>
+              <p>Comparación con volúmenes conocidos, dron o levantamiento topográfico.</p>
+            </article>
+          </div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="projectDialog" class="app-dialog">
+    <form method="dialog" id="projectForm">
+      <div class="dialog-heading">
+        <div><span class="panel-kicker">Nueva ubicación</span><h2>Crear proyecto</h2></div>
+        <button type="button" class="icon-button" id="closeProjectDialog" aria-label="Cerrar"><i class="ri-close-line"></i></button>
+      </div>
+      <label class="field"><span>Nombre del proyecto *</span><input id="projectName" type="text" placeholder="Ej: Obra Totoral" required></label>
+      <label class="field"><span>Ubicación</span><input id="projectLocation" type="text" placeholder="Ciudad, faena o dirección"></label>
+      <label class="field"><span>Cliente o institución</span><input id="projectClient" type="text" placeholder="Nombre del cliente"></label>
+      <label class="field"><span>Descripción</span><textarea id="projectDescription" rows="3" placeholder="Objetivo o alcance del proyecto"></textarea></label>
+      <div class="dialog-actions">
+        <button class="ghost-button" type="button" id="cancelProject">Cancelar</button>
+        <button class="primary-button" type="submit"><i class="ri-save-line"></i> Guardar proyecto</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite">
+    <i class="ri-checkbox-circle-fill"></i><span>Acción completada</span>
+  </div>
+
+  <footer>
+    <p>Innova Measure AI · MVP experimental desarrollado por Innova Space Education SpA</p>
+    <a href="index.html#contacto">Contacto y desarrollo del proyecto</a>
+  </footer>
+
+  <script src="innova-measure-ai.js" defer></script>
+</body>
+</html>
