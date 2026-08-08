@@ -37,7 +37,7 @@
         <label>Correo electrónico<input id="login-email" type="email" autocomplete="email" required placeholder="correo@innova-space-edu.cl" /></label>
         <label>Contraseña<input id="login-password" type="password" autocomplete="current-password" required minlength="6" placeholder="••••••••" /></label>
         <button class="btn primary wide" type="submit"><i class="ri-login-box-line"></i> Ingresar</button>
-        <button id="bootstrap-signup" class="btn ghost wide hidden" type="button" aria-hidden="true" tabindex="-1"><i class="ri-user-add-line"></i> Crear cuenta administrativa inicial</button>
+        <button id="bootstrap-signup" class="btn ghost wide hidden" type="button" hidden aria-hidden="true" tabindex="-1"><i class="ri-user-add-line"></i> Crear cuenta administrativa inicial</button>
         <p class="muted small" data-admin-only-note>Las cuentas son creadas únicamente por el administrador de Innova.</p>
         <div id="auth-message" class="form-message" aria-live="polite"></div>
       </form>
@@ -103,6 +103,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <script src="admin-config.js"></script>
   <script src="admin.js"></script>
+  <script src="assets/admin-auth-v2.js?v=20260808-auth-rut-v2"></script>
   <script src="assets/admin-enterprise/loader.js?v=20260808-enterprise-v2-complete"></script>
 </body>
 </html>
