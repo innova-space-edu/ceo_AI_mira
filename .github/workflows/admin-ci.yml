@@ -1,0 +1,33 @@
+name: Innova Admin CI
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check JavaScript syntax
+        run: |
+          node --check admin.js
+          node --check admin-config.js
+          node --check admin-nav.js
+          node --check mira-voice-controller.js
+          node --check backend/server.js
+      - name: Verify required production files
+        run: |
+          test -f admin.html
+          test -f admin.css
+          test -f admin.js
+          test -f admin-config.js
+          test -f admin-nav.js
+          grep -q "admin.html" .github/workflows/pages.yml
