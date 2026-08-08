@@ -11,6 +11,15 @@
     "assets/admin-enterprise/enterprise-4c.b64"
   ];
 
+  function keepPersonalSettingsVisible() {
+    const settings = document.querySelector('[data-view="settings"]');
+    if (!settings || settings.dataset.personalSettingsVisible === "true") return;
+    const expose = () => settings.classList.remove("role-admin", "hidden");
+    expose();
+    settings.dataset.personalSettingsVisible = "true";
+    new MutationObserver(expose).observe(settings, { attributes: true, attributeFilter: ["class"] });
+  }
+
   function loadAuthPolicy() {
     return new Promise((resolve, reject) => {
       if (document.querySelector("script[data-innova-auth-policy]")) return resolve();
@@ -27,7 +36,9 @@
     if (window.__INNOVA_ENTERPRISE_LOADING__) return;
     window.__INNOVA_ENTERPRISE_LOADING__ = true;
 
+    keepPersonalSettingsVisible();
     await loadAuthPolicy();
+    keepPersonalSettingsVisible();
 
     if (typeof DecompressionStream !== "function") {
       throw new Error("Este navegador no soporta DecompressionStream. Actualiza Chrome, Edge o Firefox.");
