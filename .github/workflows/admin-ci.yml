@@ -24,6 +24,7 @@ jobs:
           node --check mira-voice-controller.js
           node --check backend/server.js
           node --check assets/admin-enterprise/loader.js
+          node --check assets/admin-enterprise/auth-policy.js
       - name: Validate enterprise bundle
         run: |
           cat assets/admin-enterprise/enterprise-1.b64 \
@@ -50,9 +51,11 @@ jobs:
           test -f admin-config.js
           test -f admin-nav.js
           test -f assets/admin-enterprise/loader.js
+          test -f assets/admin-enterprise/auth-policy.js
           test -f assets/admin-enterprise/enterprise-4a.b64
           test -f assets/admin-enterprise/enterprise-4b.b64
           test -f assets/admin-enterprise/enterprise-4c.b64
+          grep -q "auth-policy.js" assets/admin-enterprise/loader.js
           grep -q "assets/admin-enterprise/loader.js" admin.html
           grep -q "admin.html" .github/workflows/pages.yml
           grep -q "cp -R assets _site/assets" .github/workflows/pages.yml
