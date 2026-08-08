@@ -26,13 +26,14 @@ jobs:
         run: |
           node --check admin.js
           node --check admin-config.js
+          node --check admin-nav.js
           node --check backend/server.js
 
       - name: Prepare static site
         run: |
           mkdir -p _site
           cp -R assets _site/assets
-          cp documentos.html index.html innova-space-track.html innova-measure-ai.html innova-measure-ai.css innova-measure-ai.js legal.css legal.js main.js mira-voice-controller.js speak.js style.css admin.html admin.css admin.js admin-config.js _site/
+          cp documentos.html index.html innova-space-track.html innova-measure-ai.html innova-measure-ai.css innova-measure-ai.js legal.css legal.js main.js mira-voice-controller.js speak.js style.css admin.html admin.css admin.js admin-config.js admin-nav.js _site/
           touch _site/.nojekyll
 
       - uses: actions/upload-pages-artifact@v3
