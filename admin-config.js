@@ -16,7 +16,7 @@ window.INNOVA_ADMIN_CONFIG = Object.freeze({
   document.head.appendChild(jszip);
 
   const script = document.createElement("script");
-  script.src = "admin-invoice-autofill.js";
+  script.src = "admin-invoice-autofill-v2.js";
   script.async = false;
   document.head.appendChild(script);
 })();
