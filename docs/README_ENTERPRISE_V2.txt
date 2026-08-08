@@ -1,0 +1,1 @@
+Innova Admin Enterprise v2: integración empresarial completa, política de acceso administrada, deduplicación y controles de seguridad listos para validación CI.
