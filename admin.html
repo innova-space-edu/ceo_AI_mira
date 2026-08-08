@@ -37,7 +37,8 @@
         <label>Correo electrónico<input id="login-email" type="email" autocomplete="email" required placeholder="correo@innova-space-edu.cl" /></label>
         <label>Contraseña<input id="login-password" type="password" autocomplete="current-password" required minlength="6" placeholder="••••••••" /></label>
         <button class="btn primary wide" type="submit"><i class="ri-login-box-line"></i> Ingresar</button>
-        <button id="bootstrap-signup" class="btn ghost wide" type="button"><i class="ri-user-add-line"></i> Crear cuenta administrativa inicial</button>
+        <button id="bootstrap-signup" class="btn ghost wide hidden" type="button" aria-hidden="true" tabindex="-1"><i class="ri-user-add-line"></i> Crear cuenta administrativa inicial</button>
+        <p class="muted small" data-admin-only-note>Las cuentas son creadas únicamente por el administrador de Innova.</p>
         <div id="auth-message" class="form-message" aria-live="polite"></div>
       </form>
     </div>
@@ -74,7 +75,7 @@
         <div class="nav-label">Administración</div>
         <button data-view="users" class="nav-item role-superadmin"><i class="ri-team-line"></i><span>Usuarios</span></button>
         <button data-view="activity" class="nav-item role-admin"><i class="ri-history-line"></i><span>Actividad</span></button>
-        <button data-view="settings" class="nav-item role-admin"><i class="ri-settings-3-line"></i><span>Configuración</span></button>
+        <button data-view="settings" class="nav-item"><i class="ri-settings-3-line"></i><span>Configuración</span></button>
       </nav>
       <div class="sidebar-footer"><div class="security-pill"><i class="ri-lock-2-line"></i><span id="security-level">Sesión protegida</span></div></div>
     </aside>
