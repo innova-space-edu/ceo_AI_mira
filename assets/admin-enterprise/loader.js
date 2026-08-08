@@ -1,10 +1,13 @@
 (() => {
   "use strict";
+  const VERSION = "20260808-enterprise-v2-complete";
   const PARTS = [
     "assets/admin-enterprise/enterprise-1.b64",
     "assets/admin-enterprise/enterprise-2.b64",
     "assets/admin-enterprise/enterprise-3.b64",
-    "assets/admin-enterprise/enterprise-4.b64"
+    "assets/admin-enterprise/enterprise-4a.b64",
+    "assets/admin-enterprise/enterprise-4b.b64",
+    "assets/admin-enterprise/enterprise-4c.b64"
   ];
 
   async function loadEnterprise() {
@@ -14,7 +17,7 @@
       throw new Error("Este navegador no soporta DecompressionStream. Actualiza Chrome, Edge o Firefox.");
     }
     const pieces = await Promise.all(PARTS.map(async (url) => {
-      const response = await fetch(`${url}?v=20260808-enterprise-v2`, { cache: "no-store" });
+      const response = await fetch(`${url}?v=${VERSION}`, { cache: "no-store" });
       if (!response.ok) throw new Error(`No se pudo cargar ${url} (${response.status})`);
       return (await response.text()).trim();
     }));
@@ -27,7 +30,7 @@
     const blobUrl = URL.createObjectURL(new Blob([source], { type: "text/javascript" }));
     const script = document.createElement("script");
     script.src = blobUrl;
-    script.dataset.innovaEnterprise = "v2";
+    script.dataset.innovaEnterprise = "v2-complete";
     script.onload = () => {
       URL.revokeObjectURL(blobUrl);
       document.documentElement.dataset.innovaEnterprise = "ready";
