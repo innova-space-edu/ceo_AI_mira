@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex,nofollow,noarchive" />
+  <title>Innova Admin | Innova Space Education</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Orbitron:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.6.0/fonts/remixicon.css" rel="stylesheet" />
+  <link rel="stylesheet" href="admin.css" />
+</head>
+<body>
+  <div id="app-loading" class="loading-screen">
+    <div class="loading-orb"></div>
+    <strong>INNOVA ADMIN</strong>
+    <span>Preparando centro de operaciones…</span>
+  </div>
+
+  <section id="auth-screen" class="auth-screen hidden" aria-label="Acceso administrativo">
+    <div class="auth-brand-panel">
+      <a class="auth-back" href="index.html"><i class="ri-arrow-left-line"></i> Volver al sitio</a>
+      <div class="auth-brand-copy">
+        <span class="eyebrow">INNOVA SPACE EDUCATION</span>
+        <h1>Centro de operaciones de la empresa</h1>
+        <p>Proyectos, documentos, cotizaciones, facturas, auditoría inteligente y administración en un único entorno seguro.</p>
+      </div>
+      <div class="auth-security-note"><i class="ri-shield-check-line"></i><span>Acceso protegido con autenticación, permisos por rol y verificación MFA para acciones críticas.</span></div>
+    </div>
+
+    <div class="auth-form-panel">
+      <form id="login-form" class="auth-card">
+        <div class="brand-mark"><img src="assets/img/logo1.jpg" alt="Innova Space Education" /><div><strong>INNOVA ADMIN</strong><span>Plataforma empresarial</span></div></div>
+        <h2>Ingresar</h2>
+        <p class="muted">Utiliza tu cuenta autorizada de Innova Space Education.</p>
+        <label>Correo electrónico<input id="login-email" type="email" autocomplete="email" required placeholder="correo@innova-space-edu.cl" /></label>
+        <label>Contraseña<input id="login-password" type="password" autocomplete="current-password" required minlength="6" placeholder="••••••••" /></label>
+        <button class="btn primary wide" type="submit"><i class="ri-login-box-line"></i> Ingresar</button>
+        <button id="bootstrap-signup" class="btn ghost wide" type="button"><i class="ri-user-add-line"></i> Crear cuenta administrativa inicial</button>
+        <div id="auth-message" class="form-message" aria-live="polite"></div>
+      </form>
+    </div>
+  </section>
+
+  <section id="mfa-screen" class="mfa-screen hidden">
+    <div class="mfa-card">
+      <div class="mfa-icon"><i class="ri-shield-keyhole-line"></i></div>
+      <h2>Verificación de seguridad</h2>
+      <p id="mfa-copy">Las acciones administrativas críticas requieren un segundo factor.</p>
+      <div id="mfa-enroll" class="hidden">
+        <div id="mfa-qr" class="mfa-qr"></div>
+        <p class="muted small">Escanea el código con Google Authenticator, Microsoft Authenticator, 1Password u otra aplicación TOTP.</p>
+      </div>
+      <label>Código de 6 dígitos<input id="mfa-code" type="text" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="000000" /></label>
+      <div class="button-row"><button id="mfa-verify" class="btn primary" type="button">Verificar</button><button id="mfa-skip" class="btn ghost" type="button">Continuar solo lectura</button></div>
+      <div id="mfa-message" class="form-message"></div>
+    </div>
+  </section>
+
+  <div id="admin-app" class="admin-app hidden">
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-brand"><img src="assets/img/logo1.jpg" alt="Innova" /><div><strong>INNOVA</strong><span>ADMIN</span></div></div>
+      <nav id="side-nav" class="side-nav">
+        <button data-view="dashboard" class="nav-item active"><i class="ri-dashboard-3-line"></i><span>Inicio</span></button>
+        <div class="nav-label">Gestión</div>
+        <button data-view="projects" class="nav-item"><i class="ri-folder-3-line"></i><span>Proyectos</span></button>
+        <button data-view="documents" class="nav-item"><i class="ri-file-edit-line"></i><span>Documentos</span></button>
+        <button data-view="quotations" class="nav-item"><i class="ri-file-list-3-line"></i><span>Cotizaciones</span></button>
+        <button data-view="invoices" class="nav-item"><i class="ri-bill-line"></i><span>Facturas</span></button>
+        <div class="nav-label">Inteligencia</div>
+        <button data-view="mira" class="nav-item"><i class="ri-sparkling-2-line"></i><span>MIRA Business</span></button>
+        <button data-view="auditor" class="nav-item"><i class="ri-shield-check-line"></i><span>Agente Auditor</span><span id="alert-badge" class="badge hidden">0</span></button>
+        <div class="nav-label">Administración</div>
+        <button data-view="users" class="nav-item role-superadmin"><i class="ri-team-line"></i><span>Usuarios</span></button>
+        <button data-view="activity" class="nav-item role-admin"><i class="ri-history-line"></i><span>Actividad</span></button>
+        <button data-view="settings" class="nav-item role-admin"><i class="ri-settings-3-line"></i><span>Configuración</span></button>
+      </nav>
+      <div class="sidebar-footer"><div class="security-pill"><i class="ri-lock-2-line"></i><span id="security-level">Sesión protegida</span></div></div>
+    </aside>
+
+    <div id="sidebar-backdrop" class="sidebar-backdrop"></div>
+
+    <section class="workspace">
+      <header class="topbar">
+        <div class="topbar-left"><button id="sidebar-toggle" class="icon-btn mobile-only" aria-label="Abrir menú"><i class="ri-menu-line"></i></button><div><span class="eyebrow">INNOVA SPACE EDUCATION</span><h1 id="view-title">Centro de operaciones</h1></div></div>
+        <div class="topbar-search"><i class="ri-search-line"></i><input id="global-search" type="search" placeholder="Buscar proyectos, documentos, facturas…" /><div id="search-results" class="search-results hidden"></div></div>
+        <div class="topbar-actions"><button id="notification-button" class="icon-btn" title="Alertas"><i class="ri-notification-3-line"></i><span id="notification-dot" class="notification-dot hidden"></span></button><div class="user-menu"><button id="user-menu-button" class="user-button"><span id="user-avatar">IA</span><span class="user-button-copy"><strong id="user-name">Administrador</strong><small id="user-role">Superadministrador</small></span><i class="ri-arrow-down-s-line"></i></button><div id="user-dropdown" class="user-dropdown hidden"><button id="mfa-menu-action"><i class="ri-shield-keyhole-line"></i> Seguridad MFA</button><a href="index.html"><i class="ri-global-line"></i> Sitio público</a><button id="logout-button" class="danger-text"><i class="ri-logout-box-r-line"></i> Cerrar sesión</button></div></div></div>
+      </header>
+
+      <main id="main-content" class="main-content"></main>
+    </section>
+  </div>
+
+  <div id="modal-root"></div>
+  <div id="toast-root" class="toast-root"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.2.6/purify.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.3/html2pdf.bundle.min.js"></script>
+  <script src="admin-config.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>

@@ -3,6 +3,16 @@
 (() => {
   "use strict";
 
+  // El sitio público ya carga este controlador de forma global. Aprovechamos
+  // ese punto común para incorporar el acceso transparente a Innova Admin.
+  if (!document.querySelector('script[data-innova-admin-nav]')) {
+    const adminNav = document.createElement("script");
+    adminNav.src = "admin-nav.js?v=20260807-1";
+    adminNav.async = false;
+    adminNav.dataset.innovaAdminNav = "true";
+    document.head.appendChild(adminNav);
+  }
+
   const state = {
     audio: null,
     audioUrl: null,
