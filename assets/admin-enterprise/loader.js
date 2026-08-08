@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const VERSION = "20260808-enterprise-v2-startup-fix";
+  const VERSION = "20260808-enterprise-v2-ui-freeze-fix";
   const AUTH_POLICY = `assets/admin-enterprise/auth-policy.js?v=${VERSION}`;
   const PARTS = [
     "assets/admin-enterprise/enterprise-1.b64",
@@ -12,69 +12,103 @@
     "assets/admin-enterprise/enterprise-4c.b64"
   ];
 
+  const qs = new URLSearchParams(window.location.search);
+  const SAFE_MODE = qs.get("safe") === "1";
   const isVisible = (element) => !!element && !element.classList.contains("hidden");
 
-  function coreHasSettled() {
-    const loading = document.getElementById("app-loading");
-    const auth = document.getElementById("auth-screen");
+  function coreUiReady() {
     const app = document.getElementById("admin-app");
-    return loading?.classList.contains("hidden") || isVisible(auth) || isVisible(app);
+    const main = document.getElementById("main-content");
+    if (!isVisible(app) || !main || !main.childElementCount) return false;
+    if (main.querySelector(".loading-orb")) return false;
+    const text = String(main.textContent || "").replace(/\s+/g, " ").trim();
+    if (!text) return false;
+    if (/^Cargando\b/i.test(text) || /Cargando\s+Centro\s+de\s+operaciones/i.test(text)) return false;
+    return true;
   }
 
-  function waitForCore(timeoutMs = 8000) {
-    if (coreHasSettled()) return Promise.resolve(true);
+  function waitForCoreUi(timeoutMs = 20000) {
+    if (coreUiReady()) return Promise.resolve(true);
 
     return new Promise((resolve) => {
+      const main = document.getElementById("main-content");
       const startedAt = Date.now();
-      const timer = setInterval(() => {
-        if (coreHasSettled()) {
-          clearInterval(timer);
-          resolve(true);
-          return;
-        }
-        if (Date.now() - startedAt >= timeoutMs) {
-          clearInterval(timer);
-          resolve(false);
-        }
-      }, 100);
+      let observer = null;
+      let timer = null;
+
+      const finish = (value) => {
+        if (observer) observer.disconnect();
+        if (timer) clearInterval(timer);
+        resolve(value);
+      };
+
+      const check = () => {
+        if (coreUiReady()) return finish(true);
+        if (Date.now() - startedAt >= timeoutMs) return finish(false);
+        return false;
+      };
+
+      if (main) {
+        observer = new MutationObserver(check);
+        observer.observe(main, { childList: true, subtree: true, characterData: true });
+      }
+      timer = setInterval(check, 150);
+      check();
     });
   }
 
-  function recoverCoreUi() {
-    const loading = document.getElementById("app-loading");
-    const auth = document.getElementById("auth-screen");
-    const app = document.getElementById("admin-app");
+  function waitForUiQuiet(quietMs = 700, maxMs = 3000) {
+    const main = document.getElementById("main-content");
+    if (!main) return Promise.resolve();
 
-    if (!loading || !auth || !app || loading.classList.contains("hidden")) return;
+    return new Promise((resolve) => {
+      let quietTimer = null;
+      let maxTimer = null;
+      const observer = new MutationObserver(schedule);
 
-    loading.classList.add("hidden");
-    app.classList.add("hidden");
-    auth.classList.remove("hidden");
+      function done() {
+        observer.disconnect();
+        clearTimeout(quietTimer);
+        clearTimeout(maxTimer);
+        resolve();
+      }
 
-    const message = document.getElementById("auth-message");
-    if (message && !message.textContent.trim()) {
-      message.style.color = "var(--warning, #f5b942)";
-      message.textContent = "La sesión anterior tardó demasiado en iniciar. Puedes ingresar nuevamente.";
-    }
+      function schedule() {
+        clearTimeout(quietTimer);
+        quietTimer = setTimeout(done, quietMs);
+      }
 
-    console.warn("Innova Admin: se liberó la pantalla de carga tras superar el tiempo máximo de inicio.");
+      observer.observe(main, { childList: true, subtree: true, characterData: true });
+      maxTimer = setTimeout(done, maxMs);
+      schedule();
+    });
+  }
+
+  function waitForIdle() {
+    return new Promise((resolve) => {
+      if (typeof window.requestIdleCallback === "function") {
+        window.requestIdleCallback(() => resolve(), { timeout: 1800 });
+      } else {
+        setTimeout(resolve, 450);
+      }
+    });
   }
 
   function keepPersonalSettingsVisible() {
     const settings = document.querySelector('[data-view="settings"]');
     if (!settings || settings.dataset.personalSettingsVisible === "true") return;
-    const expose = () => settings.classList.remove("role-admin", "hidden");
-    expose();
+    settings.classList.remove("role-admin", "hidden");
     settings.dataset.personalSettingsVisible = "true";
-    new MutationObserver(expose).observe(settings, { attributes: true, attributeFilter: ["class"] });
   }
 
   function loadAuthPolicy() {
     return new Promise((resolve, reject) => {
-      if (document.querySelector("script[data-innova-auth-policy]")) return resolve();
+      const existing = document.querySelector("script[data-innova-auth-policy]");
+      if (existing) return resolve();
       const script = document.createElement("script");
       script.src = AUTH_POLICY;
       script.dataset.innovaAuthPolicy = "true";
+      script.async = true;
       script.onload = resolve;
       script.onerror = () => reject(new Error(`No se pudo cargar ${AUTH_POLICY}`));
       document.head.appendChild(script);
@@ -82,13 +116,20 @@
   }
 
   async function loadEnterpriseExtensions() {
+    if (SAFE_MODE) {
+      console.info("Innova Admin: modo seguro activo; Enterprise v2 no se cargará en esta sesión.");
+      document.documentElement.dataset.innovaEnterprise = "safe";
+      return;
+    }
     if (window.__INNOVA_ENTERPRISE_LOADING__ || document.documentElement.dataset.innovaEnterprise === "ready") return;
     window.__INNOVA_ENTERPRISE_LOADING__ = true;
+    document.documentElement.dataset.innovaEnterprise = "loading";
 
     try {
       keepPersonalSettingsVisible();
       await loadAuthPolicy();
       keepPersonalSettingsVisible();
+      await waitForIdle();
 
       if (typeof DecompressionStream !== "function") {
         throw new Error("Este navegador no soporta DecompressionStream. Actualiza Chrome, Edge o Firefox.");
@@ -100,16 +141,20 @@
         return (await response.text()).trim();
       }));
 
+      await waitForIdle();
       const b64 = pieces.join("");
       const raw = atob(b64);
       const bytes = new Uint8Array(raw.length);
       for (let i = 0; i < raw.length; i += 1) bytes[i] = raw.charCodeAt(i);
       const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream("gzip"));
       const source = await new Response(stream).text();
+
+      await waitForIdle();
       const blobUrl = URL.createObjectURL(new Blob([source], { type: "text/javascript" }));
       const script = document.createElement("script");
       script.src = blobUrl;
       script.dataset.innovaEnterprise = "v2-complete";
+      script.async = true;
       script.onload = () => {
         URL.revokeObjectURL(blobUrl);
         document.documentElement.dataset.innovaEnterprise = "ready";
@@ -119,32 +164,15 @@
       script.onerror = () => {
         URL.revokeObjectURL(blobUrl);
         window.__INNOVA_ENTERPRISE_LOADING__ = false;
-        console.error("No fue posible iniciar Innova Admin Enterprise v2.");
+        document.documentElement.dataset.innovaEnterprise = "error";
+        showEnterpriseError(new Error("El bundle empresarial no pudo ejecutarse."));
       };
       document.head.appendChild(script);
     } catch (error) {
       window.__INNOVA_ENTERPRISE_LOADING__ = false;
+      document.documentElement.dataset.innovaEnterprise = "error";
       throw error;
     }
-  }
-
-  function startEnterpriseWhenAppIsVisible() {
-    const app = document.getElementById("admin-app");
-    if (!app) return;
-
-    const start = () => {
-      if (!isVisible(app)) return false;
-      loadEnterpriseExtensions().catch(showEnterpriseError);
-      return true;
-    };
-
-    if (start()) return;
-
-    const observer = new MutationObserver(() => {
-      if (!start()) return;
-      observer.disconnect();
-    });
-    observer.observe(app, { attributes: true, attributeFilter: ["class"] });
   }
 
   function showEnterpriseError(error) {
@@ -153,14 +181,32 @@
     if (!root) return;
     const item = document.createElement("div");
     item.className = "toast error";
-    item.textContent = `No se pudo cargar la ampliación empresarial: ${error.message}`;
+    item.textContent = `La ampliación empresarial no pudo iniciar, pero el panel principal sigue disponible: ${error.message}`;
     root.appendChild(item);
-    setTimeout(() => item.remove(), 7000);
+    setTimeout(() => item.remove(), 8000);
+  }
+
+  function showDeferredNotice() {
+    console.warn("Innova Admin: el núcleo no terminó su primera vista a tiempo. Enterprise v2 se dejó sin cargar para no bloquear la interfaz.");
+    document.documentElement.dataset.innovaEnterprise = "deferred";
   }
 
   (async () => {
-    const coreReady = await waitForCore();
-    if (!coreReady) recoverCoreUi();
-    startEnterpriseWhenAppIsVisible();
+    if (SAFE_MODE) {
+      document.documentElement.dataset.innovaEnterprise = "safe";
+      return;
+    }
+
+    const ready = await waitForCoreUi();
+    if (!ready) {
+      showDeferredNotice();
+      return;
+    }
+
+    document.documentElement.dataset.innovaCore = "ready";
+    window.dispatchEvent(new CustomEvent("innova-core-ready"));
+    await waitForUiQuiet();
+    await waitForIdle();
+    await loadEnterpriseExtensions();
   })().catch(showEnterpriseError);
 })();
