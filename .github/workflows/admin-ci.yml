@@ -38,6 +38,8 @@ jobs:
           grep -q "company_transactions" /tmp/admin-enterprise.js
           grep -q "company_assets" /tmp/admin-enterprise.js
           grep -q "company_tax_records" /tmp/admin-enterprise.js
+          grep -q "company_service_cases" /tmp/admin-enterprise.js
+          grep -q "openTemplateManager" /tmp/admin-enterprise.js
       - name: Verify required production files
         run: |
           test -f admin.html
