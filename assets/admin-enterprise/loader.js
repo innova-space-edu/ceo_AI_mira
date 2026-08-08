@@ -1,6 +1,7 @@
 (() => {
   "use strict";
   const VERSION = "20260808-enterprise-v2-complete";
+  const AUTH_POLICY = `assets/admin-enterprise/auth-policy.js?v=${VERSION}`;
   const PARTS = [
     "assets/admin-enterprise/enterprise-1.b64",
     "assets/admin-enterprise/enterprise-2.b64",
@@ -10,9 +11,25 @@
     "assets/admin-enterprise/enterprise-4c.b64"
   ];
 
+  function loadScript(src, marker) {
+    return new Promise((resolve, reject) => {
+      const existing = document.querySelector(`script[data-${marker}]`);
+      if (existing) return resolve();
+      const script = document.createElement("script");
+      script.src = src;
+      script.dataset[marker] = "true";
+      script.onload = resolve;
+      script.onerror = () => reject(new Error(`No se pudo cargar ${src}`));
+      document.head.appendChild(script);
+    });
+  }
+
   async function loadEnterprise() {
     if (window.__INNOVA_ENTERPRISE_LOADING__) return;
     window.__INNOVA_ENTERPRISE_LOADING__ = true;
+
+    await loadScript(AUTH_POLICY, "innovaAuthPolicy");
+
     if (typeof DecompressionStream !== "function") {
       throw new Error("Este navegador no soporta DecompressionStream. Actualiza Chrome, Edge o Firefox.");
     }
