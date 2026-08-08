@@ -5,5 +5,13 @@ window.INNOVA_ADMIN_CONFIG = Object.freeze({
   storageBucket: "company-files",
   companyName: "Innova Space Education SPA",
   companyEmail: "contacto@innova-space-edu.cl",
+  companyRuts: ["10.236.204-7"],
   initialAdminEmail: "contacto@innova-space-edu.cl"
 });
+
+(() => {
+  const script = document.createElement("script");
+  script.src = "admin-invoice-autofill.js";
+  script.async = false;
+  document.head.appendChild(script);
+})();
