@@ -10,6 +10,11 @@ window.INNOVA_ADMIN_CONFIG = Object.freeze({
 });
 
 (() => {
+  const jszip = document.createElement("script");
+  jszip.src = "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js";
+  jszip.async = false;
+  document.head.appendChild(jszip);
+
   const script = document.createElement("script");
   script.src = "admin-invoice-autofill.js";
   script.async = false;
