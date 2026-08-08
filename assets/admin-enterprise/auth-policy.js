@@ -9,12 +9,14 @@
   });
 
   let profileCache = null;
+  let profileRefreshPromise = null;
   let forcedPasswordOpen = false;
+  let usersEnhancePending = false;
+  let uiTimer = null;
 
   const esc = (value = "") => String(value).replace(/[&<>'"]/g, (c) => ({
     "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;",
   }[c]));
-
   const normalizeRut = (value = "") => String(value).toUpperCase().replace(/[^0-9K]/g, "");
 
   function toast(message, type = "success") {
@@ -31,36 +33,37 @@
     const signup = document.getElementById("bootstrap-signup");
     if (signup) {
       signup.classList.add("hidden");
+      signup.hidden = true;
       signup.setAttribute("aria-hidden", "true");
       signup.tabIndex = -1;
-    }
-    const loginCard = document.getElementById("login-form");
-    if (loginCard && !loginCard.querySelector("[data-admin-only-note]")) {
-      const note = document.createElement("p");
-      note.dataset.adminOnlyNote = "true";
-      note.className = "muted small";
-      note.style.marginTop = "10px";
-      note.textContent = "Las cuentas son creadas únicamente por el administrador de Innova.";
-      loginCard.appendChild(note);
     }
     const settingsButton = document.querySelector('[data-view="settings"]');
     settingsButton?.classList.remove("role-admin");
   }
 
   async function refreshProfile() {
-    const { data: sessionData } = await client.auth.getSession();
-    const user = sessionData?.session?.user;
-    if (!user) {
-      profileCache = null;
-      return null;
-    }
-    const { data } = await client
-      .from("company_users")
-      .select("user_id,email,full_name,rut,role,status,must_change_password,password_changed_at")
-      .eq("user_id", user.id)
-      .maybeSingle();
-    profileCache = data || null;
-    return profileCache;
+    if (profileRefreshPromise) return profileRefreshPromise;
+    profileRefreshPromise = (async () => {
+      try {
+        const { data: sessionData } = await client.auth.getSession();
+        const user = sessionData?.session?.user;
+        if (!user) {
+          profileCache = null;
+          return null;
+        }
+        const { data, error } = await client
+          .from("company_users")
+          .select("user_id,email,full_name,rut,role,status,must_change_password,password_changed_at")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        if (error) throw error;
+        profileCache = data || null;
+        return profileCache;
+      } finally {
+        profileRefreshPromise = null;
+      }
+    })();
+    return profileRefreshPromise;
   }
 
   async function invokeUserAdmin(body) {
@@ -102,6 +105,7 @@
     document.querySelector("[data-auth-policy-close-2]")?.addEventListener("click", () => { document.getElementById("modal-root").innerHTML = ""; });
     document.getElementById("admin-provision-save")?.addEventListener("click", async () => {
       const form = document.getElementById("admin-provision-user");
+      if (!form) return;
       const fd = new FormData(form);
       const fullName = String(fd.get("fullName") || "").trim();
       const email = String(fd.get("email") || "").trim().toLowerCase();
@@ -116,15 +120,7 @@
       save.textContent = "Creando usuario…";
       try {
         const result = await invokeUserAdmin({ action: "provision", fullName, email, rut, role });
-        modalShell("Usuario creado", `
-          <div class="preview-frame">
-            <p><strong>${esc(fullName)}</strong></p>
-            <p>Correo: <strong>${esc(email)}</strong></p>
-            <p>RUT: <strong>${esc(rut)}</strong></p>
-            <p>Contraseña temporal: <strong style="font-size:1.25rem;letter-spacing:.08em">${esc(result.temporaryPassword || "")}</strong></p>
-            <p class="muted small">Entrega esta clave de forma segura. Al iniciar sesión se solicitará una contraseña nueva de al menos 8 caracteres.</p>
-          </div>`,
-          '<button class="btn primary" data-auth-policy-finish>Listo</button>');
+        modalShell("Usuario creado", `<div class="preview-frame"><p><strong>${esc(fullName)}</strong></p><p>Correo: <strong>${esc(email)}</strong></p><p>RUT: <strong>${esc(rut)}</strong></p><p>Contraseña temporal: <strong style="font-size:1.25rem;letter-spacing:.08em">${esc(result.temporaryPassword || "")}</strong></p><p class="muted small">Entrega esta clave de forma segura. Al iniciar sesión se solicitará una contraseña nueva.</p></div>`, '<button class="btn primary" data-auth-policy-finish>Listo</button>');
         document.querySelector("[data-auth-policy-finish]")?.addEventListener("click", () => {
           document.getElementById("modal-root").innerHTML = "";
           document.querySelector('[data-view="users"]')?.click();
@@ -145,10 +141,7 @@
   }
 
   function passwordFormHtml(prefix) {
-    return `<form id="${prefix}-password-form" class="form-grid">
-      <label class="form-field full"><span>Nueva contraseña</span><input name="newPassword" type="password" minlength="8" required autocomplete="new-password" /></label>
-      <label class="form-field full"><span>Confirmar contraseña</span><input name="confirmPassword" type="password" minlength="8" required autocomplete="new-password" /></label>
-    </form>`;
+    return `<form id="${prefix}-password-form" class="form-grid"><label class="form-field full"><span>Nueva contraseña</span><input name="newPassword" type="password" minlength="8" required autocomplete="new-password" /></label><label class="form-field full"><span>Confirmar contraseña</span><input name="confirmPassword" type="password" minlength="8" required autocomplete="new-password" /></label></form>`;
   }
 
   function bindPasswordForm(prefix, onSuccess) {
@@ -171,16 +164,10 @@
     });
   }
 
-  async function enforceFirstPasswordChange() {
-    if (forcedPasswordOpen) return;
-    const profile = profileCache || await refreshProfile();
-    if (!profile?.must_change_password) return;
+  function enforceFirstPasswordChange() {
+    if (forcedPasswordOpen || !profileCache?.must_change_password) return;
     forcedPasswordOpen = true;
-    modalShell("Cambia tu contraseña temporal", `
-      <p>Tu cuenta fue creada por el administrador con una contraseña temporal basada en tu RUT. Debes definir una contraseña personal antes de continuar.</p>
-      ${passwordFormHtml("forced")}
-      <p class="muted small">La nueva contraseña debe tener al menos 8 caracteres y no puede ser igual a la clave temporal.</p>`,
-      '<button id="forced-password-logout" class="btn ghost">Cerrar sesión</button><button id="forced-password-save" class="btn primary">Cambiar contraseña</button>', true);
+    modalShell("Cambia tu contraseña temporal", `<p>Tu cuenta fue creada con una contraseña temporal. Debes definir una contraseña personal antes de continuar.</p>${passwordFormHtml("forced")}<p class="muted small">La nueva contraseña debe tener al menos 8 caracteres.</p>`, '<button id="forced-password-logout" class="btn ghost">Cerrar sesión</button><button id="forced-password-save" class="btn primary">Cambiar contraseña</button>', true);
     document.getElementById("forced-password-logout")?.addEventListener("click", () => client.auth.signOut());
     bindPasswordForm("forced", () => {
       forcedPasswordOpen = false;
@@ -193,15 +180,8 @@
     if (!main) return;
     const title = document.getElementById("view-title");
     if (title) title.textContent = "Configuración";
-    main.innerHTML = `<div class="page-head"><div><h2>Configuración de mi cuenta</h2><p>Administra tus credenciales de acceso a Innova Admin.</p></div></div>
-      <div class="grid-2">
-        <section class="panel"><div class="panel-head"><h3>Mi cuenta</h3></div><div class="panel-body"><p><strong>${esc(profile.full_name || profile.email || "Usuario")}</strong></p><p class="muted small">${esc(profile.email || "")}</p>${profile.rut ? `<p class="muted small">RUT: ${esc(profile.rut)}</p>` : ""}</div></section>
-        <section class="panel" id="personal-password-panel"><div class="panel-head"><h3>Contraseña</h3></div><div class="panel-body">${passwordFormHtml("personal")}<button id="personal-password-save" class="btn primary">Cambiar contraseña</button></div></section>
-      </div>`;
-    bindPasswordForm("personal", () => {
-      const form = document.getElementById("personal-password-form");
-      form?.reset();
-    });
+    main.innerHTML = `<div class="page-head"><div><h2>Configuración de mi cuenta</h2><p>Administra tus credenciales de acceso a Innova Admin.</p></div></div><div class="grid-2"><section class="panel"><div class="panel-head"><h3>Mi cuenta</h3></div><div class="panel-body"><p><strong>${esc(profile.full_name || profile.email || "Usuario")}</strong></p><p class="muted small">${esc(profile.email || "")}</p>${profile.rut ? `<p class="muted small">RUT: ${esc(profile.rut)}</p>` : ""}</div></section><section class="panel"><div class="panel-head"><h3>Contraseña</h3></div><div class="panel-body">${passwordFormHtml("personal")}<button id="personal-password-save" class="btn primary">Cambiar contraseña</button></div></section></div>`;
+    bindPasswordForm("personal", () => document.getElementById("personal-password-form")?.reset());
   }
 
   function injectPasswordIntoAdminSettings() {
@@ -220,20 +200,39 @@
     const main = document.getElementById("main-content");
     const table = main?.querySelector("table.data-table");
     const invite = document.getElementById("invite-user");
-    if (!table || !invite || table.dataset.rutEnhanced === "true") return;
-    invite.innerHTML = '<i class="ri-user-add-line"></i> Agregar usuario';
-    const { data } = await client.from("company_users").select("email,rut").order("created_at", { ascending: true });
-    const byEmail = new Map((data || []).map((row) => [String(row.email || "").toLowerCase(), row.rut || "—"]));
-    const head = table.querySelector("thead tr");
-    const firstHead = head?.children?.[0];
-    if (firstHead) firstHead.insertAdjacentHTML("afterend", "<th>RUT</th>");
-    table.querySelectorAll("tbody tr").forEach((row) => {
-      const first = row.children[0];
-      if (!first) return;
-      const email = [...first.querySelectorAll("small")].map((x) => x.textContent.trim().toLowerCase()).find((x) => x.includes("@")) || "";
-      first.insertAdjacentHTML("afterend", `<td>${esc(byEmail.get(email) || "—")}</td>`);
-    });
-    table.dataset.rutEnhanced = "true";
+    if (!table || !invite || table.dataset.rutEnhanced === "true" || usersEnhancePending) return;
+    usersEnhancePending = true;
+    try {
+      invite.innerHTML = '<i class="ri-user-add-line"></i> Agregar usuario';
+      const { data, error } = await client.from("company_users").select("email,rut").order("created_at", { ascending: true });
+      if (error) return;
+      if (!document.body.contains(table) || table.dataset.rutEnhanced === "true") return;
+      const byEmail = new Map((data || []).map((row) => [String(row.email || "").toLowerCase(), row.rut || "—"]));
+      const head = table.querySelector("thead tr");
+      const firstHead = head?.children?.[0];
+      if (firstHead) firstHead.insertAdjacentHTML("afterend", "<th>RUT</th>");
+      table.querySelectorAll("tbody tr").forEach((row) => {
+        const first = row.children[0];
+        if (!first) return;
+        const email = [...first.querySelectorAll("small")].map((x) => x.textContent.trim().toLowerCase()).find((x) => x.includes("@")) || "";
+        first.insertAdjacentHTML("afterend", `<td>${esc(byEmail.get(email) || "—")}</td>`);
+      });
+      table.dataset.rutEnhanced = "true";
+    } finally {
+      usersEnhancePending = false;
+    }
+  }
+
+  function runUiEnhancements() {
+    applyLoginPolicy();
+    injectPasswordIntoAdminSettings();
+    enhanceUsersTable().catch(() => {});
+    if (document.getElementById("auth-screen")?.classList.contains("hidden")) enforceFirstPasswordChange();
+  }
+
+  function scheduleUiEnhancements() {
+    clearTimeout(uiTimer);
+    uiTimer = setTimeout(runUiEnhancements, 120);
   }
 
   document.addEventListener("click", (event) => {
@@ -253,14 +252,11 @@
     }
   }, true);
 
-  const observer = new MutationObserver(() => {
-    applyLoginPolicy();
-    injectPasswordIntoAdminSettings();
-    enhanceUsersTable().catch(() => {});
-    if (!document.getElementById("auth-screen")?.classList.contains("hidden")) return;
-    enforceFirstPasswordChange().catch(() => {});
-  });
-  observer.observe(document.documentElement, { childList: true, subtree: true });
+  const main = document.getElementById("main-content");
+  if (main) {
+    const observer = new MutationObserver(scheduleUiEnhancements);
+    observer.observe(main, { childList: true, subtree: true });
+  }
 
   client.auth.onAuthStateChange((_event, session) => {
     if (!session) {
@@ -268,13 +264,17 @@
       forcedPasswordOpen = false;
       return;
     }
-    setTimeout(async () => {
-      await refreshProfile();
-      applyLoginPolicy();
-      enforceFirstPasswordChange().catch(() => {});
-    }, 250);
+    setTimeout(() => {
+      refreshProfile().then(() => {
+        runUiEnhancements();
+        enforceFirstPasswordChange();
+      }).catch(() => {});
+    }, 300);
   });
 
   applyLoginPolicy();
-  refreshProfile().then(() => enforceFirstPasswordChange()).catch(() => {});
+  refreshProfile().then(() => {
+    runUiEnhancements();
+    enforceFirstPasswordChange();
+  }).catch(() => {});
 })();
