@@ -1,20 +1,50 @@
 (() => {
   "use strict";
+  const VERSION = "20260808-enterprise-v2-complete";
+  const AUTH_POLICY = `assets/admin-enterprise/auth-policy.js?v=${VERSION}`;
   const PARTS = [
     "assets/admin-enterprise/enterprise-1.b64",
     "assets/admin-enterprise/enterprise-2.b64",
     "assets/admin-enterprise/enterprise-3.b64",
-    "assets/admin-enterprise/enterprise-4.b64"
+    "assets/admin-enterprise/enterprise-4a.b64",
+    "assets/admin-enterprise/enterprise-4b.b64",
+    "assets/admin-enterprise/enterprise-4c.b64"
   ];
+
+  function keepPersonalSettingsVisible() {
+    const settings = document.querySelector('[data-view="settings"]');
+    if (!settings || settings.dataset.personalSettingsVisible === "true") return;
+    const expose = () => settings.classList.remove("role-admin", "hidden");
+    expose();
+    settings.dataset.personalSettingsVisible = "true";
+    new MutationObserver(expose).observe(settings, { attributes: true, attributeFilter: ["class"] });
+  }
+
+  function loadAuthPolicy() {
+    return new Promise((resolve, reject) => {
+      if (document.querySelector("script[data-innova-auth-policy]")) return resolve();
+      const script = document.createElement("script");
+      script.src = AUTH_POLICY;
+      script.dataset.innovaAuthPolicy = "true";
+      script.onload = resolve;
+      script.onerror = () => reject(new Error(`No se pudo cargar ${AUTH_POLICY}`));
+      document.head.appendChild(script);
+    });
+  }
 
   async function loadEnterprise() {
     if (window.__INNOVA_ENTERPRISE_LOADING__) return;
     window.__INNOVA_ENTERPRISE_LOADING__ = true;
+
+    keepPersonalSettingsVisible();
+    await loadAuthPolicy();
+    keepPersonalSettingsVisible();
+
     if (typeof DecompressionStream !== "function") {
       throw new Error("Este navegador no soporta DecompressionStream. Actualiza Chrome, Edge o Firefox.");
     }
     const pieces = await Promise.all(PARTS.map(async (url) => {
-      const response = await fetch(`${url}?v=20260808-enterprise-v2`, { cache: "no-store" });
+      const response = await fetch(`${url}?v=${VERSION}`, { cache: "no-store" });
       if (!response.ok) throw new Error(`No se pudo cargar ${url} (${response.status})`);
       return (await response.text()).trim();
     }));
@@ -27,7 +57,7 @@
     const blobUrl = URL.createObjectURL(new Blob([source], { type: "text/javascript" }));
     const script = document.createElement("script");
     script.src = blobUrl;
-    script.dataset.innovaEnterprise = "v2";
+    script.dataset.innovaEnterprise = "v2-complete";
     script.onload = () => {
       URL.revokeObjectURL(blobUrl);
       document.documentElement.dataset.innovaEnterprise = "ready";

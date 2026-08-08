@@ -27,7 +27,9 @@ Innova Admin conserva los módulos originales y agrega una capa empresarial cone
 - Documentos editables
 - Contratos y convenios
 - Archivo empresarial
-- Activos y garantías
+- Plantillas reutilizables que generan documentos en el módulo Documentos existente
+- Activos e inventario
+- Garantías, soporte y postventa
 
 ### Finanzas y administración
 
@@ -59,7 +61,7 @@ Archivos principales:
 - `assets/admin-enterprise/loader.js`: carga la ampliación empresarial v2.
 - `assets/admin-enterprise/enterprise-*.b64`: bundle empresarial comprimido y dividido para publicación estática.
 
-El CI reconstruye el bundle, lo descomprime y ejecuta `node --check` antes de permitir el merge.
+El CI reconstruye el bundle, lo descomprime y ejecuta `node --check` antes de permitir el merge. Además comprueba que el bundle contenga los módulos de postventa y plantillas.
 
 ### Backend MIRA / Render
 
@@ -99,11 +101,12 @@ Entidades principales del sistema:
 - `company_bank_movements`: cartolas y conciliación bancaria.
 - `company_employees`: fichas de RR.HH.
 - `company_assets`: activos, responsables, ubicación, factura y garantía.
+- `company_service_cases`: casos de garantía, soporte, mantenimiento, devolución, reemplazo e incidentes vinculados a cliente, proyecto, activo y factura.
 - `company_tax_records`: control tributario por período.
 - `company_approvals`: flujos de revisión/aprobación.
 - `company_deadlines`: vencimientos y recordatorios.
 - `company_entity_links`: relaciones sin duplicar archivos o entidades.
-- `company_templates`: plantillas empresariales.
+- `company_templates`: plantillas empresariales reutilizables.
 
 Bucket privado: `company-files`.
 
@@ -125,6 +128,8 @@ La plataforma aplica deduplicación en varios niveles:
 4. **Facturas y tesorería:** `company_transactions.invoice_id` es único, de modo que una factura solo puede originar un movimiento financiero automático.
 5. **Órdenes de compra:** número + dirección + contraparte evitan registros equivalentes repetidos.
 6. **Activos, trabajadores, obligaciones tributarias y vencimientos:** cuentan con claves o fingerprints únicos según su naturaleza.
+7. **Plantillas:** son contenido reutilizable; al utilizarlas se crea un documento en `company_documents`, no una segunda copia funcional en otro módulo.
+8. **Postventa:** cada caso utiliza un número único y se relaciona con las entidades existentes, sin volver a crear el cliente, activo, proyecto o factura.
 
 Los registros históricos antiguos no se borran automáticamente. Se bloquea la creación de nuevos duplicados y se reutilizan relaciones existentes.
 
@@ -140,9 +145,30 @@ Al abrir un proyecto se consultan de manera relacionada:
 - órdenes de compra;
 - contratos;
 - movimientos de tesorería;
-- activos.
+- activos;
+- garantías y casos de postventa.
 
 La factura 360° muestra además proyecto, contraparte, orden de compra, cotización, contrato y estado de tesorería.
+
+## Plantillas y documentos
+
+Las plantillas se administran desde **Archivo empresarial**. Sirven para contratos, cartas, actas, informes, memorandos, informes financieros, documentos corporativos, legales y de RR.HH.
+
+Al usar una plantilla, el usuario elige título, tipo y proyecto. El resultado se guarda como un documento editable normal en `company_documents`, conservando el historial y la exportación PDF ya existentes. De esta forma no se crea un segundo editor ni un repositorio documental paralelo.
+
+## Garantías y postventa
+
+El módulo **Garantías y postventa** registra casos de garantía, soporte, mantenimiento, devolución, reemplazo, incidentes u otros. Cada caso puede vincularse con:
+
+- cliente o proveedor;
+- proyecto;
+- activo;
+- factura;
+- responsable;
+- archivo de respaldo;
+- fecha objetivo y prioridad.
+
+Desde Activos se puede abrir un caso ya asociado al equipo. Las fechas objetivo se conectan con los vencimientos y el Agente Auditor genera alertas cuando un caso sigue abierto después de su fecha de atención.
 
 ## Tesorería y conciliación
 
@@ -167,6 +193,7 @@ Revisa, entre otras condiciones:
 - contratos próximos a vencer;
 - obligaciones tributarias próximas o vencidas;
 - garantías próximas a vencer;
+- casos de postventa vencidos;
 - órdenes de compra atrasadas;
 - pagos/cobros vencidos;
 - vencimientos manuales.
