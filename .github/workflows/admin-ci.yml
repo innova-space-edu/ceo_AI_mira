@@ -29,7 +29,9 @@ jobs:
           cat assets/admin-enterprise/enterprise-1.b64 \
               assets/admin-enterprise/enterprise-2.b64 \
               assets/admin-enterprise/enterprise-3.b64 \
-              assets/admin-enterprise/enterprise-4.b64 > /tmp/admin-enterprise.b64
+              assets/admin-enterprise/enterprise-4a.b64 \
+              assets/admin-enterprise/enterprise-4b.b64 \
+              assets/admin-enterprise/enterprise-4c.b64 > /tmp/admin-enterprise.b64
           base64 --decode /tmp/admin-enterprise.b64 | gzip --decompress > /tmp/admin-enterprise.js
           node --check /tmp/admin-enterprise.js
           grep -q "company_parties" /tmp/admin-enterprise.js
@@ -48,7 +50,9 @@ jobs:
           test -f admin-config.js
           test -f admin-nav.js
           test -f assets/admin-enterprise/loader.js
-          test -f assets/admin-enterprise/enterprise-4.b64
+          test -f assets/admin-enterprise/enterprise-4a.b64
+          test -f assets/admin-enterprise/enterprise-4b.b64
+          test -f assets/admin-enterprise/enterprise-4c.b64
           grep -q "assets/admin-enterprise/loader.js" admin.html
           grep -q "admin.html" .github/workflows/pages.yml
           grep -q "cp -R assets _site/assets" .github/workflows/pages.yml
