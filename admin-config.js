@@ -9,9 +9,9 @@ window.INNOVA_ADMIN_CONFIG = Object.freeze({
   initialAdminEmail: "contacto@innova-space-edu.cl"
 });
 
-// Autorrelleno de facturas cargado desde admin-config.js porque este archivo
-// forma parte del artefacto de GitHub Pages. La lógica funciona sobre el
-// formulario dinámico que crea admin.js y no depende de un framework.
+// Autorrelleno de facturas para la versión publicada en GitHub Pages.
+// admin.js conserva el texto completo del PDF para auditoría; este módulo
+// transforma ese mismo tipo de texto en campos estructurados del formulario.
 (() => {
   "use strict";
 
@@ -28,10 +28,9 @@ window.INNOVA_ADMIN_CONFIG = Object.freeze({
     .trim();
 
   const numberCL = (value = "") => Number(String(value).replace(/[^0-9]/g, "")) || 0;
-
   const normalizeRut = (value = "") => String(value).replace(/[^0-9kK]/g, "").toUpperCase();
 
-  const formatRut = (value = "") => {
+  function formatRut(value = "") {
     const raw = normalizeRut(value);
     if (raw.length < 2) return "";
     const body = raw.slice(0, -1);
@@ -39,9 +38,9 @@ window.INNOVA_ADMIN_CONFIG = Object.freeze({
     const groups = [];
     for (let i = body.length; i > 0; i -= 3) groups.unshift(body.slice(Math.max(0, i - 3), i));
     return `${groups.join(".")}-${dv}`;
-  };
+  }
 
-  const dateISO = (value = "") => {
+  function dateISO(value = "") {
     const s = normalize(value).toLowerCase();
     let m = s.match(/\b(20\d{2})[-/.](\d{1,2})[-/.](\d{1,2})\b/);
     if (m) return `${m[1]}-${m[2].padStart(2, "0")}-${m[3].padStart(2, "0")}`;
@@ -50,13 +49,12 @@ window.INNOVA_ADMIN_CONFIG = Object.freeze({
     m = s.match(/\b(\d{1,2})\s+de\s+([a-z]+)\s+(?:de\s+)?(20\d{2})\b/);
     if (m && MONTHS[m[2]]) return `${m[3]}-${MONTHS[m[2]]}-${m[1].padStart(2, "0")}`;
     return "";
-  };
+  }
 
-  const allRuts = (text = "") => [...new Set(
-    (String(text).match(/(?:\b\d{1,2}(?:\.\d{3}){2}|\b\d{7,8})\s*-\s*[0-9Kk]\b/g) || [])
-      .map(formatRut)
-      .filter(Boolean)
-  )];
+  function allRuts(text = "") {
+    const matches = String(text).match(/(?:\b\d{1,2}(?:\.\d{3}){2}|\b\d{7,8})\s*-\s*[0-9Kk]\b/g) || [];
+    return [...new Set(matches.map(formatRut).filter(Boolean))];
+  }
 
   function dteType(text = "") {
     const t = normalize(text).toUpperCase();
@@ -70,42 +68,61 @@ window.INNOVA_ADMIN_CONFIG = Object.freeze({
     return "";
   }
 
-  function findAmounts(text = "") {
+  // Los PDF tributarios chilenos no siempre entregan el texto en orden visual.
+  // En algunos DTE, todos los rótulos aparecen primero y los cuatro montos después.
+  // Por eso se recorta exclusivamente el bloque financiero y se interpreta su secuencia.
+  function financialAmounts(text = "") {
     const t = normalize(text);
     const upper = t.toUpperCase();
-    const result = { net_amount: 0, exempt_amount: 0, vat_amount: 0, total_amount: 0 };
-
-    const directTotal = t.match(/\bTOTAL\b[^0-9]{0,30}(\d{1,3}(?:\.\d{3})+|\d{4,12})/i);
-    if (directTotal) result.total_amount = numberCL(directTotal[1]);
+    const out = { net_amount: 0, exempt_amount: 0, vat_amount: 0, total_amount: 0 };
 
     const start = upper.search(/MONTO\s+NETO|\bMNTNETO\b|\bNETO\b/);
     if (start >= 0) {
-      let block = t.slice(start, start + 650);
+      const restUpper = upper.slice(start);
+      let relativeEnd = restUpper.search(/\sR\.?\s*U\.?\s*T\.?\s*:/i);
+      if (relativeEnd < 0) relativeEnd = restUpper.search(/TIMBRE\s+ELECTRONICO/i);
+      if (relativeEnd < 0) relativeEnd = Math.min(restUpper.length, 500);
+
+      let block = t.slice(start, start + relativeEnd);
       block = block.replace(/\b\d+(?:[.,]\d+)?\s*%/g, " ");
+
       const values = [...block.matchAll(/(?:\b\d{1,3}(?:\.\d{3})+\b|\b\d{4,12}\b|\b0\b)/g)]
         .map((m) => numberCL(m[0]));
-      const large = values.filter((v) => v >= 1000);
-      if (large.length) result.net_amount = large[0];
-      if (large.length >= 2) result.vat_amount = large[1];
-      if (!result.total_amount && large.length >= 3) result.total_amount = large[large.length - 1];
+      const monetary = values.filter((v) => v >= 1000);
+
+      if (monetary.length >= 1) out.net_amount = monetary[0];
+      if (monetary.length >= 2) out.vat_amount = monetary[1];
+      if (monetary.length >= 3) out.total_amount = monetary[monetary.length - 1];
+
+      if (/MONTO\s+EXENTO|MNTEXE/i.test(block)) {
+        const total = out.total_amount;
+        const net = out.net_amount;
+        const iva = out.vat_amount;
+        const calculated = total - net - iva;
+        if (calculated > 0) out.exempt_amount = calculated;
+      }
     }
 
-    const netDirect = t.match(/(?:MONTO\s+NETO|MNTNETO|\bNETO\b)[^0-9]{0,80}(\d{1,3}(?:\.\d{3})+|\d{4,12})/i);
-    if (netDirect) result.net_amount = numberCL(netDirect[1]);
+    const totalAfter = t.match(/\bTOTAL\b\s*[:$]?\s*\$?\s*(\d{1,3}(?:\.\d{3})+|\d{4,12})/i);
+    const totalBefore = t.match(/(\d{1,3}(?:\.\d{3})+|\d{4,12})\s*\$?\s*TOTAL\b/i);
+    if (totalAfter) out.total_amount = numberCL(totalAfter[1]);
+    else if (totalBefore) out.total_amount = numberCL(totalBefore[1]);
 
-    const ivaDirect = t.match(/(?:I\.?V\.?A\.?)(?:\s*19\s*%)?[^0-9]{0,120}(\d{1,3}(?:\.\d{3})+|\d{4,12})/i);
-    if (ivaDirect) result.vat_amount = numberCL(ivaDirect[1]);
+    // Solo usar coincidencias directas cuando el monto está inmediatamente junto al rótulo.
+    const netDirect = t.match(/(?:MONTO\s+NETO|MNTNETO)\s*[:$]?\s*\$?\s*(\d{1,3}(?:\.\d{3})+|\d{4,12})/i);
+    const ivaDirect = t.match(/I\.?V\.?A\.?(?:\s*19\s*%)?\s*[:$]?\s*\$?\s*(\d{1,3}(?:\.\d{3})+|\d{4,12})/i);
+    const exemptDirect = t.match(/(?:MONTO\s+EXENTO|MNTEXE)\s*[:$]?\s*\$?\s*(\d{1,3}(?:\.\d{3})+|\d{1,12})/i);
+    if (netDirect) out.net_amount = numberCL(netDirect[1]);
+    if (ivaDirect) out.vat_amount = numberCL(ivaDirect[1]);
+    if (exemptDirect) out.exempt_amount = numberCL(exemptDirect[1]);
 
-    const exemptDirect = t.match(/(?:MONTO\s+EXENTO|MNTEXE|\bEXENTO\b)[^0-9]{0,80}(\d{1,3}(?:\.\d{3})+|\d{1,12})/i);
-    if (exemptDirect) result.exempt_amount = numberCL(exemptDirect[1]);
-
-    if (result.total_amount && result.net_amount && !result.vat_amount) {
-      result.vat_amount = Math.max(0, result.total_amount - result.net_amount - result.exempt_amount);
+    if (out.total_amount && out.net_amount && !out.vat_amount) {
+      out.vat_amount = Math.max(0, out.total_amount - out.net_amount - out.exempt_amount);
     }
-    if (result.total_amount && result.vat_amount && !result.net_amount) {
-      result.net_amount = Math.max(0, result.total_amount - result.vat_amount - result.exempt_amount);
+    if (out.total_amount && out.vat_amount && !out.net_amount) {
+      out.net_amount = Math.max(0, out.total_amount - out.vat_amount - out.exempt_amount);
     }
-    return result;
+    return out;
   }
 
   function parsePdfText(raw = "") {
@@ -114,17 +131,13 @@ window.INNOVA_ADMIN_CONFIG = Object.freeze({
     const ruts = allRuts(t);
 
     const recipientPos = upper.search(/SENOR\s*\(?ES\)?\s*:/);
-    const recipientZone = recipientPos >= 0 ? t.slice(recipientPos, recipientPos + 800) : "";
-    const recipientRuts = allRuts(recipientZone);
-    let recipientRut = recipientRuts[0] || "";
+    const recipientZone = recipientPos >= 0 ? t.slice(recipientPos, recipientPos + 850) : "";
+    const recipientRut = allRuts(recipientZone)[0] || "";
 
     const dtePos = upper.search(/FACTURA\s+(?:NO\s+AFECTA\s+O\s+EXENTA\s+)?ELECTRONICA|NOTA\s+DE\s+(?:CREDITO|DEBITO)\s+ELECTRONICA/);
-    const dteZone = dtePos >= 0 ? t.slice(Math.max(0, dtePos - 180), dtePos + 220) : "";
-    const dteRuts = allRuts(dteZone);
-    let issuerRut = dteRuts.find((rut) => normalizeRut(rut) !== normalizeRut(recipientRut)) || "";
-
+    const dteZone = dtePos >= 0 ? t.slice(Math.max(0, dtePos - 240), dtePos + 220) : "";
+    let issuerRut = allRuts(dteZone).find((rut) => normalizeRut(rut) !== normalizeRut(recipientRut)) || "";
     if (!issuerRut) issuerRut = ruts.find((rut) => normalizeRut(rut) !== normalizeRut(recipientRut)) || ruts[0] || "";
-    if (!recipientRut) recipientRut = ruts.find((rut) => normalizeRut(rut) !== normalizeRut(issuerRut)) || "";
 
     let folio = "";
     for (const re of [
@@ -136,28 +149,25 @@ window.INNOVA_ADMIN_CONFIG = Object.freeze({
       if (m) { folio = m[1]; break; }
     }
 
-    let issuerName = "";
     const nameMatch = raw.match(/(?:^|\n)\s*([A-ZÁÉÍÓÚÑ][A-ZÁÉÍÓÚÑ0-9 .&'\-]{4,120})\s*(?:\n|\r\n?)\s*Giro\s*:/im)
       || t.match(/\b([A-Z][A-Z0-9 .&'\-]{5,120})\s+Giro\s*:/i);
-    if (nameMatch) issuerName = String(nameMatch[1]).trim();
 
     const issueMatch = t.match(/FECHA\s+EMISION\s*:?\s*(\d{1,2}\s+DE\s+[A-Z]+\s+(?:DE\s+)?20\d{2}|\d{1,2}[\/.\-]\d{1,2}[\/.\-]20\d{2}|20\d{2}[\/.\-]\d{1,2}[\/.\-]\d{1,2})/i);
     const dueMatch = t.match(/FECHA\s+(?:DE\s+)?VENCIMIENTO\s*:?\s*(\d{1,2}\s+DE\s+[A-Z]+\s+(?:DE\s+)?20\d{2}|\d{1,2}[\/.\-]\d{1,2}[\/.\-]20\d{2}|20\d{2}[\/.\-]\d{1,2}[\/.\-]\d{1,2})/i);
 
     const refs = t.match(/REFERENCIAS?\s*:?\s*(.*?)(?=\s+FORMA\s+DE\s+PAGO|\s+MONTO\s+NETO|\s+I\.?V\.?A|\s+TOTAL)/i)?.[1]?.trim() || "";
-    const payment = t.match(/FORMA\s+DE\s+PAGO\s*:?\s*([A-ZÁÉÍÓÚÑ ]{3,30})/i)?.[1]?.trim() || "";
-    const notes = [refs ? `Referencias: ${refs}.` : "", payment ? `Forma de pago: ${payment}.` : ""].filter(Boolean).join("\n");
+    const payment = t.match(/FORMA\s+DE\s+PAGO\s*:?\s*(.*?)(?=\s+MONTO\s+NETO|\s+MONTO\s+EXENTO|\s+I\.?V\.?A|\s+TOTAL|$)/i)?.[1]?.trim() || "";
 
     return {
       dte_type: dteType(t),
       folio,
       issuer_rut: issuerRut,
-      issuer_name: issuerName,
+      issuer_name: nameMatch ? String(nameMatch[1]).trim() : "",
       recipient_rut: recipientRut,
       issue_date: dateISO(issueMatch?.[1] || ""),
       due_date: dateISO(dueMatch?.[1] || ""),
-      ...findAmounts(t),
-      notes
+      ...financialAmounts(t),
+      notes: [refs ? `Referencias: ${refs}.` : "", payment ? `Forma de pago: ${payment}.` : ""].filter(Boolean).join("\n")
     };
   }
 
@@ -187,8 +197,7 @@ window.INNOVA_ADMIN_CONFIG = Object.freeze({
 
   async function extractPdf(file) {
     if (!window.pdfjsLib) throw new Error("PDF.js no está disponible");
-    const bytes = new Uint8Array(await file.arrayBuffer());
-    const pdf = await window.pdfjsLib.getDocument({ data: bytes }).promise;
+    const pdf = await window.pdfjsLib.getDocument({ data: new Uint8Array(await file.arrayBuffer()) }).promise;
     let text = "";
     for (let pageNumber = 1; pageNumber <= Math.min(pdf.numPages, 80); pageNumber += 1) {
       const page = await pdf.getPage(pageNumber);
@@ -211,6 +220,7 @@ window.INNOVA_ADMIN_CONFIG = Object.freeze({
       input.value = value;
       input.dataset.autofilled = "true";
       input.dispatchEvent(new Event("input", { bubbles: true }));
+      input.dispatchEvent(new Event("change", { bubbles: true }));
       count += 1;
     }
     if (form.elements.notes && data.notes) form.elements.notes.value = data.notes;
