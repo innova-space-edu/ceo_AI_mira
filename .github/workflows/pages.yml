@@ -30,6 +30,7 @@ jobs:
           node --check backend/server.js
           node --check assets/admin-enterprise/loader.js
           node --check assets/admin-enterprise/auth-policy.js
+          node --check assets/admin-enterprise/invoice-edit.js
 
       - name: Validate enterprise bundle
         run: |
