@@ -1,9 +1,10 @@
 (() => {
   "use strict";
 
-  const VERSION = "20260808-enterprise-v2-project-reality";
+  const VERSION = "20260808-enterprise-v2-record-management";
   const AUTH_POLICY = `assets/admin-enterprise/auth-policy.js?v=${VERSION}`;
   const PROJECT_REALITY = `assets/admin-enterprise/project-reality.js?v=${VERSION}`;
+  const RECORD_MANAGER = `assets/admin-enterprise/record-manager.js?v=${VERSION}`;
   const PARTS = [
     "assets/admin-enterprise/enterprise-1.b64",
     "assets/admin-enterprise/enterprise-2.b64",
@@ -30,25 +31,21 @@
 
   function waitForCoreUi(timeoutMs = 20000) {
     if (coreUiReady()) return Promise.resolve(true);
-
     return new Promise((resolve) => {
       const main = document.getElementById("main-content");
       const startedAt = Date.now();
       let observer = null;
       let timer = null;
-
       const finish = (value) => {
         if (observer) observer.disconnect();
         if (timer) clearInterval(timer);
         resolve(value);
       };
-
       const check = () => {
         if (coreUiReady()) return finish(true);
         if (Date.now() - startedAt >= timeoutMs) return finish(false);
         return false;
       };
-
       if (main) {
         observer = new MutationObserver(check);
         observer.observe(main, { childList: true, subtree: true, characterData: true });
@@ -61,24 +58,20 @@
   function waitForUiQuiet(quietMs = 700, maxMs = 3000) {
     const main = document.getElementById("main-content");
     if (!main) return Promise.resolve();
-
     return new Promise((resolve) => {
       let quietTimer = null;
       let maxTimer = null;
       const observer = new MutationObserver(schedule);
-
       function done() {
         observer.disconnect();
         clearTimeout(quietTimer);
         clearTimeout(maxTimer);
         resolve();
       }
-
       function schedule() {
         clearTimeout(quietTimer);
         quietTimer = setTimeout(done, quietMs);
       }
-
       observer.observe(main, { childList: true, subtree: true, characterData: true });
       maxTimer = setTimeout(done, maxMs);
       schedule();
@@ -87,11 +80,8 @@
 
   function waitForIdle() {
     return new Promise((resolve) => {
-      if (typeof window.requestIdleCallback === "function") {
-        window.requestIdleCallback(() => resolve(), { timeout: 1800 });
-      } else {
-        setTimeout(resolve, 450);
-      }
+      if (typeof window.requestIdleCallback === "function") window.requestIdleCallback(() => resolve(), { timeout: 1800 });
+      else setTimeout(resolve, 450);
     });
   }
 
@@ -123,8 +113,20 @@
     try {
       await loadScriptOnce(PROJECT_REALITY, "innova-project-reality");
       document.documentElement.dataset.innovaProjectReality = "ready";
+      window.dispatchEvent(new CustomEvent("innova-project-reality-ready"));
     } catch (error) {
       document.documentElement.dataset.innovaProjectReality = "error";
+      showEnterpriseError(error);
+    }
+  }
+
+  async function loadRecordManager() {
+    try {
+      await loadScriptOnce(RECORD_MANAGER, "innova-record-manager");
+      document.documentElement.dataset.innovaRecordManager = "ready";
+      window.dispatchEvent(new CustomEvent("innova-record-manager-ready"));
+    } catch (error) {
+      document.documentElement.dataset.innovaRecordManager = "error";
       showEnterpriseError(error);
     }
   }
@@ -145,9 +147,7 @@
       keepPersonalSettingsVisible();
       await waitForIdle();
 
-      if (typeof DecompressionStream !== "function") {
-        throw new Error("Este navegador no soporta DecompressionStream. Actualiza Chrome, Edge o Firefox.");
-      }
+      if (typeof DecompressionStream !== "function") throw new Error("Este navegador no soporta DecompressionStream. Actualiza Chrome, Edge o Firefox.");
 
       const pieces = await Promise.all(PARTS.map(async (url) => {
         const response = await fetch(`${url}?v=${VERSION}`, { cache: "no-store" });
@@ -176,6 +176,8 @@
         window.dispatchEvent(new CustomEvent("innova-enterprise-ready"));
         await waitForIdle();
         await loadProjectReality();
+        await waitForIdle();
+        await loadRecordManager();
       };
       script.onerror = () => {
         URL.revokeObjectURL(blobUrl);
@@ -212,13 +214,11 @@
       document.documentElement.dataset.innovaEnterprise = "safe";
       return;
     }
-
     const ready = await waitForCoreUi();
     if (!ready) {
       showDeferredNotice();
       return;
     }
-
     document.documentElement.dataset.innovaCore = "ready";
     window.dispatchEvent(new CustomEvent("innova-core-ready"));
     await waitForUiQuiet();
