@@ -1,8 +1,9 @@
 (() => {
   "use strict";
 
-  const VERSION = "20260808-enterprise-v2-ui-freeze-fix";
+  const VERSION = "20260808-enterprise-v2-project-reality";
   const AUTH_POLICY = `assets/admin-enterprise/auth-policy.js?v=${VERSION}`;
+  const PROJECT_REALITY = `assets/admin-enterprise/project-reality.js?v=${VERSION}`;
   const PARTS = [
     "assets/admin-enterprise/enterprise-1.b64",
     "assets/admin-enterprise/enterprise-2.b64",
@@ -101,18 +102,31 @@
     settings.dataset.personalSettingsVisible = "true";
   }
 
-  function loadAuthPolicy() {
+  function loadScriptOnce(src, datasetKey) {
     return new Promise((resolve, reject) => {
-      const existing = document.querySelector("script[data-innova-auth-policy]");
-      if (existing) return resolve();
+      if (document.querySelector(`script[data-${datasetKey}]`)) return resolve();
       const script = document.createElement("script");
-      script.src = AUTH_POLICY;
-      script.dataset.innovaAuthPolicy = "true";
+      script.src = src;
+      script.setAttribute(`data-${datasetKey}`, "true");
       script.async = true;
       script.onload = resolve;
-      script.onerror = () => reject(new Error(`No se pudo cargar ${AUTH_POLICY}`));
+      script.onerror = () => reject(new Error(`No se pudo cargar ${src}`));
       document.head.appendChild(script);
     });
+  }
+
+  function loadAuthPolicy() {
+    return loadScriptOnce(AUTH_POLICY, "innova-auth-policy");
+  }
+
+  async function loadProjectReality() {
+    try {
+      await loadScriptOnce(PROJECT_REALITY, "innova-project-reality");
+      document.documentElement.dataset.innovaProjectReality = "ready";
+    } catch (error) {
+      document.documentElement.dataset.innovaProjectReality = "error";
+      showEnterpriseError(error);
+    }
   }
 
   async function loadEnterpriseExtensions() {
@@ -155,11 +169,13 @@
       script.src = blobUrl;
       script.dataset.innovaEnterprise = "v2-complete";
       script.async = true;
-      script.onload = () => {
+      script.onload = async () => {
         URL.revokeObjectURL(blobUrl);
         document.documentElement.dataset.innovaEnterprise = "ready";
         window.__INNOVA_ENTERPRISE_LOADING__ = false;
         window.dispatchEvent(new CustomEvent("innova-enterprise-ready"));
+        await waitForIdle();
+        await loadProjectReality();
       };
       script.onerror = () => {
         URL.revokeObjectURL(blobUrl);
