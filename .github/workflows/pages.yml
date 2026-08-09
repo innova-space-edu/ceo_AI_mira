@@ -31,6 +31,7 @@ jobs:
           node --check assets/admin-enterprise/loader.js
           node --check assets/admin-enterprise/auth-policy.js
           node --check assets/admin-enterprise/invoice-edit.js
+          node --check assets/admin-enterprise/project-reality.js
 
       - name: Validate enterprise bundle
         run: |
@@ -50,6 +51,7 @@ jobs:
           grep -q "company_tax_records" /tmp/admin-enterprise.js
           grep -q "company_service_cases" /tmp/admin-enterprise.js
           grep -q "openTemplateManager" /tmp/admin-enterprise.js
+          grep -q "project-reality.js" assets/admin-enterprise/loader.js
 
       - name: Prepare static site
         run: |
