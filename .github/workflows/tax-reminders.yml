@@ -1,0 +1,34 @@
+name: Innova Tax Reminders
+
+on:
+  schedule:
+    # Revisión diaria. La fecha de vencimiento efectiva vive en company_tax_records.
+    - cron: "15 13 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: innova-tax-reminders
+  cancel-in-progress: false
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      COMPANY_SUPABASE_URL: ${{ secrets.COMPANY_SUPABASE_URL }}
+      COMPANY_SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.COMPANY_SUPABASE_SERVICE_ROLE_KEY }}
+      RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+      EMAIL_SEND_TO: ${{ secrets.EMAIL_SEND_TO }}
+      EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Validate reminder script
+        run: python -m py_compile .github/scripts/tax_reminders.py
+      - name: Check F29 deadlines and notify
+        run: python .github/scripts/tax_reminders.py
