@@ -38,6 +38,7 @@ jobs:
           node --check assets/admin-enterprise/agent-command-center.js
           node --check assets/admin-enterprise/dashboard-agents-stable.js
           node --check assets/admin-enterprise/mira-orchestrator-v7.js
+          node --check assets/admin-enterprise/mira-persistent-doc-cache-v1.js
           node --check assets/admin-enterprise/admin-autosave-v1.js
 
       - name: Validate enterprise bundle
@@ -64,11 +65,13 @@ jobs:
           test -f assets/admin-enterprise/agent-command-center.js
           test -f assets/admin-enterprise/dashboard-agents-stable.js
           test -f assets/admin-enterprise/mira-orchestrator-v7.js
+          test -f assets/admin-enterprise/mira-persistent-doc-cache-v1.js
           test -f assets/admin-enterprise/admin-autosave-v1.js
           grep -q "record-manager.js" assets/admin-enterprise/loader.js
           grep -q "commercial-documents.js" assets/admin-enterprise/loader.js
           grep -q "agent-command-center.js" assets/admin-enterprise/loader.js
           grep -q "mira-orchestrator-v7.js" assets/admin-enterprise/dashboard-agents-stable.js
+          grep -q "mira-persistent-doc-cache-v1.js" assets/admin-enterprise/dashboard-agents-stable.js
           grep -q "admin-autosave-v1.js" assets/admin-enterprise/dashboard-agents-stable.js
           grep -q "admin-supabase-singleton.js" admin.html
           grep -q "dashboard-agents-stable.js" admin.html
