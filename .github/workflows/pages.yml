@@ -36,6 +36,7 @@ jobs:
           node --check assets/admin-enterprise/commercial-documents.js
           node --check assets/admin-enterprise/agent-command-center.js
           node --check assets/admin-enterprise/enterprise-sync-v4.js
+          node --check assets/admin-enterprise/section-sync-bridge-v4.js
 
       - name: Validate enterprise bundle
         run: |
@@ -59,10 +60,12 @@ jobs:
           test -f assets/admin-enterprise/commercial-documents.js
           test -f assets/admin-enterprise/agent-command-center.js
           test -f assets/admin-enterprise/enterprise-sync-v4.js
+          test -f assets/admin-enterprise/section-sync-bridge-v4.js
           grep -q "record-manager.js" assets/admin-enterprise/loader.js
           grep -q "commercial-documents.js" assets/admin-enterprise/loader.js
           grep -q "agent-command-center.js" assets/admin-enterprise/loader.js
           grep -q "enterprise-sync-v4.js" admin.html
+          grep -q "section-sync-bridge-v4.js" admin.html
 
       - name: Prepare static site
         run: |
