@@ -2,22 +2,28 @@
   "use strict";
   if (new URLSearchParams(location.search).get("safe") === "1") return;
 
-  const MIRA_V5_SRC = "assets/admin-enterprise/mira-orchestrator-v5.js?v=20260818-v5-1";
+  const MIRA_V5_SRC = "assets/admin-enterprise/mira-orchestrator-v5.js?v=20260818-v5-2";
+  const MIRA_AUTO_INDEX_SRC = "assets/admin-enterprise/mira-v5-autoindex.js?v=20260818-v5-1";
   let miraV5Promise = null;
   const main = () => document.getElementById("main-content");
   const title = () => document.getElementById("view-title")?.textContent?.trim() || "";
 
-  function ensureMiraV5() {
-    if (document.querySelector('script[data-mira-v5-loader="true"]')) return miraV5Promise || Promise.resolve();
-    miraV5Promise = new Promise((resolve, reject) => {
+  function loadOnce(src, marker) {
+    if (document.querySelector(`script[data-${marker}="true"]`)) return Promise.resolve();
+    return new Promise((resolve, reject) => {
       const s = document.createElement("script");
-      s.src = MIRA_V5_SRC;
+      s.src = src;
       s.async = true;
-      s.dataset.miraV5Loader = "true";
+      s.setAttribute(`data-${marker}`, "true");
       s.onload = resolve;
-      s.onerror = () => reject(new Error("No se pudo cargar MIRA v5"));
+      s.onerror = () => reject(new Error(`No se pudo cargar ${src}`));
       document.head.appendChild(s);
     });
+  }
+
+  function ensureMiraV5() {
+    if (document.querySelector('script[data-mira-v5-loader="true"]')) return miraV5Promise || Promise.resolve();
+    miraV5Promise = loadOnce(MIRA_V5_SRC, "mira-v5-loader").then(() => loadOnce(MIRA_AUTO_INDEX_SRC, "mira-v5-autoindex"));
     return miraV5Promise;
   }
 
