@@ -2,8 +2,24 @@
   "use strict";
   if (new URLSearchParams(location.search).get("safe") === "1") return;
 
+  const MIRA_V5_SRC = "assets/admin-enterprise/mira-orchestrator-v5.js?v=20260818-v5-1";
+  let miraV5Promise = null;
   const main = () => document.getElementById("main-content");
   const title = () => document.getElementById("view-title")?.textContent?.trim() || "";
+
+  function ensureMiraV5() {
+    if (document.querySelector('script[data-mira-v5-loader="true"]')) return miraV5Promise || Promise.resolve();
+    miraV5Promise = new Promise((resolve, reject) => {
+      const s = document.createElement("script");
+      s.src = MIRA_V5_SRC;
+      s.async = true;
+      s.dataset.miraV5Loader = "true";
+      s.onload = resolve;
+      s.onerror = () => reject(new Error("No se pudo cargar MIRA v5"));
+      document.head.appendChild(s);
+    });
+    return miraV5Promise;
+  }
 
   function styles() {
     if (document.getElementById("dashboard-agents-stable-style")) return;
@@ -20,6 +36,7 @@
   }
 
   function clickView(view) {
+    if (view === "mira") ensureMiraV5().catch(console.error);
     const btn = document.querySelector(`#side-nav [data-view="${view}"]`) || (view === "finance" ? document.getElementById("finance-agent-nav") : null);
     if (btn) btn.click();
   }
@@ -40,8 +57,8 @@
       <div class="das-grid">
         <article class="das-card primary">
           <div class="das-icon"><i class="ri-sparkling-2-line"></i></div><strong>MIRA Business</strong>
-          <p>Agente operativo principal. Prepara gestiones, solicita autorización y ejecuta cambios permitidos en la plataforma.</p>
-          <div class="das-tools"><span class="das-chip">Proyectos</span><span class="das-chip">Facturas</span><span class="das-chip">Entregas</span><span class="das-chip">Auditoría</span><span class="das-chip">Finanzas</span></div>
+          <p>Orquestador central. Puede conversar, investigar toda Innova Admin, preparar gestiones, pedir autorización y ejecutar cambios permitidos.</p>
+          <div class="das-tools"><span class="das-chip">Toda la empresa</span><span class="das-chip">Orquestación</span><span class="das-chip">Ejecución</span><span class="das-chip">Verificación</span></div>
           <div class="das-actions"><button class="btn primary" data-das-view="mira">Gestionar con MIRA</button></div>
         </article>
         <article class="das-card">
@@ -65,8 +82,14 @@
 
   let timer = null;
   function schedule(){ clearTimeout(timer); timer = setTimeout(enhance, 120); }
-  const m = main(); if (m) new MutationObserver(schedule).observe(m,{childList:true,subtree:false});
-  document.addEventListener("click", e => { if (e.target.closest?.('[data-view="dashboard"]')) setTimeout(schedule,180); });
+  const m = main(); if (m) new MutationObserver(() => {
+    schedule();
+    if (title() === "MIRA Business") ensureMiraV5().catch(console.error);
+  }).observe(m,{childList:true,subtree:false});
+  document.addEventListener("click", e => {
+    if (e.target.closest?.('[data-view="dashboard"]')) setTimeout(schedule,180);
+    if (e.target.closest?.('[data-view="mira"]')) ensureMiraV5().catch(console.error);
+  }, true);
   window.addEventListener("innova-enterprise-ready", schedule);
   window.addEventListener("innova-agent-command-center-ready", schedule);
   schedule();
