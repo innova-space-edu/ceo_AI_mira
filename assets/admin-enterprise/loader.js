@@ -1,11 +1,12 @@
 (() => {
   "use strict";
 
-  const VERSION = "20260809-commercial-documents-v1";
+  const VERSION = "20260818-agents-v3";
   const AUTH_POLICY = `assets/admin-enterprise/auth-policy.js?v=${VERSION}`;
   const PROJECT_REALITY = `assets/admin-enterprise/project-reality.js?v=${VERSION}`;
   const RECORD_MANAGER = `assets/admin-enterprise/record-manager.js?v=${VERSION}`;
   const COMMERCIAL_DOCUMENTS = `assets/admin-enterprise/commercial-documents.js?v=${VERSION}`;
+  const AGENT_COMMAND_CENTER = `assets/admin-enterprise/agent-command-center.js?v=${VERSION}`;
   const PARTS = [
     "assets/admin-enterprise/enterprise-1.b64",
     "assets/admin-enterprise/enterprise-2.b64",
@@ -143,6 +144,17 @@
     }
   }
 
+  async function loadAgentCommandCenter() {
+    try {
+      await loadScriptOnce(AGENT_COMMAND_CENTER, "innova-agent-command-center");
+      document.documentElement.dataset.innovaAgentCommandCenter = "ready";
+      window.dispatchEvent(new CustomEvent("innova-agent-command-center-ready"));
+    } catch (error) {
+      document.documentElement.dataset.innovaAgentCommandCenter = "error";
+      showEnterpriseError(error);
+    }
+  }
+
   async function loadEnterpriseExtensions() {
     if (SAFE_MODE) {
       console.info("Innova Admin: modo seguro activo; Enterprise v2 no se cargará en esta sesión.");
@@ -192,6 +204,8 @@
         await loadRecordManager();
         await waitForIdle();
         await loadCommercialDocuments();
+        await waitForIdle();
+        await loadAgentCommandCenter();
       };
       script.onerror = () => {
         URL.revokeObjectURL(blobUrl);
