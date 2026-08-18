@@ -3,8 +3,10 @@
   if (new URLSearchParams(location.search).get("safe") === "1") return;
 
   const MIRA_V7_SRC = "assets/admin-enterprise/mira-orchestrator-v7.js?v=20260818-v7-1";
+  const DOC_CACHE_SRC = "assets/admin-enterprise/mira-persistent-doc-cache-v1.js?v=20260818-doc-cache-1";
   const AUTOSAVE_SRC = "assets/admin-enterprise/admin-autosave-v1.js?v=20260818-autosave-1";
   let miraV7Promise = null;
+  let docCachePromise = null;
   const main = () => document.getElementById("main-content");
   const title = () => document.getElementById("view-title")?.textContent?.trim() || "";
 
@@ -21,13 +23,24 @@
     });
   }
 
+  function ensureDocCache() {
+    if (docCachePromise) return docCachePromise;
+    docCachePromise = loadOnce(DOC_CACHE_SRC, "mira-doc-cache")
+      .then(() => window.INNOVA_MIRA_DOC_CACHE_READY || Promise.resolve())
+      .catch((error) => {
+        console.warn("Caché documental persistente no disponible:", error);
+      });
+    return docCachePromise;
+  }
+
   function ensureMiraV7() {
     if (document.querySelector('script[data-mira-v7-loader="true"]')) return miraV7Promise || Promise.resolve();
-    miraV7Promise = loadOnce(MIRA_V7_SRC, "mira-v7-loader");
+    miraV7Promise = ensureDocCache().then(() => loadOnce(MIRA_V7_SRC, "mira-v7-loader"));
     return miraV7Promise;
   }
 
   loadOnce(AUTOSAVE_SRC, "admin-autosave").catch(console.error);
+  ensureDocCache();
 
   function styles() {
     if (document.getElementById("dashboard-agents-stable-style")) return;
@@ -65,8 +78,8 @@
       <div class="das-grid">
         <article class="das-card primary">
           <div class="das-icon"><i class="ri-sparkling-2-line"></i></div><strong>MIRA Business</strong>
-          <p>Orquestador central alineado con el esquema real de Supabase, sincronización eficiente cada 5 segundos, caché documental y ejecución verificada.</p>
-          <div class="das-tools"><span class="das-chip">Toda la empresa</span><span class="das-chip">Supabase real</span><span class="das-chip">Sync 5 s</span><span class="das-chip">Ejecución</span></div>
+          <p>Orquestador central alineado con Supabase real, sincronización eficiente cada 5 segundos, índice documental persistente y ejecución verificada.</p>
+          <div class="das-tools"><span class="das-chip">Toda la empresa</span><span class="das-chip">Supabase real</span><span class="das-chip">Sync 5 s</span><span class="das-chip">Caché persistente</span></div>
           <div class="das-actions"><button class="btn primary" data-das-view="mira">Gestionar con MIRA</button></div>
         </article>
         <article class="das-card">
