@@ -47,7 +47,7 @@ def main() -> int:
     service_key = env("COMPANY_SUPABASE_SERVICE_ROLE_KEY")
     resend_key = env("RESEND_API_KEY")
     recipient = env("EMAIL_SEND_TO")
-    sender = env("EMAIL_FROM", "Innova Admin <contacto@innova-space-edu.cl>")
+    sender = env("EMAIL_FROM") or "Innova Admin <contacto@innova-space-edu.cl>"
 
     query = urllib.parse.urlencode({
         "select": "id,period,record_type,status,due_date,debit_vat,credit_vat,ppm_amount,tax_amount,total_amount,notes",
