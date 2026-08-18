@@ -28,6 +28,7 @@ jobs:
           node --check admin-config.js
           node --check admin-nav.js
           node --check backend/server.js
+          node --check assets/admin-enterprise/admin-supabase-singleton.js
           node --check assets/admin-enterprise/loader.js
           node --check assets/admin-enterprise/auth-policy.js
           node --check assets/admin-enterprise/invoice-edit.js
@@ -57,6 +58,7 @@ jobs:
           grep -q "company_tax_records" /tmp/admin-enterprise.js
           grep -q "company_service_cases" /tmp/admin-enterprise.js
           grep -q "openTemplateManager" /tmp/admin-enterprise.js
+          test -f assets/admin-enterprise/admin-supabase-singleton.js
           test -f assets/admin-enterprise/record-manager.js
           test -f assets/admin-enterprise/commercial-documents.js
           test -f assets/admin-enterprise/agent-command-center.js
@@ -68,6 +70,7 @@ jobs:
           grep -q "agent-command-center.js" assets/admin-enterprise/loader.js
           grep -q "mira-orchestrator-v6.js" assets/admin-enterprise/dashboard-agents-stable.js
           grep -q "admin-autosave-v1.js" assets/admin-enterprise/dashboard-agents-stable.js
+          grep -q "admin-supabase-singleton.js" admin.html
           grep -q "dashboard-agents-stable.js" admin.html
 
       - name: Prepare static site
