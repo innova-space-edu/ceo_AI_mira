@@ -2,9 +2,9 @@
   "use strict";
   if (new URLSearchParams(location.search).get("safe") === "1") return;
 
-  const MIRA_V5_SRC = "assets/admin-enterprise/mira-orchestrator-v5.js?v=20260818-v5-2";
-  const MIRA_AUTO_INDEX_SRC = "assets/admin-enterprise/mira-v5-autoindex.js?v=20260818-v5-1";
-  let miraV5Promise = null;
+  const MIRA_V6_SRC = "assets/admin-enterprise/mira-orchestrator-v6.js?v=20260818-v6-1";
+  const AUTOSAVE_SRC = "assets/admin-enterprise/admin-autosave-v1.js?v=20260818-autosave-1";
+  let miraV6Promise = null;
   const main = () => document.getElementById("main-content");
   const title = () => document.getElementById("view-title")?.textContent?.trim() || "";
 
@@ -21,11 +21,13 @@
     });
   }
 
-  function ensureMiraV5() {
-    if (document.querySelector('script[data-mira-v5-loader="true"]')) return miraV5Promise || Promise.resolve();
-    miraV5Promise = loadOnce(MIRA_V5_SRC, "mira-v5-loader").then(() => loadOnce(MIRA_AUTO_INDEX_SRC, "mira-v5-autoindex"));
-    return miraV5Promise;
+  function ensureMiraV6() {
+    if (document.querySelector('script[data-mira-v6-loader="true"]')) return miraV6Promise || Promise.resolve();
+    miraV6Promise = loadOnce(MIRA_V6_SRC, "mira-v6-loader");
+    return miraV6Promise;
   }
+
+  loadOnce(AUTOSAVE_SRC, "admin-autosave").catch(console.error);
 
   function styles() {
     if (document.getElementById("dashboard-agents-stable-style")) return;
@@ -42,7 +44,7 @@
   }
 
   function clickView(view) {
-    if (view === "mira") ensureMiraV5().catch(console.error);
+    if (view === "mira") ensureMiraV6().catch(console.error);
     const btn = document.querySelector(`#side-nav [data-view="${view}"]`) || (view === "finance" ? document.getElementById("finance-agent-nav") : null);
     if (btn) btn.click();
   }
@@ -63,8 +65,8 @@
       <div class="das-grid">
         <article class="das-card primary">
           <div class="das-icon"><i class="ri-sparkling-2-line"></i></div><strong>MIRA Business</strong>
-          <p>Orquestador central. Puede conversar, investigar toda Innova Admin, preparar gestiones, pedir autorización y ejecutar cambios permitidos.</p>
-          <div class="das-tools"><span class="das-chip">Toda la empresa</span><span class="das-chip">Orquestación</span><span class="das-chip">Ejecución</span><span class="das-chip">Verificación</span></div>
+          <p>Orquestador central con sincronización eficiente cada 5 segundos, caché documental, autorización y ejecución verificada.</p>
+          <div class="das-tools"><span class="das-chip">Toda la empresa</span><span class="das-chip">Sync 5 s</span><span class="das-chip">Caché</span><span class="das-chip">Ejecución</span></div>
           <div class="das-actions"><button class="btn primary" data-das-view="mira">Gestionar con MIRA</button></div>
         </article>
         <article class="das-card">
@@ -90,11 +92,11 @@
   function schedule(){ clearTimeout(timer); timer = setTimeout(enhance, 120); }
   const m = main(); if (m) new MutationObserver(() => {
     schedule();
-    if (title() === "MIRA Business") ensureMiraV5().catch(console.error);
+    if (title() === "MIRA Business") ensureMiraV6().catch(console.error);
   }).observe(m,{childList:true,subtree:false});
   document.addEventListener("click", e => {
     if (e.target.closest?.('[data-view="dashboard"]')) setTimeout(schedule,180);
-    if (e.target.closest?.('[data-view="mira"]')) ensureMiraV5().catch(console.error);
+    if (e.target.closest?.('[data-view="mira"]')) ensureMiraV6().catch(console.error);
   }, true);
   window.addEventListener("innova-enterprise-ready", schedule);
   window.addEventListener("innova-agent-command-center-ready", schedule);
