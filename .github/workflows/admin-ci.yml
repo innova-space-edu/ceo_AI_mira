@@ -23,6 +23,7 @@ jobs:
           node --check admin-nav.js
           node --check mira-voice-controller.js
           node --check backend/server.js
+          node --check assets/admin-enterprise/admin-supabase-singleton.js
           node --check assets/admin-enterprise/loader.js
           node --check assets/admin-enterprise/auth-policy.js
           node --check assets/admin-enterprise/invoice-edit.js
@@ -58,6 +59,7 @@ jobs:
           test -f admin.js
           test -f admin-config.js
           test -f admin-nav.js
+          test -f assets/admin-enterprise/admin-supabase-singleton.js
           test -f assets/admin-enterprise/loader.js
           test -f assets/admin-enterprise/auth-policy.js
           test -f assets/admin-enterprise/invoice-edit.js
@@ -78,6 +80,7 @@ jobs:
           grep -q "agent-command-center.js" assets/admin-enterprise/loader.js
           grep -q "mira-orchestrator-v6.js" assets/admin-enterprise/dashboard-agents-stable.js
           grep -q "admin-autosave-v1.js" assets/admin-enterprise/dashboard-agents-stable.js
+          grep -q "admin-supabase-singleton.js" admin.html
           grep -q "assets/admin-enterprise/loader.js" admin.html
           grep -q "assets/admin-enterprise/invoice-edit.js" admin.html
           grep -q "assets/admin-enterprise/dashboard-agents-stable.js" admin.html
