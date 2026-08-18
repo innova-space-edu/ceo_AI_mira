@@ -36,8 +36,8 @@ jobs:
           node --check assets/admin-enterprise/commercial-documents.js
           node --check assets/admin-enterprise/agent-command-center.js
           node --check assets/admin-enterprise/dashboard-agents-stable.js
-          node --check assets/admin-enterprise/mira-orchestrator-v5.js
-          node --check assets/admin-enterprise/mira-v5-autoindex.js
+          node --check assets/admin-enterprise/mira-orchestrator-v6.js
+          node --check assets/admin-enterprise/admin-autosave-v1.js
 
       - name: Validate enterprise bundle
         run: |
@@ -61,13 +61,13 @@ jobs:
           test -f assets/admin-enterprise/commercial-documents.js
           test -f assets/admin-enterprise/agent-command-center.js
           test -f assets/admin-enterprise/dashboard-agents-stable.js
-          test -f assets/admin-enterprise/mira-orchestrator-v5.js
-          test -f assets/admin-enterprise/mira-v5-autoindex.js
+          test -f assets/admin-enterprise/mira-orchestrator-v6.js
+          test -f assets/admin-enterprise/admin-autosave-v1.js
           grep -q "record-manager.js" assets/admin-enterprise/loader.js
           grep -q "commercial-documents.js" assets/admin-enterprise/loader.js
           grep -q "agent-command-center.js" assets/admin-enterprise/loader.js
-          grep -q "mira-orchestrator-v5.js" assets/admin-enterprise/dashboard-agents-stable.js
-          grep -q "mira-v5-autoindex.js" assets/admin-enterprise/dashboard-agents-stable.js
+          grep -q "mira-orchestrator-v6.js" assets/admin-enterprise/dashboard-agents-stable.js
+          grep -q "admin-autosave-v1.js" assets/admin-enterprise/dashboard-agents-stable.js
           grep -q "dashboard-agents-stable.js" admin.html
 
       - name: Prepare static site
