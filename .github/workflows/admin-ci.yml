@@ -31,6 +31,7 @@ jobs:
           node --check assets/admin-enterprise/commercial-documents.js
           node --check assets/admin-enterprise/agent-command-center.js
           node --check assets/admin-enterprise/dashboard-agents-stable.js
+          node --check assets/admin-enterprise/mira-orchestrator-v5.js
       - name: Validate enterprise bundle
         run: |
           cat assets/admin-enterprise/enterprise-1.b64 \
@@ -64,6 +65,7 @@ jobs:
           test -f assets/admin-enterprise/commercial-documents.js
           test -f assets/admin-enterprise/agent-command-center.js
           test -f assets/admin-enterprise/dashboard-agents-stable.js
+          test -f assets/admin-enterprise/mira-orchestrator-v5.js
           test -f assets/admin-enterprise/enterprise-4a.b64
           test -f assets/admin-enterprise/enterprise-4b.b64
           test -f assets/admin-enterprise/enterprise-4c.b64
@@ -72,6 +74,7 @@ jobs:
           grep -q "record-manager.js" assets/admin-enterprise/loader.js
           grep -q "commercial-documents.js" assets/admin-enterprise/loader.js
           grep -q "agent-command-center.js" assets/admin-enterprise/loader.js
+          grep -q "mira-orchestrator-v5.js" assets/admin-enterprise/dashboard-agents-stable.js
           grep -q "assets/admin-enterprise/loader.js" admin.html
           grep -q "assets/admin-enterprise/invoice-edit.js" admin.html
           grep -q "assets/admin-enterprise/dashboard-agents-stable.js" admin.html
