@@ -1,6 +1,12 @@
 // Perfil corporativo público 2026 para la web de Innova Space Education SpA.
 // Mantiene el contenido de MIRA alineado con las capacidades y proyectos visibles.
 
+// Compatibilidad con el identificador esperado por main.js para el video de introducción.
+const introVideoCompat = document.getElementById("intro-video-overlay-video");
+if (introVideoCompat && !document.getElementById("intro-video")) {
+  introVideoCompat.id = "intro-video";
+}
+
 window.INNOVA_COMPANY_PROFILE = {
   company: "Innova Space Education SpA",
   summary:
