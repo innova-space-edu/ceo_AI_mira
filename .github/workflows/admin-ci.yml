@@ -29,6 +29,7 @@ jobs:
           node --check assets/admin-enterprise/project-reality.js
           node --check assets/admin-enterprise/record-manager.js
           node --check assets/admin-enterprise/commercial-documents.js
+          node --check assets/admin-enterprise/agent-command-center.js
       - name: Validate enterprise bundle
         run: |
           cat assets/admin-enterprise/enterprise-1.b64 \
@@ -60,6 +61,7 @@ jobs:
           test -f assets/admin-enterprise/project-reality.js
           test -f assets/admin-enterprise/record-manager.js
           test -f assets/admin-enterprise/commercial-documents.js
+          test -f assets/admin-enterprise/agent-command-center.js
           test -f assets/admin-enterprise/enterprise-4a.b64
           test -f assets/admin-enterprise/enterprise-4b.b64
           test -f assets/admin-enterprise/enterprise-4c.b64
@@ -67,6 +69,7 @@ jobs:
           grep -q "project-reality.js" assets/admin-enterprise/loader.js
           grep -q "record-manager.js" assets/admin-enterprise/loader.js
           grep -q "commercial-documents.js" assets/admin-enterprise/loader.js
+          grep -q "agent-command-center.js" assets/admin-enterprise/loader.js
           grep -q "assets/admin-enterprise/loader.js" admin.html
           grep -q "assets/admin-enterprise/invoice-edit.js" admin.html
           grep -q "admin.html" .github/workflows/pages.yml
