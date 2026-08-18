@@ -2,10 +2,10 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8" />
-    <title>Innova Space Education</title>
+    <title>Innova Space Education SpA · Tecnología, infraestructura e innovación</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description"
-          content="Innova Space Edu SPA - Soluciones educativas, inteligencia artificial, páginas web y gestión de proyectos institucionales con diseño futurista." />
+          content="Innova Space Education SpA desarrolla soluciones integrales para instituciones públicas y privadas: tecnología, inteligencia artificial, software, seguridad, plataformas de gestión, remodelación, reparación y mejoramiento de espacios." />
 
     <!-- Fuentes -->
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Poppins:wght@300;400;500;600;700&display=swap"
@@ -15,6 +15,7 @@
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet">
 
     <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="company-refresh.css" />
     <link rel="stylesheet" href="legal.css" />
 </head>
 
@@ -26,13 +27,13 @@
     <div id="global-loader">
         <div class="loader-content">
             <div class="loader-galaxy"></div>
-            <p>Cargando universo educativo...</p>
+            <p>Cargando ecosistema de soluciones...</p>
         </div>
     </div>
 
     <!-- Intro video (solo en la primera carga de la sesión) -->
     <div id="intro-video-overlay" class="intro-overlay hidden">
-        <video id="intro-video"
+        <video id="intro-video-overlay-video"
                class="intro-video"
                src="assets/media/video7.mp4"
                muted
@@ -41,8 +42,8 @@
             Tu navegador no soporta la reproducción de video.
         </video>
         <div class="intro-message">
-            <p>Bienvenido a Innova Space Edu</p>
-            <small>Preparando tu experiencia futurista...</small>
+            <p>Bienvenido a Innova Space Education</p>
+            <small>Tecnología, infraestructura y soluciones integrales</small>
         </div>
     </div>
 
@@ -64,10 +65,10 @@
 
             <ul class="nav-links" id="navLinks">
                 <li><a href="#hero">Inicio</a></li>
-                <li><a href="#sobre">Sobre la empresa</a></li>
+                <li><a href="#sobre">Empresa</a></li>
                 <li><a href="#servicios">Servicios</a></li>
-                <li><a href="#portafolio">Portafolio</a></li>
-                <li><a href="#redes">Redes sociales</a></li>
+                <li><a href="#tecnologias">Tecnologías</a></li>
+                <li><a href="#portafolio">Proyectos</a></li>
                 <li><a href="#contacto">Contacto</a></li>
             </ul>
         </nav>
@@ -78,22 +79,21 @@
                 <h1>INNOVA SPACE EDUCATION SPA</h1>
 
                 <p>
-                    Educación, tecnología e inteligencia artificial unidas en un
-                    ecosistema futurista para transformar colegios, instituciones y
-                    proyectos en todo Chile.
+                    Tecnología, inteligencia artificial, infraestructura y soluciones digitales
+                    para transformar instituciones públicas y privadas, empresas y espacios de trabajo en Chile.
                 </p>
 
                 <div class="hero-buttons">
                     <a href="#portafolio"
                        class="btn-primary"
-                       data-mira-hint="Este botón le permite ver el portafolio de proyectos creados por Innova Space.">
-                        <i class="ri-rocket-2-fill"></i> Ver portafolio
+                       data-mira-hint="Este botón le permite conocer proyectos tecnológicos, de seguridad, gestión e innovación desarrollados por Innova Space.">
+                        <i class="ri-rocket-2-fill"></i> Ver proyectos
                     </a>
 
                     <a href="#contacto"
                        class="btn-secondary"
-                       data-mira-hint="Desde este botón puede agendar una reunión o dejar sus datos para un proyecto.">
-                        <i class="ri-calendar-event-fill"></i> Agenda una reunión
+                       data-mira-hint="Desde este botón puede solicitar una reunión o conversar sobre una solución para su institución o empresa.">
+                        <i class="ri-calendar-event-fill"></i> Conversemos
                     </a>
                 </div>
 
@@ -112,7 +112,7 @@
             <!-- CARRUSEL DE VIDEOS -->
             <div class="hero-media">
                 <div class="video-carousel"
-                     data-mira-hint="Este carrusel muestra videos de proyectos y experiencias desarrolladas por Innova Space">
+                     data-mira-hint="Este carrusel muestra proyectos, trabajos y experiencias desarrolladas por Innova Space Education.">
                     <video id="carouselVideo" autoplay muted playsinline>
                         <source src="assets/media/video7.mp4" type="video/mp4" />
                         Tu navegador no soporta la reproducción de video.
@@ -127,52 +127,76 @@
         <section id="sobre" class="section" data-mira-section="sobre">
             <div class="section-header">
                 <h2>Sobre la empresa</h2>
-                <p>Quiénes somos y qué hacemos</p>
+                <p>Soluciones integrales para necesidades reales</p>
             </div>
 
             <div class="sobre-grid">
                 <div class="sobre-text">
-                    <h3>Innovación, educación y tecnología</h3>
-                    <p>
-                        Innova Space Edu SPA es una empresa chilena que integra
-                        innovación, educación, inteligencia artificial y desarrollo
-                        web para crear experiencias futuristas y funcionales para
-                        colegios, instituciones y proyectos tecnológicos.
+                    <span class="company-kicker"><i class="ri-building-4-line"></i> Tecnología · Infraestructura · Innovación</span>
+                    <h3>Tecnología, infraestructura y transformación institucional</h3>
+
+                    <p class="company-lead">
+                        Innova Space Education SpA es una empresa chilena que desarrolla y ejecuta soluciones
+                        para instituciones públicas y privadas, empresas, organizaciones y establecimientos educacionales.
+                        El trabajo de la empresa no se limita a educación: integra desarrollo de software, inteligencia artificial,
+                        seguridad, plataformas de gestión, recursos digitales y proyectos de mejoramiento físico de espacios.
                     </p>
-                    <p>
-                        La empresa impulsa el desarrollo de tecnología aplicada,
-                        asistentes virtuales, plataformas interactivas y la innovación de
-                        espacios educativos para instituciones y organizaciones, uniendo
-                        IA, diseño web y gestión digital.
+
+                    <p class="company-lead">
+                        Podemos abordar un proyecto desde distintas capas: diagnóstico de una necesidad, diseño de la solución,
+                        desarrollo tecnológico, implementación, automatización, infraestructura digital y, cuando corresponde,
+                        remodelación, reparación, habilitación o mejoramiento del espacio institucional.
                     </p>
+
+                    <div class="capability-chips" aria-label="Capacidades principales">
+                        <span class="capability-chip"><i class="ri-tools-line"></i> Remodelación y reparación</span>
+                        <span class="capability-chip"><i class="ri-code-s-slash-line"></i> Software y páginas web</span>
+                        <span class="capability-chip"><i class="ri-shield-check-line"></i> Seguridad y control de acceso</span>
+                        <span class="capability-chip"><i class="ri-robot-2-line"></i> Inteligencia artificial</span>
+                        <span class="capability-chip"><i class="ri-database-2-line"></i> Plataformas de gestión</span>
+                        <span class="capability-chip"><i class="ri-cloud-line"></i> Nube e infraestructura digital</span>
+                    </div>
 
                     <div class="sobre-cards">
                         <div class="sobre-card">
                             <h4>Misión</h4>
                             <p>
-                                Transformar la educación y la gestión institucional mediante
-                                tecnología accesible, visualmente atractiva y fácil de usar,
-                                conectando IA, desarrollo web y nuevas experiencias
-                                educativas.
+                                Resolver necesidades institucionales mediante soluciones prácticas y escalables que combinen
+                                tecnología, inteligencia artificial, seguridad, gestión digital e infraestructura física,
+                                adaptándose a cada organización y a su realidad operativa.
                             </p>
                         </div>
                         <div class="sobre-card">
                             <h4>Visión</h4>
                             <p>
-                                Ser un referente en soluciones educativas inteligentes y
-                                plataformas futuristas en Latinoamérica, con foco en Chile y
-                                en el desarrollo de proyectos innovadores.
+                                Consolidar una empresa chilena capaz de integrar software, IA, infraestructura, seguridad y
+                                transformación de espacios en proyectos completos, con soluciones modernas para el sector público y privado.
                             </p>
+                        </div>
+                    </div>
+
+                    <div class="company-metrics">
+                        <div class="company-metric">
+                            <strong>Soluciones digitales</strong>
+                            <span>Web, plataformas, automatización, bases de datos, paneles y servicios en la nube.</span>
+                        </div>
+                        <div class="company-metric">
+                            <strong>Seguridad y operación</strong>
+                            <span>Control de acceso, monitoreo, auditoría, incidencias, recursos y continuidad operacional.</span>
+                        </div>
+                        <div class="company-metric">
+                            <strong>Infraestructura física</strong>
+                            <span>Remodelación, reparación, habilitación, mantención y mejoramiento de espacios institucionales.</span>
                         </div>
                     </div>
 
                     <div class="sobre-documents-cta">
                         <a href="documentos.html"
                            class="btn-primary"
-                           data-mira-hint="Este botón abre la biblioteca de documentos oficiales de Innova Space Edu para revisar o descargar archivos PDF.">
+                           data-mira-hint="Este botón abre la biblioteca de documentos oficiales de Innova Space Education para revisar documentación corporativa.">
                             <i class="ri-file-shield-2-fill"></i> Documentos de empresa
                         </a>
-                        <p>Biblioteca pública para revisar vista previa y descargar documentación corporativa.</p>
+                        <p>Biblioteca pública para revisar vista previa y documentación corporativa.</p>
                     </div>
                 </div>
 
@@ -185,12 +209,15 @@
                         <li><span>Ubicación:</span> Antofagasta, Chile</li>
                         <li><span>Correo:</span> contacto@innova-space-edu.cl</li>
                         <li>
-                            <span>Áreas:</span> Educación, Inteligencia Artificial, Desarrollo Web,
-                            Ciencia y Tecnología, innovación de espacios educativos e institucionales.
+                            <span>Áreas:</span> Tecnología, Inteligencia Artificial, Desarrollo de Software,
+                            Seguridad, Gestión Digital, Educación, Ciencia, Remodelación y Mejoramiento Institucional.
                         </li>
                         <li>
-                            <span>Enfoque:</span> desarrollo de proyectos tecnológicos y educativos
-                            a medida para colegios, instituciones, PYMEs y emprendimientos.
+                            <span>Clientes y proyectos:</span> instituciones públicas y privadas, colegios,
+                            organizaciones, PYMEs, empresas y proyectos personalizados.
+                        </li>
+                        <li>
+                            <span>Enfoque:</span> integrar soluciones digitales y físicas según la necesidad real de cada proyecto.
                         </li>
                     </ul>
                 </div>
@@ -200,123 +227,320 @@
         <!-- SERVICIOS -->
         <section id="servicios" class="section section-dark" data-mira-section="servicios">
             <div class="section-header">
-                <h2>Servicios</h2>
-                <p>Soluciones integrales con diseño futurista</p>
+                <h2>Servicios y capacidades</h2>
+                <p>Un mismo equipo para resolver necesidades físicas y digitales</p>
             </div>
 
             <div class="services-grid">
                 <article class="service-card"
-                         data-mira-hint="Aquí puede conocer el trabajo de Innova Space Education con inteligencia artificial aplicada a la educación y la gestión.">
+                         data-mira-hint="Soluciones de inteligencia artificial, automatización y asistentes para instituciones y empresas.">
                     <i class="ri-robot-2-fill service-icon"></i>
+                    <span class="service-label">IA y automatización</span>
                     <h3>Inteligencia Artificial</h3>
                     <p>
-                        Diseño de asistentes virtuales como MIRA, integración de modelos
-                        de IA para apoyo a clases, automatización de tareas y análisis de
-                        datos educativos o administrativos.
+                        Integración de modelos de IA, asistentes virtuales, análisis multimodal, RAG, automatización de tareas,
+                        generación de contenidos, clasificación de información y flujos con múltiples proveedores.
                     </p>
                 </article>
 
                 <article class="service-card"
-                         data-mira-hint="Esta tarjeta describe el servicio de creación de páginas web futuristas e interactivas.">
+                         data-mira-hint="Desarrollo de páginas web, plataformas institucionales y sistemas personalizados.">
                     <i class="ri-macbook-fill service-icon"></i>
-                    <h3>Creación de páginas web</h3>
+                    <span class="service-label">Software a medida</span>
+                    <h3>Web y plataformas</h3>
                     <p>
-                        Desarrollo de sitios modernos, responsivos y futuristas para
-                        colegios, emprendimientos y empresas, integrados con bases de
-                        datos, paneles y APIs externas.
+                        Páginas web, portales, sistemas administrativos, dashboards, plataformas de recursos, inventarios,
+                        reservas, evaluaciones, expedientes digitales, integraciones API y aplicaciones responsivas.
                     </p>
                 </article>
 
                 <article class="service-card"
-                         data-mira-hint="Remodelación y diseño de espacios institucionales con enfoque temático, innovador y futurista.">
-                    <i class="ri-share-fill service-icon"></i>
-                    <h3>Gestión de Proyectos Institucionales</h3>
+                         data-mira-hint="Sistemas de seguridad y control institucional con monitoreo, registros y auditoría.">
+                    <i class="ri-shield-keyhole-fill service-icon"></i>
+                    <span class="service-label">Seguridad institucional</span>
+                    <h3>Control de acceso y monitoreo</h3>
                     <p>
-                        Diseño y transformación de áreas educativas en espacios modernos,
-                        funcionales y futuristas. Ambientes innovadores que fortalecen la
-                        identidad institucional y mejoran la experiencia de aprendizaje.
+                        Sistemas para control de acceso, gestión de equipos, monitoreo operativo, incidencias, auditoría,
+                        roles, reportes y seguimiento de eventos en entornos institucionales administrados.
                     </p>
                 </article>
 
                 <article class="service-card"
-                         data-mira-hint="En esta sección se indican los proyectos educativos interactivos y actividades para colegios.">
+                         data-mira-hint="Trabajos de remodelación, reparación, habilitación y mejoramiento de espacios institucionales.">
+                    <i class="ri-hammer-fill service-icon"></i>
+                    <span class="service-label">Infraestructura física</span>
+                    <h3>Remodelación y reparación</h3>
+                    <p>
+                        Mejoramiento, reparación, habilitación, terminaciones y adecuación de espacios para instituciones públicas
+                        y privadas, coordinando el proyecto según requerimientos funcionales, técnicos y de uso.
+                    </p>
+                </article>
+
+                <article class="service-card"
+                         data-mira-hint="Plataformas para inventarios, recursos, reservas, documentos y operación institucional.">
+                    <i class="ri-database-2-fill service-icon"></i>
+                    <span class="service-label">Gestión y datos</span>
+                    <h3>Recursos y operación</h3>
+                    <p>
+                        Sistemas para administrar inventario, préstamos, reservas, documentos, usuarios, evidencias,
+                        reportes, notificaciones y procesos internos con trazabilidad y control de permisos.
+                    </p>
+                </article>
+
+                <article class="service-card"
+                         data-mira-hint="Innovación educativa, científica y tecnológica para colegios e instituciones.">
                     <i class="ri-flask-fill service-icon"></i>
-                    <h3>Proyectos educativos interactivos</h3>
+                    <span class="service-label">Educación y ciencia</span>
+                    <h3>Innovación institucional</h3>
                     <p>
-                        Herramientas y experiencias interactivas para Matemáticas,
-                        Ciencias y Tecnología. Soporte para pantallas interactivas,
-                        tecnologías AR-VR y ferias científicas.
+                        Plataformas educativas, proyectos STEAM, IA aplicada, recursos interactivos, evaluación digital,
+                        apoyo científico-tecnológico y modernización de espacios y procesos de aprendizaje.
                     </p>
                 </article>
+            </div>
+        </section>
+
+        <!-- TECNOLOGÍAS -->
+        <section id="tecnologias" class="section" data-mira-section="tecnologias">
+            <div class="section-header">
+                <h2>Tecnologías y herramientas</h2>
+                <p>Arquitecturas modernas, multimodelo y preparadas para evolucionar</p>
+            </div>
+
+            <p class="tech-intro">
+                La selección tecnológica depende de cada proyecto. Trabajamos con servicios en la nube, bases de datos,
+                desarrollo web moderno, infraestructura de despliegue y múltiples proveedores de inteligencia artificial,
+                evitando depender de una sola plataforma cuando el proyecto requiere redundancia o escalabilidad.
+            </p>
+
+            <div class="tech-grid">
+                <article class="tech-card">
+                    <h3><i class="ri-cloud-fill"></i> Nube, datos y despliegue</h3>
+                    <p>Hosting, bases de datos, autenticación, almacenamiento, redes, despliegue y operación de servicios.</p>
+                    <div class="tech-cloud">
+                        <span class="tech-pill">Supabase</span>
+                        <span class="tech-pill">Vercel</span>
+                        <span class="tech-pill">Cloudflare</span>
+                        <span class="tech-pill">Netlify</span>
+                        <span class="tech-pill">GitHub</span>
+                        <span class="tech-pill">PostgreSQL</span>
+                        <span class="tech-pill">PostGIS</span>
+                    </div>
+                </article>
+
+                <article class="tech-card">
+                    <h3><i class="ri-code-box-fill"></i> Desarrollo de software</h3>
+                    <p>Front-end, back-end, APIs, interfaces responsivas, automatización y servicios especializados.</p>
+                    <div class="tech-cloud">
+                        <span class="tech-pill">Next.js</span>
+                        <span class="tech-pill">React</span>
+                        <span class="tech-pill">TypeScript</span>
+                        <span class="tech-pill">Node.js</span>
+                        <span class="tech-pill">Python</span>
+                        <span class="tech-pill">REST APIs</span>
+                        <span class="tech-pill">PWA</span>
+                    </div>
+                </article>
+
+                <article class="tech-card">
+                    <h3><i class="ri-brain-fill"></i> IA, modelos y proveedores</h3>
+                    <p>Arquitecturas multi-proveedor para texto, visión, audio, razonamiento, investigación y automatización.</p>
+                    <div class="tech-cloud">
+                        <span class="tech-pill">Google Gemini</span>
+                        <span class="tech-pill">Groq</span>
+                        <span class="tech-pill">OpenRouter</span>
+                        <span class="tech-pill">Hugging Face</span>
+                        <span class="tech-pill">Cerebras</span>
+                        <span class="tech-pill">Llama</span>
+                        <span class="tech-pill">Qwen</span>
+                        <span class="tech-pill">Kimi</span>
+                        <span class="tech-pill">DeepSeek</span>
+                    </div>
+                </article>
+
+                <article class="tech-card">
+                    <h3><i class="ri-mic-ai-fill"></i> Multimedia y comunicaciones</h3>
+                    <p>Voz, audio, correo transaccional, generación multimedia y servicios integrables según cada solución.</p>
+                    <div class="tech-cloud">
+                        <span class="tech-pill">ElevenLabs</span>
+                        <span class="tech-pill">Resend</span>
+                        <span class="tech-pill">Gemini multimodal</span>
+                        <span class="tech-pill">Generación de imágenes</span>
+                        <span class="tech-pill">Generación de video</span>
+                        <span class="tech-pill">TTS / STT</span>
+                    </div>
+                </article>
+            </div>
+
+            <div class="google-roadmap" data-mira-hint="Bloque de investigación y actualización de EduAI con capacidades recientes del ecosistema Google AI.">
+                <div class="google-roadmap-header">
+                    <div>
+                        <h3>EduAI · evolución con Google AI</h3>
+                        <p>
+                            EduAI mantiene una arquitectura multi-proveedor y se actualiza progresivamente para aprovechar
+                            nuevas capacidades del ecosistema Google sin quedar acoplada a un único modelo o versión.
+                        </p>
+                    </div>
+                    <span class="roadmap-status">I+D · integración progresiva</span>
+                </div>
+
+                <div class="roadmap-grid">
+                    <div class="roadmap-item">
+                        <strong>Gemini API multimodal</strong>
+                        <span>Texto, documentos, imágenes y flujos de razonamiento para agentes y herramientas de EduAI.</span>
+                    </div>
+                    <div class="roadmap-item">
+                        <strong>Gemini Live</strong>
+                        <span>Base para experiencias en tiempo real con audio, video y conversación bidireccional.</span>
+                    </div>
+                    <div class="roadmap-item">
+                        <strong>Gemini Notebook</strong>
+                        <span>Referencia para investigación con fuentes, cuadernos, análisis y generación de materiales derivados.</span>
+                    </div>
+                    <div class="roadmap-item">
+                        <strong>Gen Media</strong>
+                        <span>Integración progresiva de capacidades de generación y edición de imagen, audio y video.</span>
+                    </div>
+                </div>
             </div>
         </section>
 
         <!-- PORTAFOLIO -->
-        <section id="portafolio" class="section" data-mira-section="portafolio">
+        <section id="portafolio" class="section section-dark" data-mira-section="portafolio">
             <div class="section-header">
-                <h2>Portafolio</h2>
-                <p>Proyectos y plataformas desarrolladas</p>
+                <h2>Proyectos y soluciones desarrolladas</h2>
+                <p>Ejemplos reales del ecosistema de Innova Space Education</p>
             </div>
 
             <div class="portfolio-grid">
                 <article class="portfolio-card">
-                    <h3>Innova Space Track</h3>
+                    <div class="project-eyebrow">
+                        <span class="project-type">Plataforma IA</span>
+                        <span class="project-status">En evolución</span>
+                    </div>
+                    <h3>EduAI Platform</h3>
                     <p>
-                        Sistema de inventario web para laboratorios, salas y recursos
-                        educativos. Incluye registro de préstamos, análisis de datos y
-                        panel de administración.
+                        Ecosistema educativo multiagente y multimodal con planificación, investigación con fuentes,
+                        notebooks, Creator Hub, evaluación digital, audio, imagen, video, colaboración y herramientas con IA.
                     </p>
-                    <a href="innova-space-track.html"
-                       class="portfolio-link"
-                       target="_blank"
-                       rel="noopener"
-                       data-mira-hint="Abrirá un demo del sistema de inventario desarrollado por Innova Space Education.">
-                        Ver demo
-                    </a>
+                    <div class="project-tags">
+                        <span class="project-tag">Next.js</span>
+                        <span class="project-tag">Supabase</span>
+                        <span class="project-tag">Gemini</span>
+                        <span class="project-tag">Groq</span>
+                    </div>
+                    <a href="https://eduaiplatformclon.vercel.app"
+                       class="portfolio-link" target="_blank" rel="noopener">Ver plataforma</a>
                 </article>
 
                 <article class="portfolio-card">
-                    <h3>MIRA - Asistente Virtual</h3>
+                    <div class="project-eyebrow">
+                        <span class="project-type">Gestión STEAM</span>
+                        <span class="project-status">Producción</span>
+                    </div>
+                    <h3>Sello Tecnológico</h3>
                     <p>
-                        Asistente de inteligencia artificial con voz, memoria contextual y
-                        análisis de texto, diseñada para apoyar clases, proyectos y tareas
-                        administrativas.
+                        Plataforma para crear, desarrollar, documentar, evaluar y publicar proyectos tecnológicos,
+                        científicos y STEAM con roles institucionales, evidencias, seguimiento, rúbricas y comunidad.
                     </p>
+                    <div class="project-tags">
+                        <span class="project-tag">Supabase</span>
+                        <span class="project-tag">RLS</span>
+                        <span class="project-tag">Realtime</span>
+                        <span class="project-tag">Vercel</span>
+                    </div>
+                    <a href="https://sello-tecnologico.vercel.app"
+                       class="portfolio-link" target="_blank" rel="noopener">Ver plataforma</a>
+                </article>
+
+                <article class="portfolio-card">
+                    <div class="project-eyebrow">
+                        <span class="project-type">Seguridad</span>
+                        <span class="project-status">Institucional</span>
+                    </div>
+                    <h3>Control de Acceso Escolar</h3>
+                    <p>
+                        Centro de operación y seguridad para accesos y notebooks institucionales, con monitoreo,
+                        incidencias, auditoría, reportes, roles, comandos controlados y seguimiento de dispositivos.
+                    </p>
+                    <div class="project-tags">
+                        <span class="project-tag">Supabase</span>
+                        <span class="project-tag">Auditoría</span>
+                        <span class="project-tag">Monitoreo</span>
+                        <span class="project-tag">Agente Windows</span>
+                    </div>
+                    <a href="#contacto" class="portfolio-link">Consultar solución</a>
+                </article>
+
+                <article class="portfolio-card">
+                    <div class="project-eyebrow">
+                        <span class="project-type">Emergencias</span>
+                        <span class="project-status">Plataforma ciudadana</span>
+                    </div>
+                    <h3>Innova Emergency</h3>
+                    <p>
+                        Plataforma de reportes geolocalizados y operación de emergencias con funcionamiento offline-first,
+                        evidencia privada, mapas, clasificación asistida por IA, deduplicación y seguimiento auditable.
+                    </p>
+                    <div class="project-tags">
+                        <span class="project-tag">PostGIS</span>
+                        <span class="project-tag">PWA</span>
+                        <span class="project-tag">Gemini</span>
+                        <span class="project-tag">Resend</span>
+                    </div>
+                    <a href="#contacto" class="portfolio-link">Conocer proyecto</a>
+                </article>
+
+                <article class="portfolio-card">
+                    <div class="project-eyebrow">
+                        <span class="project-type">Asistente IA</span>
+                        <span class="project-status">Activo</span>
+                    </div>
+                    <h3>MIRA</h3>
+                    <p>
+                        Identidad de asistente de IA utilizada en distintos proyectos de la empresa, con chat,
+                        voz, contexto y automatización para apoyo institucional, administrativo y tecnológico.
+                    </p>
+                    <div class="project-tags">
+                        <span class="project-tag">OpenRouter</span>
+                        <span class="project-tag">ElevenLabs</span>
+                        <span class="project-tag">Node.js</span>
+                        <span class="project-tag">APIs</span>
+                    </div>
                     <a href="https://ai-mira-seven.vercel.app/"
-                       class="portfolio-link"
-                       target="_blank"
-                       rel="noopener">
-                        Ver proyecto
-                    </a>
+                       class="portfolio-link" target="_blank" rel="noopener">Ver proyecto</a>
                 </article>
 
                 <article class="portfolio-card">
-                    <h3>Plataforma Innova Space Education</h3>
+                    <div class="project-eyebrow">
+                        <span class="project-type">Gestión de recursos</span>
+                        <span class="project-status">Solución web</span>
+                    </div>
+                    <h3>Innova Space Track / Inventario</h3>
                     <p>
-                        Sitio educativo con IA integrada, contenido interactivo y diseño
-                        espacial para estudiantes de distintos niveles.
+                        Sistema de inventario, reservas, préstamos y gestión de recursos para laboratorios,
+                        computación y biblioteca, con usuarios autorizados, registros y control de disponibilidad.
                     </p>
-                    <a href="#" class="portfolio-link" target="_blank" rel="noopener">
-                        Ver sitio
-                    </a>
-                </article>
-
-                <article class="portfolio-card">
-                    <h3>Otros proyectos personalizados</h3>
-                    <p>
-                        Páginas web para emprendimientos, módulos de inventario
-                        adicionales, paneles de control y sistemas adaptados a distintas
-                        instituciones.
-                    </p>
-                    <a href="#contacto" class="portfolio-link">
-                        Solicitar algo similar
-                    </a>
+                    <div class="project-tags">
+                        <span class="project-tag">Inventario</span>
+                        <span class="project-tag">Reservas</span>
+                        <span class="project-tag">Préstamos</span>
+                        <span class="project-tag">Node.js</span>
+                    </div>
+                    <a href="innova-space-track.html"
+                       class="portfolio-link" target="_blank" rel="noopener">Ver demo</a>
                 </article>
             </div>
+
+            <p class="portfolio-note">
+                Además de estas plataformas, Innova Space Education desarrolla proyectos personalizados y trabajos de
+                remodelación, reparación, habilitación y mejoramiento de espacios institucionales, integrando tecnología
+                cuando aporta valor al objetivo del proyecto.
+            </p>
         </section>
 
         <!-- REDES SOCIALES -->
-        <section id="redes" class="section section-dark" data-mira-section="redes">
+        <section id="redes" class="section" data-mira-section="redes">
             <div class="section-header">
                 <h2>Redes sociales</h2>
                 <p>Conecta con nuestro ecosistema digital</p>
@@ -350,10 +574,10 @@
         </section>
 
         <!-- CONTACTO -->
-        <section id="contacto" class="section" data-mira-section="contacto">
+        <section id="contacto" class="section section-dark" data-mira-section="contacto">
             <div class="section-header">
                 <h2>Contacto</h2>
-                <p>Conversemos su próximo proyecto</p>
+                <p>Conversemos sobre su próximo proyecto</p>
             </div>
 
             <div class="contact-grid">
@@ -370,7 +594,7 @@
 
                     <div class="form-group">
                         <label for="institucion">Institución / Empresa</label>
-                        <input type="text" id="institucion" name="institucion" placeholder="Colegio, empresa, pyme, etc." />
+                        <input type="text" id="institucion" name="institucion" placeholder="Institución, empresa, pyme, organización, etc." />
                     </div>
 
                     <div class="form-group">
@@ -380,12 +604,12 @@
 
                     <div class="form-group">
                         <label for="mensaje">Mensaje</label>
-                        <textarea id="mensaje" name="mensaje" rows="4" placeholder="Cuéntenos qué necesita" required></textarea>
+                        <textarea id="mensaje" name="mensaje" rows="4" placeholder="Cuéntenos qué necesita: tecnología, seguridad, plataforma, remodelación u otro proyecto" required></textarea>
                     </div>
 
                     <button type="submit"
                             class="btn-primary btn-full"
-                            data-mira-hint="Este botón envía el formulario de contacto para coordinar una reunión.">
+                            data-mira-hint="Este botón envía el formulario de contacto para coordinar una reunión o revisar un proyecto.">
                         <i class="ri-send-plane-fill"></i> Enviar mensaje
                     </button>
 
@@ -400,9 +624,15 @@
                     <p><i class="ri-map-pin-2-fill"></i> Vallenar – Antofagasta, Chile</p>
                     <p><i class="ri-time-fill"></i> Atención a instituciones y proyectos por agenda.</p>
                     <p>
-                        Podemos conectar sus sistemas actuales, crear nuevas plataformas
-                        o diseñar proyectos educativos con IA y desarrollo web a la medida.
+                        Podemos evaluar una necesidad completa: desde una página web o plataforma hasta un sistema de seguridad,
+                        automatización con IA, gestión de recursos o trabajos de remodelación y mejoramiento institucional.
                     </p>
+                    <div class="contact-capabilities">
+                        <span><i class="ri-check-line"></i> Instituciones públicas y privadas</span>
+                        <span><i class="ri-check-line"></i> Proyectos tecnológicos y de seguridad</span>
+                        <span><i class="ri-check-line"></i> Remodelación, reparación y habilitación</span>
+                        <span><i class="ri-check-line"></i> Desarrollo personalizado</span>
+                    </div>
                 </div>
             </div>
         </section>
@@ -427,7 +657,6 @@
 
     <!-- CHATBOT MIRA flotante -->
     <div id="mira-widget">
-        <!-- Botón flotante con SVG inline -->
         <button id="mira-toggle" aria-label="Abrir asistente MIRA">
             <svg width="110" height="110" viewBox="0 0 110 110" xmlns="http://www.w3.org/2000/svg">
                 <defs>
@@ -473,7 +702,6 @@
             </svg>
         </button>
 
-        <!-- Ventana del chat -->
         <div id="mira-chat" class="mira-chat-closed">
             <div class="mira-header">
                 <div class="mira-header-info">
@@ -489,7 +717,7 @@
                     </svg>
                     <div>
                         <h4>MIRA · Asistente IA</h4>
-                        <span>Futuristic AI · Voz femenina</span>
+                        <span>Soluciones Innova Space · Voz femenina</span>
                     </div>
                 </div>
 
@@ -503,7 +731,6 @@
                 </div>
             </div>
 
-            <!-- Selector modo (Chat/Voz) -->
             <div id="mira-mode-switch"
                  style="display:flex; gap:10px; padding:10px 12px; align-items:center; border-bottom: 1px solid rgba(255,255,255,0.08);">
                 <button id="mira-mode-chat" type="button"
@@ -518,7 +745,6 @@
                 </button>
             </div>
 
-            <!-- CONTENEDOR CHAT -->
             <div id="mira-chat-mode">
                 <div class="mira-messages" id="miraMessages"></div>
 
@@ -530,7 +756,7 @@
                 <form id="miraForm" class="mira-input-area">
                     <input type="text"
                            id="miraInput"
-                           placeholder="Escriba aquí... Ej: ¿Qué hace la empresa?"
+                           placeholder="Ej: ¿Qué soluciones desarrolla la empresa?"
                            autocomplete="off" />
                     <button type="submit">
                         <i class="ri-send-plane-2-fill"></i>
@@ -538,7 +764,6 @@
                 </form>
             </div>
 
-            <!-- CONTENEDOR VOZ -->
             <div id="mira-voice-mode" style="display:none; padding: 10px 12px;">
                 <div style="opacity:0.9; font-size: 0.92rem; margin-bottom:10px;">
                     <i class="ri-mic-fill"></i> Habla con MIRA por voz (ElevenLabs). Presiona “Start a call”.
@@ -554,6 +779,7 @@
     <!-- JS principal -->
     <script src="legal.js" defer></script>
     <script src="main.js" defer></script>
+    <script src="company-profile.js" defer></script>
 
     <!-- Widget ElevenLabs -->
     <script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async type="text/javascript"></script>
