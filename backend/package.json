@@ -2,9 +2,10 @@
   "name": "mira-backend",
   "version": "1.0.0",
   "description": "Backend de MIRA para Innova Space Education SPA (proxy a OpenRouter, correo con Resend y TTS Aria en Azure)",
-  "main": "server.js",
+  "main": "start.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node start.js",
+    "check": "node --check start.js && node --check server.js"
   },
   "engines": {
     "node": ">=18"
