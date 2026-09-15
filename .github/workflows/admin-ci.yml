@@ -35,6 +35,7 @@ jobs:
           node --check assets/admin-enterprise/mira-orchestrator-v7.js
           node --check assets/admin-enterprise/mira-persistent-doc-cache-v1.js
           node --check assets/admin-enterprise/admin-autosave-v1.js
+          node --check assets/admin-enterprise/ceo-project-hub-loader.js
       - name: Validate enterprise bundle
         run: |
           cat assets/admin-enterprise/enterprise-1.b64 \
@@ -53,6 +54,20 @@ jobs:
           grep -q "company_tax_records" /tmp/admin-enterprise.js
           grep -q "company_service_cases" /tmp/admin-enterprise.js
           grep -q "openTemplateManager" /tmp/admin-enterprise.js
+      - name: Validate CEO project hub bundle
+        run: |
+          cat assets/admin-enterprise/ceo-project-hub-1.b64 \
+              assets/admin-enterprise/ceo-project-hub-2.b64 \
+              assets/admin-enterprise/ceo-project-hub-3.b64 \
+              assets/admin-enterprise/ceo-project-hub-4.b64 > /tmp/ceo-project-hub.b64
+          base64 --decode /tmp/ceo-project-hub.b64 | gzip --decompress > /tmp/ceo-project-hub.js
+          node --check /tmp/ceo-project-hub.js
+          grep -q "company_files" /tmp/ceo-project-hub.js
+          grep -q "company_purchase_orders" /tmp/ceo-project-hub.js
+          grep -q "company_invoices" /tmp/ceo-project-hub.js
+          grep -q "/api/admin/mira" /tmp/ceo-project-hub.js
+          grep -q "ChatPaper / MIRA" /tmp/ceo-project-hub.js
+          grep -q "CEO_PORTFOLIO_META" /tmp/ceo-project-hub.js
       - name: Verify required production files
         run: |
           test -f admin.html
@@ -75,6 +90,12 @@ jobs:
           test -f assets/admin-enterprise/enterprise-4a.b64
           test -f assets/admin-enterprise/enterprise-4b.b64
           test -f assets/admin-enterprise/enterprise-4c.b64
+          test -f assets/admin-enterprise/ceo-project-hub-loader.js
+          test -f assets/admin-enterprise/ceo-project-hub.css
+          test -f assets/admin-enterprise/ceo-project-hub-1.b64
+          test -f assets/admin-enterprise/ceo-project-hub-2.b64
+          test -f assets/admin-enterprise/ceo-project-hub-3.b64
+          test -f assets/admin-enterprise/ceo-project-hub-4.b64
           grep -q "auth-policy.js" assets/admin-enterprise/loader.js
           grep -q "project-reality.js" assets/admin-enterprise/loader.js
           grep -q "record-manager.js" assets/admin-enterprise/loader.js
@@ -84,8 +105,10 @@ jobs:
           grep -q "mira-persistent-doc-cache-v1.js" assets/admin-enterprise/dashboard-agents-stable.js
           grep -q "admin-autosave-v1.js" assets/admin-enterprise/dashboard-agents-stable.js
           grep -q "admin-supabase-singleton.js" admin.html
-          grep -q "assets/admin-enterprise/loader.js" admin.html
-          grep -q "assets/admin-enterprise/invoice-edit.js" admin.html
-          grep -q "assets/admin-enterprise/dashboard-agents-stable.js" admin.html
+          grep -q "ceo-project-hub-loader.js" admin.html
+          grep -q "ceo-project-hub.css" admin.html
+          ! grep -q "assets/admin-enterprise/loader.js" admin.html
+          ! grep -q "assets/admin-enterprise/invoice-edit.js" admin.html
+          ! grep -q "assets/admin-enterprise/dashboard-agents-stable.js" admin.html
           grep -q "admin.html" .github/workflows/pages.yml
           grep -q "cp -R assets _site/assets" .github/workflows/pages.yml
