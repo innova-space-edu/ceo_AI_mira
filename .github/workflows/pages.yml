@@ -121,7 +121,7 @@ jobs:
           grep -q "company_invoices" /tmp/contador-tributario.js
           grep -q "/api/admin/mira" /tmp/contador-tributario.js
           grep -q "f29_precheck" /tmp/contador-tributario.js
-          grep -q "rcv_purchases" /tmp/contador-tributario.js
+          grep -q 'rcv_${book}' /tmp/contador-tributario.js
           grep -q "contador-tributario-loader.js" contador.html
           grep -q "contador-tributario.css" contador.html
           grep -q "RCV / SII" contador.html
