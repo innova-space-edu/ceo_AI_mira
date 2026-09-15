@@ -10,6 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Orbitron:wght@500;600;700&display=swap" rel="stylesheet" />
   <link href="https://cdn.jsdelivr.net/npm/remixicon@4.6.0/fonts/remixicon.css" rel="stylesheet" />
   <link rel="stylesheet" href="contador.css?v=20260915-1" />
+  <link rel="stylesheet" href="contador-tributario.css?v=20260915-2" />
 </head>
 <body>
   <div id="loading" class="loading-screen"><div class="loading-orb"></div><strong>CONTADOR IA</strong><span>Preparando información financiera…</span></div>
@@ -27,6 +28,10 @@
         <div class="nav-label">Control contable</div>
         <button class="nav-item" data-view="auditor"><i class="ri-shield-check-line"></i><span>Contador Auditor</span></button>
         <button class="nav-item" data-view="taxes"><i class="ri-percent-line"></i><span>IVA y presupuestos</span></button>
+        <div class="nav-label">SII y conciliación</div>
+        <button class="nav-item" data-tax-view="rcv"><i class="ri-file-list-3-line"></i><span>RCV / SII</span></button>
+        <button class="nav-item" data-tax-view="f29"><i class="ri-government-line"></i><span>F29 y PPM</span></button>
+        <button class="nav-item" data-tax-view="reconcile"><i class="ri-bank-line"></i><span>Conciliación bancaria</span></button>
         <button class="nav-item" data-view="mira"><i class="ri-bard-line"></i><span>MIRA Contable</span></button>
       </nav>
       <div class="sidebar-foot"><div class="security"><i class="ri-lock-2-line"></i><span id="security-text">Sesión protegida</span></div></div>
@@ -49,8 +54,10 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.2.6/purify.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="admin-config.js"></script>
   <script src="assets/admin-enterprise/admin-supabase-singleton.js?v=20260818-singleton-1"></script>
   <script src="contador.js?v=20260915-1"></script>
+  <script src="contador-tributario-loader.js?v=20260915-2"></script>
 </body>
 </html>
