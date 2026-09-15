@@ -128,11 +128,22 @@ jobs:
           grep -q "F29 y PPM" contador.html
           grep -q "Conciliación bancaria" contador.html
 
+      - name: Validate responsive screen bands
+        run: |
+          test -f responsive-admin-suite.css
+          grep -q "min-width:1440px" responsive-admin-suite.css
+          grep -q "min-width:921px" responsive-admin-suite.css
+          grep -q "max-width:920px" responsive-admin-suite.css
+          grep -q "max-width:767px" responsive-admin-suite.css
+          grep -q "max-width:480px" responsive-admin-suite.css
+          grep -q "responsive-admin-suite.css" admin.html
+          grep -q "responsive-admin-suite.css" contador.html
+
       - name: Prepare static site
         run: |
           mkdir -p _site
           cp -R assets _site/assets
-          cp documentos.html index.html innova-space-track.html innova-measure-ai.html innova-measure-ai.css innova-measure-ai.js legal.css legal.js main.js mira-voice-controller.js speak.js style.css admin.html admin.css admin.js admin-config.js admin-nav.js contador.html contador.css contador.js contador-tributario.css contador-tributario-loader.js _site/
+          cp documentos.html index.html innova-space-track.html innova-measure-ai.html innova-measure-ai.css innova-measure-ai.js legal.css legal.js main.js mira-voice-controller.js speak.js style.css admin.html admin.css admin.js admin-config.js admin-nav.js contador.html contador.css contador.js contador-tributario.css contador-tributario-loader.js responsive-admin-suite.css _site/
           touch _site/.nojekyll
 
       - uses: actions/upload-pages-artifact@v3

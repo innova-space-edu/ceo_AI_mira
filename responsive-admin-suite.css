@@ -1,0 +1,171 @@
+/* Responsive shell shared by Innova CEO Admin + Contador IA.
+   Target bands: large >=1440px, medium 921-1439px, small <=920px,
+   with phone refinements <=767px and <=480px. Loaded last on both pages. */
+
+html,body{max-width:100%;overflow-x:hidden}
+img,svg,canvas,video{max-width:100%;height:auto}
+.admin-app .workspace,.app .workspace,.admin-app .main-content,.app .main{min-width:0;max-width:100%}
+.ceo-table-wrap,.table-wrap{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-inline:contain}
+.ceo-tabs,.tax-tabs{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.modal{max-width:calc(100vw - 24px)}
+.ceo-modal-wide{max-width:calc(100vw - 24px)!important}
+
+/* LARGE — full desktop / wide notebook / monitor */
+@media (min-width:1440px){
+  .admin-app{--sidebar:260px}
+  .admin-app .main-content{max-width:1880px;padding:28px 32px}
+  .admin-app .topbar{padding-inline:32px;grid-template-columns:auto minmax(360px,700px) auto}
+  .app{grid-template-columns:260px minmax(0,1fr)}
+  .app .sidebar{width:260px}
+  .app .main{max-width:1880px;padding:26px 30px}
+  .app .topbar{padding-inline:28px}
+  .app .kpis{grid-template-columns:repeat(6,minmax(145px,1fr))}
+  .app .grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .tri-grid,.tax-matrix{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .reconcile-grid,.f29-summary{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+
+/* MEDIUM — 13–14 inch notebooks and landscape tablets */
+@media (min-width:921px) and (max-width:1439px){
+  .admin-app{--sidebar:220px}
+  .admin-app .sidebar{padding-inline:11px}
+  .admin-app .sidebar-brand{padding-inline:5px}
+  .admin-app .nav-item{padding:10px 9px;font-size:.76rem;gap:9px}
+  .admin-app .main-content{padding:20px;max-width:none}
+  .admin-app .topbar{padding-inline:18px;gap:14px;grid-template-columns:auto minmax(210px,1fr) auto}
+  .admin-app .topbar-search{max-width:440px;justify-self:stretch}
+  .admin-app .stats-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .admin-app .grid-3{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .ceo-kpis{grid-template-columns:repeat(3,minmax(145px,1fr))}
+  .ceo-grid,.ceo-folder-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .ceo-filterbar{grid-template-columns:minmax(180px,1fr) minmax(135px,.55fr);gap:8px}
+  .ceo-filterbar>*:nth-child(n+3){min-width:0}
+  .ceo-project-hero{grid-template-columns:1fr}
+  .ceo-stage{grid-template-columns:repeat(5,115px)}
+
+  .app{grid-template-columns:220px minmax(0,1fr)}
+  .app .sidebar{width:220px;padding-inline:10px}
+  .app .nav-item{padding:9px 9px;font-size:.72rem;gap:8px}
+  .app .back-admin{font-size:.68rem;padding:9px}
+  .app .main{padding:18px;max-width:none}
+  .app .topbar{padding-inline:16px;gap:10px}
+  .app .kpis{grid-template-columns:repeat(3,minmax(135px,1fr));gap:9px}
+  .app .grid.three{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .app .grid{gap:11px}
+  .app .filterbar{grid-template-columns:minmax(180px,1fr) minmax(130px,.55fr);gap:8px}
+  .app .filterbar>*:nth-child(n+3){min-width:0}
+  .mira-layout{grid-template-columns:minmax(0,1fr) 280px;gap:11px}
+  .tri-grid,.tax-matrix{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .reconcile-grid,.f29-summary{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .ppm-box{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+
+/* Narrow medium: preserve desktop navigation, but reduce density before drawer mode. */
+@media (min-width:921px) and (max-width:1080px){
+  .admin-app{--sidebar:205px}
+  .admin-app .user-button-copy{display:none}
+  .admin-app .topbar-search{max-width:320px}
+  .ceo-kpis{grid-template-columns:repeat(2,minmax(145px,1fr))}
+  .ceo-grid,.ceo-folder-grid{grid-template-columns:1fr}
+  .app{grid-template-columns:205px minmax(0,1fr)}
+  .app .sidebar{width:205px}
+  .app .brand span{font-size:.61rem}
+  .app .user div{display:none}
+  .app .kpis{grid-template-columns:repeat(2,minmax(135px,1fr))}
+  .mira-layout{grid-template-columns:1fr}
+}
+
+/* SMALL — tablet portrait and mobile. Both apps switch sidebar at the same width. */
+@media (max-width:920px){
+  .admin-app{grid-template-columns:1fr}
+  .admin-app .workspace{grid-column:1}
+  .admin-app .main-content{padding:16px;max-width:none}
+  .admin-app .topbar{height:70px;padding-inline:12px;grid-template-columns:auto minmax(0,1fr) auto;gap:8px}
+  .admin-app .topbar-search{display:none}
+  .admin-app .user-button-copy{display:none}
+  .admin-app .stats-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .admin-app .grid-3{grid-template-columns:1fr}
+  .admin-app .page-head{gap:12px}
+  .admin-app .page-head .button-row,.ceo-actions{width:100%}
+  .ceo-head{flex-direction:column;gap:12px}
+  .ceo-actions{justify-content:flex-start}
+  .ceo-kpis{grid-template-columns:repeat(2,minmax(130px,1fr));gap:9px}
+  .ceo-grid,.ceo-folder-grid{grid-template-columns:1fr}
+  .ceo-filterbar{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .ceo-project-hero{grid-template-columns:1fr}
+  .ceo-stage{grid-template-columns:repeat(5,118px)}
+  .ceo-table{min-width:760px}
+
+  .app{grid-template-columns:1fr}
+  .app .workspace{grid-column:1;min-width:0}
+  .app .sidebar{position:fixed;left:-270px;top:0;bottom:0;width:246px;height:100vh;z-index:30;transition:left .2s ease}
+  .app .sidebar.open{left:0}
+  .app .backdrop{display:none;position:fixed;inset:0;background:#0007;z-index:25}
+  .app .backdrop.show{display:block}
+  .app .mobile{display:grid}
+  .app .topbar{height:70px;padding-inline:12px;gap:8px}
+  .app .main{padding:14px;max-width:none}
+  .app .period-control{margin-left:auto}
+  .app .user div{display:none}
+  .app .kpis{grid-template-columns:repeat(2,minmax(125px,1fr));gap:9px}
+  .app .grid,.app .grid.three{grid-template-columns:1fr}
+  .app .filterbar{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .app .page-head{gap:12px}
+  .mira-layout{grid-template-columns:1fr}
+  .chat{height:min(650px,calc(100dvh - 130px));min-height:480px}
+  .tri-grid,.tax-matrix,.reconcile-grid,.f29-summary{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .ppm-box{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .diff-row{grid-template-columns:82px minmax(0,1fr) 100px}
+  .diff-row>:nth-child(3){display:none}
+}
+
+/* Phones */
+@media (max-width:767px){
+  .admin-app .main-content,.app .main{padding:12px}
+  .admin-app .stats-grid,.ceo-kpis,.app .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .admin-app .page-head,.app .page-head{flex-direction:column;align-items:stretch}
+  .admin-app .page-head .btn,.ceo-actions .btn,.app .page-head .btn{min-height:42px}
+  .ceo-filterbar,.app .filterbar{grid-template-columns:1fr}
+  .ceo-filterbar .wide-mobile{grid-column:auto}
+  .ceo-form,.app .form-grid{grid-template-columns:1fr}
+  .ceo-form .full,.app .form-grid .full{grid-column:auto}
+  .ceo-project-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .ceo-file{grid-template-columns:auto minmax(0,1fr)}
+  .ceo-file-actions{grid-column:1/-1;justify-content:flex-end}
+  .app .period-control{padding:6px 8px}
+  .app .period-control input{max-width:128px}
+  .app .table{min-width:760px}
+  .tri-grid,.tax-matrix,.reconcile-grid,.f29-summary,.ppm-box{grid-template-columns:1fr}
+  .diff-row,.bank-match{grid-template-columns:1fr}
+  .tax-subhead{align-items:flex-start;flex-direction:column}
+  .tax-toolbar{display:grid;grid-template-columns:1fr;width:100%}
+  .tax-toolbar .field{min-width:0}
+  .modal-backdrop{padding:8px}
+  .modal{width:100%;max-width:100%;max-height:96dvh;border-radius:16px}
+  .modal-head,.modal-body,.modal-foot{padding-inline:13px}
+  .modal-foot{flex-wrap:wrap}
+  .modal-foot .btn{flex:1 1 130px}
+}
+
+/* Very small phones */
+@media (max-width:480px){
+  .admin-app .topbar-left h1,.app .topbar h1{font-size:.82rem;max-width:155px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .admin-app .eyebrow,.app .eyebrow{display:none}
+  .admin-app .main-content,.app .main{padding:10px}
+  .admin-app .stats-grid,.ceo-kpis,.app .kpis{grid-template-columns:1fr}
+  .ceo-project-stats{grid-template-columns:1fr}
+  .ceo-head h2,.app .page-head h2{font-size:1.18rem}
+  .ceo-folder,.ceo-project-card,.panel,.kpi{border-radius:13px}
+  .app .period-control i{display:none}
+  .app .period-control input{max-width:112px;font-size:.72rem}
+  .app .user>a.icon-btn{display:none}
+  .toast-root{left:10px;right:10px;bottom:10px}
+  .toast{min-width:0;max-width:none;width:100%}
+}
+
+/* Short laptop screens: avoid oversized chat/modal vertical footprints. */
+@media (max-height:720px) and (min-width:768px){
+  .chat{height:calc(100vh - 125px);min-height:430px}
+  .modal{max-height:95vh}
+  .admin-app .topbar,.app .topbar{height:66px}
+}
