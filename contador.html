@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="robots" content="noindex,nofollow,noarchive" />
+  <title>Contador IA | Innova Space Education</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Orbitron:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.6.0/fonts/remixicon.css" rel="stylesheet" />
+  <link rel="stylesheet" href="contador.css?v=20260915-1" />
+</head>
+<body>
+  <div id="loading" class="loading-screen"><div class="loading-orb"></div><strong>CONTADOR IA</strong><span>Preparando información financiera…</span></div>
+
+  <div id="accounting-app" class="app hidden">
+    <aside id="sidebar" class="sidebar">
+      <div class="brand"><img src="assets/img/logo1.jpg" alt="Innova" /><div><strong>INNOVA</strong><span>Contador IA</span></div></div>
+      <a class="back-admin" href="admin.html"><i class="ri-arrow-left-line"></i><span>Administración CEO</span></a>
+      <nav id="accounting-nav">
+        <button class="nav-item active" data-view="dashboard"><i class="ri-dashboard-3-line"></i><span>Resumen</span></button>
+        <div class="nav-label">Documentación</div>
+        <button class="nav-item" data-view="documents"><i class="ri-upload-cloud-2-line"></i><span>Documentos</span></button>
+        <button class="nav-item" data-view="agents"><i class="ri-sparkling-2-line"></i><span>Agentes IA</span></button>
+        <button class="nav-item" data-view="folders"><i class="ri-folder-chart-line"></i><span>Períodos y proyectos</span></button>
+        <div class="nav-label">Control contable</div>
+        <button class="nav-item" data-view="auditor"><i class="ri-shield-check-line"></i><span>Contador Auditor</span></button>
+        <button class="nav-item" data-view="taxes"><i class="ri-percent-line"></i><span>IVA y presupuestos</span></button>
+        <button class="nav-item" data-view="mira"><i class="ri-bard-line"></i><span>MIRA Contable</span></button>
+      </nav>
+      <div class="sidebar-foot"><div class="security"><i class="ri-lock-2-line"></i><span id="security-text">Sesión protegida</span></div></div>
+    </aside>
+
+    <div id="backdrop" class="backdrop"></div>
+    <section class="workspace">
+      <header class="topbar">
+        <div class="topbar-left"><button id="menu-toggle" class="icon-btn mobile" aria-label="Menú"><i class="ri-menu-line"></i></button><div><span class="eyebrow">INNOVA SPACE EDUCATION</span><h1 id="view-title">Contador IA</h1></div></div>
+        <div class="period-control"><i class="ri-calendar-2-line"></i><input id="global-period" type="month" /></div>
+        <div class="user"><span id="user-avatar">IA</span><div><strong id="user-name">Usuario</strong><small id="user-role">Finanzas</small></div><a class="icon-btn" href="admin.html" title="Volver a Administración"><i class="ri-home-6-line"></i></a></div>
+      </header>
+      <main id="main" class="main"></main>
+    </section>
+  </div>
+
+  <div id="modal-root"></div>
+  <div id="toast-root" class="toast-root"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.2.6/purify.min.js"></script>
+  <script src="admin-config.js"></script>
+  <script src="assets/admin-enterprise/admin-supabase-singleton.js?v=20260818-singleton-1"></script>
+  <script src="contador.js?v=20260915-1"></script>
+</body>
+</html>
