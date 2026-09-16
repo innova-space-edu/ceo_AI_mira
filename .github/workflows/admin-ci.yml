@@ -98,6 +98,7 @@ jobs:
       - name: Validate responsive screen bands
         run: |
           test -f responsive-admin-suite.css
+          test -f contador-shell-fix.css
           grep -q "min-width:1440px" responsive-admin-suite.css
           grep -q "min-width:921px" responsive-admin-suite.css
           grep -q "max-width:920px" responsive-admin-suite.css
@@ -108,6 +109,9 @@ jobs:
           grep -q "ceo-table-wrap" responsive-admin-suite.css
           grep -q "table-wrap" responsive-admin-suite.css
           grep -q "sidebar.open" responsive-admin-suite.css
+          grep -q "grid-column:2" contador-shell-fix.css
+          grep -q "backdrop.show" contador-shell-fix.css
+          grep -q "contador-shell-fix.css" contador.html
       - name: Verify required production files
         run: |
           test -f admin.html
@@ -121,6 +125,7 @@ jobs:
           test -f contador-tributario.css
           test -f contador-tributario-loader.js
           test -f responsive-admin-suite.css
+          test -f contador-shell-fix.css
           test -f assets/admin-enterprise/contador-1.b64
           test -f assets/admin-enterprise/contador-2.b64
           test -f assets/admin-enterprise/contador-tributario-1.b64
@@ -162,10 +167,12 @@ jobs:
           grep -q "contador-tributario.css" contador.html
           grep -q "responsive-admin-suite.css" admin.html
           grep -q "responsive-admin-suite.css" contador.html
+          grep -q "contador-shell-fix.css" contador.html
           ! grep -q "assets/admin-enterprise/loader.js" admin.html
           ! grep -q "assets/admin-enterprise/invoice-edit.js" admin.html
           ! grep -q "assets/admin-enterprise/dashboard-agents-stable.js" admin.html
           grep -q "admin.html" .github/workflows/pages.yml
           grep -q "contador.html" .github/workflows/pages.yml
           grep -q "responsive-admin-suite.css" .github/workflows/pages.yml
+          grep -q "contador-shell-fix.css" .github/workflows/pages.yml
           grep -q "cp -R assets _site/assets" .github/workflows/pages.yml
