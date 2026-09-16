@@ -24,6 +24,7 @@ jobs:
           node --check contador.js
           node --check contador-tributario-loader.js
           node --check dashboard-sync.js
+          node --check dashboard-sync-auth.js
           node --check mira-voice-controller.js
           node --check backend/server.js
           node --check assets/admin-enterprise/admin-supabase-singleton.js
@@ -100,7 +101,9 @@ jobs:
         run: |
           test -f dashboard-sync.js
           test -f dashboard-sync.css
+          test -f dashboard-sync-auth.js
           node --check dashboard-sync.js
+          node --check dashboard-sync-auth.js
           grep -q "company_projects" dashboard-sync.js
           grep -q "company_invoices" dashboard-sync.js
           grep -q "company_bank_movements" dashboard-sync.js
@@ -109,10 +112,13 @@ jobs:
           grep -q "company_service_cases" dashboard-sync.js
           grep -q "innova:dashboard-period:v1" dashboard-sync.js
           grep -q "innova-dashboard-synced" dashboard-sync.js
+          grep -q "innova-business-sync" dashboard-sync-auth.js
           grep -q "dashboard-sync.css" admin.html
           grep -q "dashboard-sync.js" admin.html
+          grep -q "dashboard-sync-auth.js" admin.html
           grep -q "dashboard-sync.css" contador.html
           grep -q "dashboard-sync.js" contador.html
+          grep -q "dashboard-sync-auth.js" contador.html
       - name: Validate responsive screen bands
         run: |
           test -f responsive-admin-suite.css
@@ -145,6 +151,7 @@ jobs:
           test -f admin-shell-fix.css
           test -f dashboard-sync.js
           test -f dashboard-sync.css
+          test -f dashboard-sync-auth.js
           test -f contador.html
           test -f contador.css
           test -f contador.js
@@ -192,10 +199,12 @@ jobs:
           grep -q "admin-shell-fix.css" admin.html
           grep -q "dashboard-sync.js" admin.html
           grep -q "dashboard-sync.css" admin.html
+          grep -q "dashboard-sync-auth.js" admin.html
           grep -q "contador-tributario-loader.js" contador.html
           grep -q "contador-tributario.css" contador.html
           grep -q "dashboard-sync.js" contador.html
           grep -q "dashboard-sync.css" contador.html
+          grep -q "dashboard-sync-auth.js" contador.html
           grep -q "responsive-admin-suite.css" admin.html
           grep -q "responsive-admin-suite.css" contador.html
           grep -q "contador-shell-fix.css" contador.html
@@ -209,4 +218,5 @@ jobs:
           grep -q "admin-shell-fix.css" .github/workflows/pages.yml
           grep -q "dashboard-sync.js" .github/workflows/pages.yml
           grep -q "dashboard-sync.css" .github/workflows/pages.yml
+          grep -q "dashboard-sync-auth.js" .github/workflows/pages.yml
           grep -q "cp -R assets _site/assets" .github/workflows/pages.yml
