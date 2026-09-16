@@ -30,6 +30,7 @@ jobs:
           node --check contador.js
           node --check contador-tributario-loader.js
           node --check dashboard-sync.js
+          node --check dashboard-sync-auth.js
           node --check backend/server.js
           node --check assets/admin-enterprise/admin-supabase-singleton.js
           node --check assets/admin-enterprise/loader.js
@@ -133,7 +134,9 @@ jobs:
         run: |
           test -f dashboard-sync.js
           test -f dashboard-sync.css
+          test -f dashboard-sync-auth.js
           node --check dashboard-sync.js
+          node --check dashboard-sync-auth.js
           grep -q "company_projects" dashboard-sync.js
           grep -q "company_invoices" dashboard-sync.js
           grep -q "company_bank_movements" dashboard-sync.js
@@ -141,10 +144,13 @@ jobs:
           grep -q "company_deadlines" dashboard-sync.js
           grep -q "company_service_cases" dashboard-sync.js
           grep -q "innova:dashboard-period:v1" dashboard-sync.js
+          grep -q "innova-business-sync" dashboard-sync-auth.js
           grep -q "dashboard-sync.css" admin.html
           grep -q "dashboard-sync.js" admin.html
+          grep -q "dashboard-sync-auth.js" admin.html
           grep -q "dashboard-sync.css" contador.html
           grep -q "dashboard-sync.js" contador.html
+          grep -q "dashboard-sync-auth.js" contador.html
 
       - name: Validate responsive screen bands
         run: |
@@ -170,7 +176,7 @@ jobs:
         run: |
           mkdir -p _site
           cp -R assets _site/assets
-          cp documentos.html index.html innova-space-track.html innova-measure-ai.html innova-measure-ai.css innova-measure-ai.js legal.css legal.js main.js mira-voice-controller.js speak.js style.css admin.html admin.css admin.js admin-config.js admin-nav.js admin-shell-fix.css dashboard-sync.js dashboard-sync.css contador.html contador.css contador.js contador-tributario.css contador-tributario-loader.js responsive-admin-suite.css contador-shell-fix.css _site/
+          cp documentos.html index.html innova-space-track.html innova-measure-ai.html innova-measure-ai.css innova-measure-ai.js legal.css legal.js main.js mira-voice-controller.js speak.js style.css admin.html admin.css admin.js admin-config.js admin-nav.js admin-shell-fix.css dashboard-sync.js dashboard-sync.css dashboard-sync-auth.js contador.html contador.css contador.js contador-tributario.css contador-tributario-loader.js responsive-admin-suite.css contador-shell-fix.css _site/
           touch _site/.nojekyll
 
       - uses: actions/upload-pages-artifact@v3
