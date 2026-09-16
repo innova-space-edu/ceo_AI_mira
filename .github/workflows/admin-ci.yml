@@ -99,6 +99,7 @@ jobs:
         run: |
           test -f responsive-admin-suite.css
           test -f contador-shell-fix.css
+          test -f admin-shell-fix.css
           grep -q "min-width:1440px" responsive-admin-suite.css
           grep -q "min-width:921px" responsive-admin-suite.css
           grep -q "max-width:920px" responsive-admin-suite.css
@@ -112,6 +113,10 @@ jobs:
           grep -q "grid-column:2" contador-shell-fix.css
           grep -q "backdrop.show" contador-shell-fix.css
           grep -q "contador-shell-fix.css" contador.html
+          grep -q "height:100dvh" admin-shell-fix.css
+          grep -q "overflow-y:auto" admin-shell-fix.css
+          grep -q "sidebar-backdrop.show" admin-shell-fix.css
+          grep -q "admin-shell-fix.css" admin.html
       - name: Verify required production files
         run: |
           test -f admin.html
@@ -119,6 +124,7 @@ jobs:
           test -f admin.js
           test -f admin-config.js
           test -f admin-nav.js
+          test -f admin-shell-fix.css
           test -f contador.html
           test -f contador.css
           test -f contador.js
@@ -163,6 +169,7 @@ jobs:
           grep -q "ceo-project-hub-loader.js" admin.html
           grep -q "ceo-project-hub.css" admin.html
           grep -q "contador.html" admin.html
+          grep -q "admin-shell-fix.css" admin.html
           grep -q "contador-tributario-loader.js" contador.html
           grep -q "contador-tributario.css" contador.html
           grep -q "responsive-admin-suite.css" admin.html
@@ -175,4 +182,5 @@ jobs:
           grep -q "contador.html" .github/workflows/pages.yml
           grep -q "responsive-admin-suite.css" .github/workflows/pages.yml
           grep -q "contador-shell-fix.css" .github/workflows/pages.yml
+          grep -q "admin-shell-fix.css" .github/workflows/pages.yml
           grep -q "cp -R assets _site/assets" .github/workflows/pages.yml
