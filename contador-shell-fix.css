@@ -1,0 +1,78 @@
+/* Authoritative Contador IA shell layout.
+   Loaded last so sidebar/workspace placement is not affected by older cached responsive rules. */
+
+.app{
+  --contador-sidebar-width:246px;
+  grid-template-columns:var(--contador-sidebar-width) minmax(0,1fr);
+  grid-template-rows:minmax(100vh,auto);
+  align-items:start;
+}
+.app>.sidebar{
+  grid-column:1;
+  grid-row:1;
+  width:var(--contador-sidebar-width);
+  min-width:var(--contador-sidebar-width);
+  position:sticky;
+  top:0;
+  align-self:start;
+  height:100vh;
+  overflow-y:auto;
+  overflow-x:hidden;
+}
+.app>.workspace{
+  grid-column:2;
+  grid-row:1;
+  min-width:0;
+  width:100%;
+  align-self:start;
+}
+.app>.backdrop{display:none}
+
+@media (min-width:1440px){
+  .app{--contador-sidebar-width:260px}
+}
+
+@media (min-width:1081px) and (max-width:1439px){
+  .app{--contador-sidebar-width:220px}
+}
+
+@media (min-width:921px) and (max-width:1080px){
+  .app{--contador-sidebar-width:205px}
+}
+
+@media (max-width:920px){
+  .app{
+    grid-template-columns:minmax(0,1fr);
+    grid-template-rows:auto;
+  }
+  .app>.workspace{
+    grid-column:1;
+    grid-row:1;
+    width:100%;
+    min-width:0;
+  }
+  .app>.sidebar{
+    grid-column:auto;
+    grid-row:auto;
+    position:fixed;
+    inset:0 auto 0 0;
+    width:min(82vw,260px);
+    min-width:0;
+    height:100dvh;
+    transform:translateX(-105%);
+    transition:transform .2s ease;
+    overflow-y:auto;
+    z-index:40;
+  }
+  .app>.sidebar.open{
+    left:0;
+    transform:translateX(0);
+  }
+  .app>.backdrop{
+    position:fixed;
+    inset:0;
+    background:rgba(8,14,30,.52);
+    z-index:35;
+  }
+  .app>.backdrop.show{display:block}
+}
