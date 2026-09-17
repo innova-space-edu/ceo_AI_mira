@@ -180,3 +180,14 @@ window.INNOVA_COMPANY_PROFILE = {
     enrichGoogleRoadmap();
   }
 })();
+
+// Verificación pública de documentos emitidos desde INNOVA CEO.
+// Se carga aquí para mantener index.html desacoplado del módulo administrativo.
+(function loadPublicDocumentVerifier() {
+  if (document.querySelector('script[data-innova-document-verifier]')) return;
+  const script = document.createElement('script');
+  script.src = 'assets/document-verification-public.js?v=20260917-1';
+  script.defer = true;
+  script.dataset.innovaDocumentVerifier = '1';
+  document.head.appendChild(script);
+})();
