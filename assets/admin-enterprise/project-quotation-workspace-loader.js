@@ -1,7 +1,20 @@
 (() => {
   'use strict';
-  const VERSION = '20260917-project-quotation-1';
+  const VERSION = '20260917-project-quotation-2';
   const SOURCE = `assets/admin-enterprise/project-quotation-workspace.b64?v=${VERSION}`;
+
+  function decodeBase64Payload(value) {
+    let encoded = String(value || '').replace(/^data:[^,]*,/, '').trim();
+    encoded = encoded.replace(/\s+/g, '').replace(/-/g, '+').replace(/_/g, '/');
+    const invalid = encoded.match(/[^A-Za-z0-9+/=]/);
+    if (invalid) throw new Error(`Bundle de cotización inválido: carácter inesperado ${JSON.stringify(invalid[0])}.`);
+    const remainder = encoded.length % 4;
+    if (remainder) encoded += '='.repeat(4 - remainder);
+    const raw = atob(encoded);
+    const bytes = new Uint8Array(raw.length);
+    for (let i = 0; i < raw.length; i += 1) bytes[i] = raw.charCodeAt(i);
+    return bytes;
+  }
 
   async function boot() {
     if (window.__INNOVA_PROJECT_QUOTATION_WORKSPACE_LOADING__) return;
@@ -9,11 +22,9 @@
     try {
       if (typeof DecompressionStream !== 'function') throw new Error('Actualiza el navegador para usar la cotización del proyecto.');
       const response = await fetch(SOURCE, { cache: 'no-store' });
-      if (!response.ok) throw new Error('No se pudo cargar el módulo de cotización del proyecto.');
-      const encoded = (await response.text()).trim();
-      const raw = atob(encoded);
-      const bytes = new Uint8Array(raw.length);
-      for (let i = 0; i < raw.length; i += 1) bytes[i] = raw.charCodeAt(i);
+      if (!response.ok) throw new Error(`No se pudo cargar el módulo de cotización del proyecto (${response.status}).`);
+      const payload = await response.text();
+      const bytes = decodeBase64Payload(payload);
       const source = await new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'))).text();
       const url = URL.createObjectURL(new Blob([source], { type: 'text/javascript' }));
       const script = document.createElement('script');
@@ -27,7 +38,7 @@
       script.onerror = () => {
         URL.revokeObjectURL(url);
         window.__INNOVA_PROJECT_QUOTATION_WORKSPACE_LOADING__ = false;
-        throw new Error('No se pudo ejecutar la cotización del proyecto.');
+        console.error('Project quotation workspace: no se pudo ejecutar el bundle descomprimido.');
       };
       document.head.appendChild(script);
     } catch (error) {
