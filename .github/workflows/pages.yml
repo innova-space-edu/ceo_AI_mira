@@ -172,15 +172,20 @@ jobs:
           grep -q "overflow-y:auto" admin-shell-fix.css
           grep -q "sidebar-backdrop.show" admin-shell-fix.css
 
-      - name: Validate ScientificBrain MCP public pages
+      - name: Validate ScientificBrain Cloud Connector public pages
         run: |
           test -f scientificbrain-mcp/index.html
           test -f scientificbrain-mcp/privacidad/index.html
           test -f scientificbrain-mcp/condiciones-de-servicio/index.html
+          test -f scientificbrain-mcp/terminos/index.html
           test -f scientificbrain-mcp/styles.css
-          grep -q "ScientificBrain MCP" scientificbrain-mcp/index.html
+          grep -q "ScientificBrain Cloud Connector" scientificbrain-mcp/index.html
+          grep -q "ScientificBrain Cloud Connector" scientificbrain-mcp/privacidad/index.html
+          grep -q "ScientificBrain Cloud Connector" scientificbrain-mcp/condiciones-de-servicio/index.html
+          grep -q "ScientificBrain Cloud Connector" scientificbrain-mcp/terminos/index.html
           grep -q "Google API Services User Data Policy" scientificbrain-mcp/privacidad/index.html
           grep -q "https://www.googleapis.com/auth/cloud-platform" scientificbrain-mcp/index.html
+          grep -q "Innova Space Education SpA" scientificbrain-mcp/terminos/index.html
 
       - name: Prepare static site
         run: |
