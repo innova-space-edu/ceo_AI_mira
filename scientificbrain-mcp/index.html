@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ScientificBrain MCP | Innova Space Education</title>
+  <meta name="description" content="ScientificBrain MCP es una integración de Innova Space Education para conectar, mediante OAuth, clientes autorizados con recursos de Google Cloud administrados por ScientificBrain.">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell nav">
+      <a class="brand" href="/">
+        <img src="../assets/img/logo1.jpg" alt="Innova Space Education">
+        <span>ScientificBrain MCP</span>
+      </a>
+      <nav class="navlinks" aria-label="Navegación principal">
+        <a href="#funciones">Funciones</a>
+        <a href="./privacidad/">Privacidad</a>
+        <a href="./condiciones-de-servicio/">Condiciones</a>
+        <a href="mailto:contacto@innova-space-edu.cl">Contacto</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="shell">
+        <span class="kicker">Integración segura con Google Cloud</span>
+        <h1>ScientificBrain MCP</h1>
+        <p class="lead">
+          ScientificBrain MCP es una integración desarrollada y administrada por Innova Space Education SpA para permitir que usuarios autorizados conecten un cliente compatible con Model Context Protocol (MCP) a recursos de Google Cloud bajo sus propios permisos OAuth e IAM.
+        </p>
+        <div class="actions">
+          <a class="btn btn-primary" href="./privacidad/">Leer política de privacidad</a>
+          <a class="btn btn-secondary" href="./condiciones-de-servicio/">Ver condiciones del servicio</a>
+        </div>
+        <div class="notice">
+          Esta integración no solicita la contraseña de Google del usuario. La autenticación se realiza mediante OAuth 2.0 y las acciones disponibles quedan limitadas por los permisos que la cuenta autenticada tenga en Google Cloud.
+        </div>
+      </div>
+    </section>
+
+    <section id="funciones" class="section">
+      <div class="shell">
+        <div class="section-head">
+          <h2>Finalidad de la aplicación</h2>
+          <p>
+            La aplicación facilita tareas de administración, diagnóstico y consulta de infraestructura de Google Cloud asociada a proyectos de ScientificBrain, siempre a solicitud del usuario y dentro de sus autorizaciones.
+          </p>
+        </div>
+
+        <div class="grid">
+          <article class="card">
+            <h3>Diagnóstico</h3>
+            <p>Consulta de servicios, configuraciones, registros de ejecución, errores y estado de recursos de Google Cloud.</p>
+          </article>
+          <article class="card">
+            <h3>Administración autorizada</h3>
+            <p>Operaciones sobre recursos cloud cuando el usuario las solicita y su identidad cuenta con los permisos IAM correspondientes.</p>
+          </article>
+          <article class="card">
+            <h3>Control de acceso</h3>
+            <p>La autorización se basa en OAuth 2.0 de Google y en IAM de Google Cloud. La aplicación no amplía los privilegios de la cuenta.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="shell document">
+        <h2>Acceso a datos de Google</h2>
+        <p>
+          Cuando el usuario autoriza la integración, el cliente puede solicitar el alcance
+          <code>https://www.googleapis.com/auth/cloud-platform</code>. Este alcance permite interactuar con recursos de Google Cloud a los que el usuario ya tenga acceso. Su uso se limita a las funciones solicitadas por el usuario y a los permisos efectivos definidos por Google Cloud IAM.
+        </p>
+
+        <h2>Lo que esta integración no hace</h2>
+        <ul>
+          <li>No solicita ni conoce la contraseña de la cuenta de Google.</li>
+          <li>No otorga por sí misma nuevos privilegios de Google Cloud.</li>
+          <li>No solicita acceso a Google Drive, Gmail o Google Calendar mediante esta configuración OAuth.</li>
+          <li>No vende información personal ni datos obtenidos desde Google Cloud.</li>
+        </ul>
+
+        <h2>Responsable y contacto</h2>
+        <p>
+          Responsable de la aplicación: <strong>Innova Space Education SpA</strong>, Chile.<br>
+          Correo de contacto y soporte: <a href="mailto:contacto@innova-space-edu.cl">contacto@innova-space-edu.cl</a>.
+        </p>
+
+        <p class="small">Última actualización: 20 de septiembre de 2026.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="shell footer-row">
+      <div>© 2026 Innova Space Education SpA · ScientificBrain MCP</div>
+      <div class="footer-links">
+        <a href="./privacidad/">Privacidad</a>
+        <a href="./condiciones-de-servicio/">Condiciones del servicio</a>
+        <a href="/">Sitio corporativo</a>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
