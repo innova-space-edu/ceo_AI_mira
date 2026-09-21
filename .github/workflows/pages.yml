@@ -172,10 +172,21 @@ jobs:
           grep -q "overflow-y:auto" admin-shell-fix.css
           grep -q "sidebar-backdrop.show" admin-shell-fix.css
 
+      - name: Validate ScientificBrain MCP public pages
+        run: |
+          test -f scientificbrain-mcp/index.html
+          test -f scientificbrain-mcp/privacidad/index.html
+          test -f scientificbrain-mcp/condiciones-de-servicio/index.html
+          test -f scientificbrain-mcp/styles.css
+          grep -q "ScientificBrain MCP" scientificbrain-mcp/index.html
+          grep -q "Google API Services User Data Policy" scientificbrain-mcp/privacidad/index.html
+          grep -q "https://www.googleapis.com/auth/cloud-platform" scientificbrain-mcp/index.html
+
       - name: Prepare static site
         run: |
           mkdir -p _site
           cp -R assets _site/assets
+          cp -R scientificbrain-mcp _site/scientificbrain-mcp
           cp documentos.html index.html innova-space-track.html innova-measure-ai.html innova-measure-ai.css innova-measure-ai.js legal.css legal.js main.js mira-voice-controller.js speak.js style.css admin.html admin.css admin.js admin-config.js admin-nav.js admin-shell-fix.css dashboard-sync.js dashboard-sync.css dashboard-sync-auth.js contador.html contador.css contador.js contador-tributario.css contador-tributario-loader.js responsive-admin-suite.css contador-shell-fix.css _site/
           touch _site/.nojekyll
 
