@@ -20,15 +20,20 @@ let miraTTSMutedByMode = false;
 window.addEventListener("load", () => {
   const loader = document.getElementById("global-loader");
   const introOverlay = document.getElementById("intro-video-overlay");
-  const introVideo = document.getElementById("intro-video");
+  const introVideo =
+    document.getElementById("intro-video-overlay-video") ||
+    document.getElementById("intro-video");
 
-  const hasSeenIntro = sessionStorage.getItem("introVideoShown") === "true";
+  // El video se reproduce al entrar a la página, pero NO al recargarla.
+  const navigationEntry = performance.getEntriesByType?.("navigation")?.[0];
+  const isReload =
+    navigationEntry?.type === "reload" ||
+    (!navigationEntry && performance.navigation?.type === 1);
 
   const showLoader = () => loader?.classList.remove("hidden");
   const hideLoader = () => loader?.classList.add("hidden");
 
-  if (!hasSeenIntro && introOverlay && introVideo) {
-    sessionStorage.setItem("introVideoShown", "true");
+  if (!isReload && introOverlay && introVideo) {
     hideLoader();
 
     const endIntro = () => {
