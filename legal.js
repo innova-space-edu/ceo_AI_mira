@@ -148,6 +148,19 @@ document.addEventListener("DOMContentLoaded", () => {
     `;
 
     footer.appendChild(legalWrap);
+
+    const disclosure = legalWrap.querySelector(".legal-disclosure");
+    const panel = legalWrap.querySelector(".legal-panel");
+    disclosure?.addEventListener("toggle", () => {
+        const isOpen = disclosure.open;
+        document.body.classList.toggle("legal-modal-open", isOpen);
+        if (isOpen && panel) {
+            // Cada apertura comienza desde el encabezado; evita que el panel
+            // reaparezca visualmente "cortado" por conservar un scroll anterior.
+            panel.scrollTop = 0;
+            requestAnimationFrame(() => { panel.scrollTop = 0; });
+        }
+    });
 });
 
 // Categoría "Aplicaciones web" dentro del portafolio.

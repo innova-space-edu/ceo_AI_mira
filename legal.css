@@ -131,6 +131,17 @@
     opacity: 0.85;
 }
 
+body.legal-modal-open {
+    overflow: hidden;
+}
+
+body.legal-modal-open .section-nav,
+body.legal-modal-open #mira-widget {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
 .legal-disclosure[open]::before {
     content: "";
     position: fixed;
@@ -173,6 +184,8 @@
     border-radius: 26px;
     box-shadow: 0 28px 90px rgba(0, 0, 0, 0.82);
     scrollbar-width: thin;
+    overscroll-behavior: contain;
+    scroll-behavior: auto;
 }
 
 .legal-disclosure[open] > .legal-panel h3 {
