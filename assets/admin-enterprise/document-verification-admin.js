@@ -77,14 +77,21 @@
     document.head.appendChild(style);
   }
 
+  function documentIdFrom(node) {
+    const value = String(node?.dataset?.documentId || '').trim();
+    return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value) ? value : '';
+  }
+
   function internalCodeFrom(node) {
+    const declared = String(node?.dataset?.internalCode || '').trim();
+    if (declared) return declared.toUpperCase();
     const match = String(node?.textContent || '').match(/ISE-COT-[A-Z0-9-]+/i);
     return match ? match[0].toUpperCase() : '';
   }
 
   function addPending(node, message) {
     if (node.querySelector('.ise-doc-pending')) return;
-    const footer = node.querySelector('.pqw2-doc-footer');
+    const footer = node.querySelector('.pqw2-doc-footer, .commercial-footer');
     const el = document.createElement('div');
     el.className = 'ise-doc-pending';
     el.textContent = message;
@@ -93,21 +100,31 @@
 
   function markHeader(node, record) {
     const header = node.querySelector('.pqw2-doc-head');
-    if (!header) return;
-    const strongs = [...header.querySelectorAll('strong')];
-    const codeNode = strongs.find((el) => /ISE-COT-/i.test(el.textContent || ''));
-    if (codeNode) codeNode.textContent = record.verification_code;
+    if (header) {
+      const strongs = [...header.querySelectorAll('strong')];
+      const codeNode = strongs.find((el) => /ISE-COT-/i.test(el.textContent || ''));
+      if (codeNode) codeNode.textContent = record.verification_code;
 
-    const labels = [...header.querySelectorAll('div')];
-    const draft = labels.find((el) => /^Borrador$/i.test((el.textContent || '').trim()));
-    if (draft) draft.textContent = 'Emitido · verificable';
+      const labels = [...header.querySelectorAll('div')];
+      const draft = labels.find((el) => /^Borrador$/i.test((el.textContent || '').trim()));
+      if (draft) draft.textContent = 'Emitido · verificable';
 
-    const side = codeNode?.parentElement || header.lastElementChild;
-    if (side && !side.querySelector('.ise-doc-seal')) {
+      const side = codeNode?.parentElement || header.lastElementChild;
+      if (side && !side.querySelector('.ise-doc-seal')) {
+        const seal = document.createElement('div');
+        seal.className = 'ise-doc-seal';
+        seal.innerHTML = '<span>✓</span><span>Documento verificable</span>';
+        side.appendChild(seal);
+      }
+      return;
+    }
+
+    const commercial = node.querySelector('.commercial-doc-no');
+    if (commercial && !commercial.querySelector('.ise-doc-seal')) {
       const seal = document.createElement('div');
       seal.className = 'ise-doc-seal';
-      seal.innerHTML = '<span>✓</span><span>Documento verificable</span>';
-      side.appendChild(seal);
+      seal.innerHTML = '<span>✓</span><span>Emitido · verificable</span>';
+      commercial.appendChild(seal);
     }
   }
 
@@ -133,39 +150,50 @@
       </div>`;
     if (footer) footer.before(panel); else node.appendChild(panel);
 
-    if (footer) {
-      footer.innerHTML = '<strong>Documento generado automáticamente por Innova Space Education.</strong><br>Validado digitalmente por Innova Space Education para fines de verificación interna. La autenticidad y vigencia de esta emisión puede comprobarse mediante el código o QR indicado.';
+    if (pqwFooter) {
+      pqwFooter.innerHTML = '<strong>Documento generado automáticamente por Innova Space Education.</strong><br>Validado digitalmente por Innova Space Education para fines de verificación interna. La autenticidad y vigencia de esta emisión puede comprobarse mediante el código o QR indicado.';
     }
   }
 
   async function enhanceDocument(node) {
-    if (!node || node.dataset.iseVerificationState === 'loading' || node.dataset.iseVerificationState === 'done') return;
+    const currentState = node?.dataset?.iseVerificationState || '';
+    if (!node || ['loading', 'done', 'pending', 'error'].includes(currentState)) return;
     injectStyles();
+
+    const documentId = documentIdFrom(node);
     const internalCode = internalCodeFrom(node);
-    if (!internalCode || /BORRADOR/i.test(internalCode)) {
-      addPending(node, 'Guardar la cotización para emitir el código de verificación, la huella digital y el QR.');
+    if (!documentId && (!internalCode || /BORRADOR/i.test(internalCode))) {
+      addPending(node, 'Guardar el documento para emitir el código de verificación, la huella digital y el QR.');
       node.dataset.iseVerificationState = 'pending';
       return;
     }
 
     node.dataset.iseVerificationState = 'loading';
     try {
-      const { data, error } = await db.rpc('resolve_company_document_verification', { p_internal_code: internalCode });
+      const response = documentId
+        ? await db.rpc('issue_company_document_verification', { p_document_id: documentId })
+        : await db.rpc('resolve_company_document_verification', { p_internal_code: internalCode });
+
+      const { data, error } = response || {};
       if (error) throw error;
       const record = firstRow(data);
       if (!record?.verification_code) throw new Error('No se obtuvo un código de verificación.');
+
+      node.querySelector('.ise-doc-pending')?.remove();
       markHeader(node, record);
       await renderVerification(node, record);
       node.dataset.iseVerificationState = 'done';
     } catch (error) {
       console.warn('Verificación documental:', error?.message || error);
-      addPending(node, 'La cotización está guardada, pero la verificación documental aún no está habilitada en la base de datos.');
+      addPending(node, 'No fue posible emitir la verificación documental. Cierre y vuelva a abrir el documento para reintentar.');
       node.dataset.iseVerificationState = 'error';
     }
   }
 
   function scan() {
-    document.querySelectorAll('.pqw2-document[data-document]').forEach((node) => enhanceDocument(node));
+    document
+      .querySelectorAll('.pqw2-document[data-document], .commercial-sheet[data-document-id]')
+      .forEach((node) => enhanceDocument(node));
   }
 
   const observer = new MutationObserver(scan);

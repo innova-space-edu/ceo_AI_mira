@@ -172,6 +172,7 @@ security definer
 set search_path = public
 as $$
 declare
+  v_raw text;
   v_prefix text;
   v_quote_id uuid;
 begin
@@ -182,16 +183,34 @@ begin
     raise exception 'No autorizado';
   end if;
 
-  v_prefix := upper(regexp_replace(coalesce(p_internal_code, ''), '^ISE-COT-', '', 'i'));
-  if v_prefix = '' or v_prefix = 'BORRADOR' then
+  v_raw := upper(trim(coalesce(p_internal_code, '')));
+  if v_raw = '' or v_raw = 'ISE-COT-BORRADOR' or v_raw = 'BORRADOR' then
     raise exception 'La cotización debe guardarse antes de emitir un código verificable';
   end if;
 
-  select q.id into v_quote_id
-  from public.company_quotations q
-  where upper(substr(replace(q.id::text, '-', ''), 1, 10)) = v_prefix
-  order by q.updated_at desc nulls last, q.created_at desc nulls last
+  select d.document_id into v_quote_id
+  from public.company_document_verifications d
+  where d.document_type = 'quotation'
+    and upper(d.verification_code) = v_raw
+  order by d.version desc
   limit 1;
+
+  if v_quote_id is null then
+    select q.id into v_quote_id
+    from public.company_quotations q
+    where upper(q.quote_number) = v_raw
+    order by q.updated_at desc nulls last, q.created_at desc nulls last
+    limit 1;
+  end if;
+
+  if v_quote_id is null then
+    v_prefix := regexp_replace(v_raw, '^ISE-COT-', '', 'i');
+    select q.id into v_quote_id
+    from public.company_quotations q
+    where upper(substr(replace(q.id::text, '-', ''), 1, 10)) = v_prefix
+    order by q.updated_at desc nulls last, q.created_at desc nulls last
+    limit 1;
+  end if;
 
   if v_quote_id is null then
     raise exception 'No se pudo resolver la cotización guardada';

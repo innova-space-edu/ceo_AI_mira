@@ -358,7 +358,8 @@
     const c = q.company || DEFAULT_PROFILE;
     const itemRows = (q.items || []).map((item, index) => `<tr><td class="center">${index + 1}</td><td><strong>${esc(item.description)}</strong></td><td>${esc(item.unit)}</td><td class="center">${item.quantity}</td><td class="right">${money(item.unit_price)}</td><td class="right">${item.discount_pct ? `${item.discount_pct}%` : "—"}</td><td class="right"><strong>${money(item.line_total)}</strong></td></tr>`).join("");
     const mp = q.mp_process_type || q.mp_process_id ? `<div class="commercial-box"><div class="box-title">Referencia Mercado Público</div><p><strong>${esc(q.mp_process_type || "Proceso de compra")}</strong></p><p>ID / código: ${esc(q.mp_process_id || "Por informar")}</p>${q.mp_delivery_address ? `<p>Despacho: ${esc(q.mp_delivery_address)}</p>` : ""}</div>` : `<div class="commercial-box"><div class="box-title">Proyecto / referencia</div><p><strong>${esc(q.project_title || "Cotización comercial")}</strong></p><p>${esc(q.title || "Oferta de bienes y/o servicios")}</p></div>`;
-    return `<article class="commercial-sheet" data-commercial-sheet>
+    const verificationAttrs = q.id ? ` data-document-type="quotation" data-document-id="${esc(q.id)}" data-internal-code="${esc(q.quote_number || '')}"` : "";
+    return `<article class="commercial-sheet" data-commercial-sheet${verificationAttrs}>
       <header class="commercial-head"><div class="commercial-brand"><img src="assets/img/logo1.jpg" alt="Logo Innova"><div><h1>${esc(c.brand_name)}</h1><p>${esc(c.legal_name)} · RUT ${esc(c.rut)}</p><p>${esc(c.billing_address)} · ${esc(formatPhone(c.phone))}</p><p>${esc(c.email)} · innova-space-edu.cl</p></div></div><div class="commercial-doc-no"><span>Cotización</span><strong>N° ${esc(q.quote_number)}</strong><small>Emisión ${esc(formatDate(q.issue_date))}<br>Válida hasta ${esc(formatDate(q.valid_until))}</small></div></header>
       <section class="commercial-info-grid"><div class="commercial-box"><div class="box-title">Cliente</div><strong>${esc(q.client_name || "—")}</strong><p>RUT ${esc(q.client_rut || "—")}</p><p>${esc(q.client_address || "—")}</p>${q.client_contact ? `<p>Contacto: ${esc(q.client_contact)}</p>` : ""}${q.client_email ? `<p>${esc(q.client_email)}</p>` : ""}${q.client_phone ? `<p>${esc(q.client_phone)}</p>` : ""}</div>${mp}</section>
       ${q.title ? `<div class="commercial-section-title">Propuesta</div><div class="commercial-copy"><strong>${esc(q.title)}</strong></div>` : ""}
@@ -496,7 +497,7 @@
         };
         const rows = await rest("company_quotations", { method: "POST", headers: { Prefer: "return=representation" }, body: JSON.stringify(payload) });
         const saved = Array.isArray(rows) ? rows[0] : null;
-        const finalSnapshot = { ...snapshot, quote_number: saved?.quote_number || quoteNumber };
+        const finalSnapshot = { ...snapshot, id: saved?.id || null, quote_number: saved?.quote_number || quoteNumber };
         closeCommercialModal();
         toast(`Cotización N° ${finalSnapshot.quote_number} guardada.`);
         await showPreview(buildQuoteHtml(finalSnapshot), `Cotizacion-${finalSnapshot.quote_number}.pdf`);
