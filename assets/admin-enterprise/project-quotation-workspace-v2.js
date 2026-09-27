@@ -9,8 +9,8 @@
   const LEGACY_MARKERS = ['project_quotation_workspace', MARKER];
   const EMITTER = Object.freeze({
     legal_name: 'Innova Space Edu SpA',
-    rut: '78.699.220-0',
-    business_activity: '',
+    rut: '78.220.699-0',
+    business_activity: 'Venta de computadores, equipos NCP y terminación de edificios',
     phone: '+569-926301822',
     email: 'contacto@innova-space-edu.cl'
   });
