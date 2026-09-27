@@ -876,12 +876,19 @@ video {
 
 /* FOOTER */
 .footer {
-    padding: 18px 7%;
+    padding: 18px 7% calc(104px + env(safe-area-inset-bottom));
     text-align: center;
     font-size: 0.8rem;
     color: var(--text-muted);
     border-top: 1px solid rgba(255, 255, 255, 0.05);
     background: #040615;
+}
+
+/* Reserva una zona segura para que la navegación flotante no tape
+   acciones del footer (condiciones legales y verificación documental). */
+.footer > * {
+    position: relative;
+    z-index: 1;
 }
 
 /* CHECK LIST */
