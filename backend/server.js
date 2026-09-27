@@ -4,6 +4,7 @@
 const express = require("express");
 const cors = require("cors");
 const nodemailer = require("nodemailer");
+const crypto = require("crypto");
 
 // Polyfill de fetch para Node (usando node-fetch v3 con import dinámico)
 const fetchFn = (...args) =>
@@ -40,6 +41,18 @@ const COMPANY_SUPABASE_URL =
 const COMPANY_SUPABASE_PUBLISHABLE_KEY =
   process.env.COMPANY_SUPABASE_PUBLISHABLE_KEY ||
   "sb_publishable_x8GWfejC94VkWopDMUBXSQ_PQcqNIj8";
+const COMPANY_SUPABASE_SERVICE_ROLE_KEY =
+  process.env.COMPANY_SUPABASE_SERVICE_ROLE_KEY || "";
+
+// Innova Pay. Las credenciales privadas se mantienen exclusivamente en backend.
+const MERCADOPAGO_ACCESS_TOKEN = process.env.MERCADOPAGO_ACCESS_TOKEN || "";
+const MERCADOPAGO_WEBHOOK_SECRET = process.env.MERCADOPAGO_WEBHOOK_SECRET || "";
+const INNOVA_PAY_PUBLIC_BASE_URL =
+  process.env.INNOVA_PAY_PUBLIC_BASE_URL || "https://webpay.innova-space-edu.cl";
+const INNOVA_PAY_FALLBACK_BASE_URL =
+  process.env.INNOVA_PAY_FALLBACK_BASE_URL || "https://www.innova-space-edu.cl/webpay.html";
+const INNOVA_PAY_RETURN_BASE_URL =
+  process.env.INNOVA_PAY_RETURN_BASE_URL || INNOVA_PAY_FALLBACK_BASE_URL;
 
 // 🔊 ElevenLabs TTS
 const ELEVEN_API_KEY = process.env.ELEVEN_API_KEY || "";
@@ -64,6 +77,12 @@ console.log(
   COMPANY_SUPABASE_URL && COMPANY_SUPABASE_PUBLISHABLE_KEY
     ? "OK"
     : "❌ FALTA CONFIGURACIÓN"
+);
+console.log(
+  "INNOVA_PAY:",
+  COMPANY_SUPABASE_SERVICE_ROLE_KEY && MERCADOPAGO_ACCESS_TOKEN
+    ? "OK (BD + Mercado Pago)"
+    : "PENDIENTE (configurar service role y/o Mercado Pago)"
 );
 
 // -------------------------------------------------------------
@@ -146,6 +165,274 @@ function cleanHistory(history, maxItems = 12) {
     }))
     .filter((item) => item.content);
 }
+
+// -------------------------------------------------------------
+// INNOVA PAY · helpers
+// -------------------------------------------------------------
+function paymentPublicUrl(token) {
+  return INNOVA_PAY_PUBLIC_BASE_URL.replace(/\/$/, "") + "/?p=" + encodeURIComponent(token);
+}
+
+function paymentFallbackUrl(token) {
+  const base = INNOVA_PAY_FALLBACK_BASE_URL;
+  const sep = base.includes("?") ? "&" : "?";
+  return base + sep + "p=" + encodeURIComponent(token);
+}
+
+function paymentReturnUrl(token, result) {
+  const base = INNOVA_PAY_RETURN_BASE_URL;
+  const sep = base.includes("?") ? "&" : "?";
+  return base + sep + "p=" + encodeURIComponent(token) + "&result=" + encodeURIComponent(result);
+}
+
+function cleanNullableUuid(value) {
+  const s = cleanText(value, 80);
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(s) ? s : null;
+}
+
+function normalizeExpiry(value) {
+  const raw = cleanText(value, 64);
+  if (!raw) return null;
+  let date;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) {
+    date = new Date(raw + "T23:59:59-03:00");
+  } else {
+    date = new Date(raw);
+  }
+  return Number.isNaN(date.getTime()) ? null : date.toISOString();
+}
+
+function paymentDbReady() {
+  return Boolean(COMPANY_SUPABASE_URL && COMPANY_SUPABASE_SERVICE_ROLE_KEY);
+}
+
+async function paymentDb(path, options = {}) {
+  if (!paymentDbReady()) {
+    const error = new Error("Base de datos de pagos no configurada en backend");
+    error.code = "PAYMENTS_DB_NOT_CONFIGURED";
+    throw error;
+  }
+  const response = await fetchFn(
+    COMPANY_SUPABASE_URL.replace(/\/$/, "") + "/rest/v1/" + String(path || "").replace(/^\//, ""),
+    {
+      method: options.method || "GET",
+      headers: {
+        apikey: COMPANY_SUPABASE_SERVICE_ROLE_KEY,
+        Authorization: "Bearer " + COMPANY_SUPABASE_SERVICE_ROLE_KEY,
+        Accept: "application/json",
+        ...(options.body ? { "Content-Type": "application/json" } : {}),
+        ...(options.prefer ? { Prefer: options.prefer } : {}),
+        ...(options.headers || {}),
+      },
+      body: options.body === undefined ? undefined : JSON.stringify(options.body),
+    }
+  );
+  const text = await response.text();
+  let data = null;
+  if (text) {
+    try { data = JSON.parse(text); } catch (_) { data = text; }
+  }
+  if (!response.ok) {
+    const detail = typeof data === "object" && data
+      ? data.message || data.details || data.hint || JSON.stringify(data)
+      : String(data || response.statusText);
+    const error = new Error("Supabase pagos: " + detail);
+    error.status = response.status;
+    throw error;
+  }
+  return data;
+}
+
+async function paymentEvent(paymentLinkId, eventType, payload = {}, providerEventId = null) {
+  try {
+    await paymentDb("company_payment_events", {
+      method: "POST",
+      prefer: "return=minimal",
+      body: {
+        payment_link_id: paymentLinkId,
+        event_type: cleanText(eventType, 80),
+        provider: "mercadopago",
+        provider_event_id: cleanText(providerEventId, 180) || null,
+        payload: payload && typeof payload === "object" ? payload : {},
+      },
+    });
+  } catch (error) {
+    console.warn("Innova Pay event:", error.message || error);
+  }
+}
+
+async function getPaymentLinkByToken(token) {
+  const safe = cleanText(token, 120);
+  if (!safe) return null;
+  const rows = await paymentDb(
+    "company_payment_links?public_token=eq." + encodeURIComponent(safe) + "&select=*&limit=1"
+  );
+  return Array.isArray(rows) ? rows[0] || null : null;
+}
+
+async function getPaymentLinkById(id) {
+  const safe = cleanNullableUuid(id);
+  if (!safe) return null;
+  const rows = await paymentDb(
+    "company_payment_links?id=eq." + encodeURIComponent(safe) + "&select=*&limit=1"
+  );
+  return Array.isArray(rows) ? rows[0] || null : null;
+}
+
+function paymentIsExpired(row) {
+  if (!row?.expires_at) return false;
+  const time = new Date(row.expires_at).getTime();
+  return Number.isFinite(time) && time < Date.now();
+}
+
+function paymentStatusFromMercadoPago(order, row) {
+  const status = String(order?.status || "").toLowerCase();
+  const paidAmount = Number(order?.total_paid_amount || 0);
+  const expected = Number(row?.amount || 0);
+  if (expected > 0 && paidAmount >= expected) return "paid";
+  if (status === "processed") return "paid";
+  if (["cancelled", "canceled"].includes(status)) return "cancelled";
+  if (status === "expired") return "expired";
+  if (["failed", "rejected"].includes(status)) return "failed";
+  return "processing";
+}
+
+async function fetchMercadoPagoOrder(orderId) {
+  if (!MERCADOPAGO_ACCESS_TOKEN) throw new Error("Mercado Pago no está configurado");
+  const response = await fetchFn(
+    "https://api.mercadopago.com/v1/orders/" + encodeURIComponent(String(orderId || "")),
+    {
+      headers: {
+        Authorization: "Bearer " + MERCADOPAGO_ACCESS_TOKEN,
+        Accept: "application/json",
+      },
+    }
+  );
+  const body = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(body?.message || body?.error || "No fue posible consultar la order en Mercado Pago");
+  }
+  return body;
+}
+
+async function syncMercadoPagoOrder(orderId, webhookPayload = null) {
+  const order = await fetchMercadoPagoOrder(orderId);
+  let rows = await paymentDb(
+    "company_payment_links?provider_order_id=eq." + encodeURIComponent(String(order.id || orderId)) + "&select=*&limit=1"
+  );
+  let link = Array.isArray(rows) ? rows[0] || null : null;
+
+  if (!link && cleanNullableUuid(order?.external_reference)) {
+    link = await getPaymentLinkById(order.external_reference);
+  }
+  if (!link) return { order, link: null };
+
+  const status = paymentStatusFromMercadoPago(order, link);
+  const patch = {
+    provider_status: cleanText(order.status, 80) || null,
+    status,
+    provider_order_id: cleanText(order.id, 180) || link.provider_order_id,
+    provider_checkout_url: cleanText(order.checkout_url, 2000) || link.provider_checkout_url,
+    paid_at: status === "paid" ? (order.last_updated_date || new Date().toISOString()) : link.paid_at,
+    updated_at: new Date().toISOString(),
+  };
+
+  const updated = await paymentDb(
+    "company_payment_links?id=eq." + encodeURIComponent(link.id),
+    { method: "PATCH", prefer: "return=representation", body: patch }
+  );
+  const next = Array.isArray(updated) ? updated[0] || { ...link, ...patch } : { ...link, ...patch };
+
+  try {
+    await paymentDb(
+      "company_payment_attempts?provider_order_id=eq." + encodeURIComponent(String(order.id || orderId)),
+      {
+        method: "PATCH",
+        prefer: "return=minimal",
+        body: {
+          status,
+          provider_status: cleanText(order.status, 80) || null,
+          raw_response: order,
+          paid_at: status === "paid" ? (order.last_updated_date || new Date().toISOString()) : null,
+          updated_at: new Date().toISOString(),
+        },
+      }
+    );
+  } catch (_) {}
+
+  await paymentEvent(
+    link.id,
+    status === "paid" ? "payment_paid" : "provider_status",
+    webhookPayload ? { notification: webhookPayload, order } : { order },
+    cleanText(order.id, 180)
+  );
+
+  return { order, link: next };
+}
+
+function validateMercadoPagoWebhook(req) {
+  if (!MERCADOPAGO_WEBHOOK_SECRET) return false;
+  const xSignature = cleanText(req.headers["x-signature"], 1000);
+  const xRequestId = cleanText(req.headers["x-request-id"], 300);
+  if (!xSignature || !xRequestId) return false;
+
+  let ts = "";
+  let hash = "";
+  xSignature.split(",").forEach((part) => {
+    const pieces = part.split("=", 2);
+    const key = String(pieces[0] || "").trim();
+    const value = String(pieces[1] || "").trim();
+    if (key === "ts") ts = value;
+    if (key === "v1") hash = value;
+  });
+  if (!ts || !hash) return false;
+
+  const rawDataId =
+    req.query?.["data.id"] ||
+    req.body?.data?.id ||
+    "";
+  const dataId = String(rawDataId || "").toLowerCase();
+  if (!dataId) return false;
+
+  const manifest =
+    "id:" + dataId +
+    ";request-id:" + xRequestId +
+    ";ts:" + ts + ";";
+  const expected = crypto
+    .createHmac("sha256", MERCADOPAGO_WEBHOOK_SECRET)
+    .update(manifest)
+    .digest("hex");
+
+  try {
+    const a = Buffer.from(expected, "hex");
+    const b = Buffer.from(hash, "hex");
+    return a.length === b.length && crypto.timingSafeEqual(a, b);
+  } catch (_) {
+    return false;
+  }
+}
+
+function publicPaymentPayload(row) {
+  return {
+    token: row.public_token,
+    customer_name: row.customer_name || "",
+    description: row.description || "",
+    amount: Number(row.amount || 0),
+    currency: row.currency || "CLP",
+    provider: "Mercado Pago",
+    status: row.status || "active",
+    expires_at: row.expires_at || null,
+    paid_at: row.paid_at || null,
+    provider_ready: Boolean(MERCADOPAGO_ACCESS_TOKEN),
+    merchant: {
+      legal_name: "Innova Space Edu SpA",
+      rut: "78.220.699-0",
+      phone: "+569-26301822",
+      email: "contacto@innova-space-edu.cl",
+    },
+  };
+}
+
 
 async function fetchWithTimeout(url, options = {}, timeoutMs = 45000) {
   const controller = new AbortController();
@@ -675,6 +962,411 @@ app.post("/api/admin/notify", async (req, res) => {
   }
 });
 
+
+// -------------------------------------------------------------
+// 2d) INNOVA PAY · links de cobro y Mercado Pago
+// -------------------------------------------------------------
+app.get("/api/admin/payments/health", async (req, res) => {
+  const access = await verifyCompanyUser(req, ["superadmin", "admin", "finance"]);
+  if (!access.ok) return res.status(access.status).json({ error: access.error });
+
+  return res.json({
+    success: true,
+    database_configured: paymentDbReady(),
+    mercadopago_configured: Boolean(MERCADOPAGO_ACCESS_TOKEN),
+    webhook_configured: Boolean(MERCADOPAGO_WEBHOOK_SECRET),
+    public_base_url: INNOVA_PAY_PUBLIC_BASE_URL,
+    fallback_base_url: INNOVA_PAY_FALLBACK_BASE_URL,
+  });
+});
+
+app.get("/api/admin/payments/links", async (req, res) => {
+  try {
+    const access = await verifyCompanyUser(req, ["superadmin", "admin", "finance"]);
+    if (!access.ok) return res.status(access.status).json({ error: access.error });
+
+    const rows = await paymentDb(
+      "company_payment_links?select=*&order=created_at.desc&limit=200"
+    );
+    return res.json({
+      success: true,
+      links: (Array.isArray(rows) ? rows : []).map((row) => ({
+        ...row,
+        public_url: paymentPublicUrl(row.public_token),
+        fallback_url: paymentFallbackUrl(row.public_token),
+      })),
+    });
+  } catch (error) {
+    console.error("❌ /api/admin/payments/links GET:", error.message || error);
+    return res.status(error.code === "PAYMENTS_DB_NOT_CONFIGURED" ? 503 : 500).json({
+      error: error.message || "No fue posible cargar los cobros",
+      code: error.code || null,
+    });
+  }
+});
+
+app.post("/api/admin/payments/links", async (req, res) => {
+  try {
+    const access = await verifyCompanyUser(req, ["superadmin", "admin", "finance"]);
+    if (!access.ok) return res.status(access.status).json({ error: access.error });
+
+    const amount = Math.round(Number(req.body?.amount || 0));
+    const description = cleanText(req.body?.description, 240);
+    if (!Number.isFinite(amount) || amount <= 0) {
+      return res.status(400).json({ error: "El monto debe ser mayor que cero" });
+    }
+    if (!description) {
+      return res.status(400).json({ error: "El concepto del cobro es obligatorio" });
+    }
+
+    const token = crypto.randomBytes(18).toString("base64url");
+    const row = {
+      public_token: token,
+      provider: "mercadopago",
+      status: "active",
+      customer_name: cleanText(req.body?.customer_name, 180),
+      customer_rut: cleanText(req.body?.customer_rut, 30),
+      customer_email: cleanText(req.body?.customer_email, 240),
+      customer_phone: cleanText(req.body?.customer_phone, 50),
+      description,
+      amount,
+      currency: "CLP",
+      project_id: cleanNullableUuid(req.body?.project_id),
+      quotation_id: cleanNullableUuid(req.body?.quotation_id),
+      invoice_id: cleanNullableUuid(req.body?.invoice_id),
+      expires_at: normalizeExpiry(req.body?.expires_at),
+      created_by: access.user.id,
+      metadata: {
+        source: cleanText(req.body?.source, 80) || "ceo_admin",
+        provider_version: "mercadopago_orders_v1",
+      },
+    };
+
+    const inserted = await paymentDb("company_payment_links", {
+      method: "POST",
+      prefer: "return=representation",
+      body: row,
+    });
+    const created = Array.isArray(inserted) ? inserted[0] : inserted;
+    await paymentEvent(created.id, "link_created", { amount, description });
+
+    return res.status(201).json({
+      success: true,
+      link: {
+        ...created,
+        public_url: paymentPublicUrl(token),
+        fallback_url: paymentFallbackUrl(token),
+      },
+    });
+  } catch (error) {
+    console.error("❌ /api/admin/payments/links POST:", error.message || error);
+    return res.status(error.code === "PAYMENTS_DB_NOT_CONFIGURED" ? 503 : 500).json({
+      error: error.message || "No fue posible crear el link de pago",
+      code: error.code || null,
+    });
+  }
+});
+
+app.patch("/api/admin/payments/links/:id", async (req, res) => {
+  try {
+    const access = await verifyCompanyUser(req, ["superadmin", "admin", "finance"]);
+    if (!access.ok) return res.status(access.status).json({ error: access.error });
+
+    const current = await getPaymentLinkById(req.params.id);
+    if (!current) return res.status(404).json({ error: "Cobro no encontrado" });
+    if (["paid", "refunded"].includes(current.status)) {
+      return res.status(409).json({ error: "Un cobro pagado o reembolsado no se puede modificar" });
+    }
+
+    const patch = {};
+    const textFields = [
+      ["customer_name", 180],
+      ["customer_rut", 30],
+      ["customer_email", 240],
+      ["customer_phone", 50],
+      ["description", 240],
+    ];
+    textFields.forEach(([key, max]) => {
+      if (Object.prototype.hasOwnProperty.call(req.body || {}, key)) {
+        patch[key] = cleanText(req.body[key], max);
+      }
+    });
+
+    if (Object.prototype.hasOwnProperty.call(req.body || {}, "amount")) {
+      const amount = Math.round(Number(req.body.amount || 0));
+      if (!Number.isFinite(amount) || amount <= 0) {
+        return res.status(400).json({ error: "El monto debe ser mayor que cero" });
+      }
+      patch.amount = amount;
+    }
+    if (Object.prototype.hasOwnProperty.call(req.body || {}, "expires_at")) {
+      patch.expires_at = normalizeExpiry(req.body.expires_at);
+    }
+    if (Object.prototype.hasOwnProperty.call(req.body || {}, "status")) {
+      const allowed = ["active", "cancelled"];
+      const status = cleanText(req.body.status, 30);
+      if (!allowed.includes(status)) return res.status(400).json({ error: "Estado no permitido" });
+      patch.status = status;
+    }
+
+    const checkoutSensitive =
+      Object.prototype.hasOwnProperty.call(patch, "amount") ||
+      Object.prototype.hasOwnProperty.call(patch, "description") ||
+      Object.prototype.hasOwnProperty.call(patch, "customer_email");
+
+    if (checkoutSensitive && current.provider_order_id) {
+      patch.provider_order_id = null;
+      patch.provider_checkout_url = null;
+      patch.provider_status = null;
+      if (patch.status !== "cancelled") patch.status = "active";
+    }
+    patch.updated_at = new Date().toISOString();
+
+    const updated = await paymentDb(
+      "company_payment_links?id=eq." + encodeURIComponent(current.id),
+      { method: "PATCH", prefer: "return=representation", body: patch }
+    );
+    const row = Array.isArray(updated) ? updated[0] : updated;
+    await paymentEvent(current.id, "link_updated", { fields: Object.keys(patch) });
+
+    return res.json({
+      success: true,
+      link: {
+        ...row,
+        public_url: paymentPublicUrl(row.public_token),
+        fallback_url: paymentFallbackUrl(row.public_token),
+      },
+    });
+  } catch (error) {
+    console.error("❌ /api/admin/payments/links PATCH:", error.message || error);
+    return res.status(error.code === "PAYMENTS_DB_NOT_CONFIGURED" ? 503 : 500).json({
+      error: error.message || "No fue posible editar el cobro",
+      code: error.code || null,
+    });
+  }
+});
+
+app.post("/api/admin/payments/links/:id/sync", async (req, res) => {
+  try {
+    const access = await verifyCompanyUser(req, ["superadmin", "admin", "finance"]);
+    if (!access.ok) return res.status(access.status).json({ error: access.error });
+
+    const current = await getPaymentLinkById(req.params.id);
+    if (!current) return res.status(404).json({ error: "Cobro no encontrado" });
+    if (!current.provider_order_id) {
+      return res.status(409).json({ error: "Este cobro aún no tiene una order de Mercado Pago" });
+    }
+
+    const synced = await syncMercadoPagoOrder(current.provider_order_id);
+    return res.json({
+      success: true,
+      link: {
+        ...synced.link,
+        public_url: paymentPublicUrl(synced.link.public_token),
+        fallback_url: paymentFallbackUrl(synced.link.public_token),
+      },
+    });
+  } catch (error) {
+    console.error("❌ /api/admin/payments/links sync:", error.message || error);
+    return res.status(500).json({ error: error.message || "No fue posible sincronizar el pago" });
+  }
+});
+
+app.get("/api/payments/link/:token", async (req, res) => {
+  try {
+    const link = await getPaymentLinkByToken(req.params.token);
+    if (!link) return res.status(404).json({ error: "Link de pago no encontrado" });
+
+    let row = link;
+    if (paymentIsExpired(link) && !["paid", "refunded", "cancelled"].includes(link.status)) {
+      const updated = await paymentDb(
+        "company_payment_links?id=eq." + encodeURIComponent(link.id),
+        {
+          method: "PATCH",
+          prefer: "return=representation",
+          body: { status: "expired", updated_at: new Date().toISOString() },
+        }
+      );
+      row = Array.isArray(updated) ? updated[0] || link : link;
+    } else {
+      paymentDb(
+        "company_payment_links?id=eq." + encodeURIComponent(link.id),
+        {
+          method: "PATCH",
+          prefer: "return=minimal",
+          body: {
+            view_count: Number(link.view_count || 0) + 1,
+            last_opened_at: new Date().toISOString(),
+            status: link.status === "active" ? "opened" : link.status,
+            updated_at: new Date().toISOString(),
+          },
+        }
+      ).catch(() => {});
+      if (link.status === "active") row = { ...link, status: "opened" };
+    }
+
+    return res.json({ success: true, payment: publicPaymentPayload(row) });
+  } catch (error) {
+    console.error("❌ /api/payments/link GET:", error.message || error);
+    return res.status(error.code === "PAYMENTS_DB_NOT_CONFIGURED" ? 503 : 500).json({
+      error: error.message || "No fue posible cargar el cobro",
+      code: error.code || null,
+    });
+  }
+});
+
+app.post("/api/payments/link/:token/checkout", async (req, res) => {
+  try {
+    const link = await getPaymentLinkByToken(req.params.token);
+    if (!link) return res.status(404).json({ error: "Link de pago no encontrado" });
+    if (paymentIsExpired(link) || link.status === "expired") {
+      return res.status(410).json({ error: "Este link de pago está vencido" });
+    }
+    if (link.status === "cancelled") {
+      return res.status(410).json({ error: "Este link de pago fue cancelado" });
+    }
+    if (link.status === "paid") {
+      return res.status(409).json({ error: "Este cobro ya fue pagado", paid: true });
+    }
+    if (!MERCADOPAGO_ACCESS_TOKEN) {
+      return res.status(503).json({ error: "Mercado Pago aún no está habilitado" });
+    }
+
+    if (link.provider_order_id && link.provider_checkout_url && link.status === "processing") {
+      return res.json({
+        success: true,
+        checkout_url: link.provider_checkout_url,
+        order_id: link.provider_order_id,
+        reused: true,
+      });
+    }
+
+    const payer = {};
+    if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(link.customer_email || ""))) {
+      payer.email = link.customer_email;
+    }
+
+    const payload = {
+      type: "online",
+      processing_mode: "manual",
+      total_amount: String(Math.round(Number(link.amount || 0))),
+      external_reference: link.id,
+      description: String(link.description || "Pago Innova Space Edu SpA").slice(0, 240),
+      payer,
+      items: [
+        {
+          title: String(link.description || "Pago Innova Space Edu SpA").slice(0, 120),
+          quantity: 1,
+          unit_price: String(Math.round(Number(link.amount || 0))),
+          unit_measure: "unit",
+          total_amount: String(Math.round(Number(link.amount || 0))),
+        },
+      ],
+      config: {
+        online: {
+          success_url: paymentReturnUrl(link.public_token, "success"),
+          failure_url: paymentReturnUrl(link.public_token, "failure"),
+          pending_url: paymentReturnUrl(link.public_token, "pending"),
+          auto_return: "approved",
+        },
+      },
+    };
+
+    const idempotencyKey = crypto
+      .createHash("sha256")
+      .update(link.id + ":" + link.amount + ":" + String(link.updated_at || link.created_at || "v1"))
+      .digest("hex")
+      .slice(0, 64);
+
+    const mpResponse = await fetchFn("https://api.mercadopago.com/v1/orders", {
+      method: "POST",
+      headers: {
+        Authorization: "Bearer " + MERCADOPAGO_ACCESS_TOKEN,
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        "X-Idempotency-Key": idempotencyKey,
+      },
+      body: JSON.stringify(payload),
+    });
+    const order = await mpResponse.json().catch(() => ({}));
+    if (!mpResponse.ok || !order?.id || !order?.checkout_url) {
+      console.error("Mercado Pago create order:", order);
+      return res.status(502).json({
+        error: order?.message || order?.error || "Mercado Pago no pudo crear el checkout",
+      });
+    }
+
+    try {
+      await paymentDb("company_payment_attempts", {
+        method: "POST",
+        prefer: "return=minimal",
+        body: {
+          payment_link_id: link.id,
+          provider: "mercadopago",
+          provider_order_id: order.id,
+          checkout_url: order.checkout_url,
+          amount: link.amount,
+          status: "processing",
+          provider_status: order.status || "created",
+          raw_response: order,
+        },
+      });
+    } catch (error) {
+      if (error.status !== 409) console.warn("Innova Pay attempt:", error.message || error);
+    }
+
+    await paymentDb(
+      "company_payment_links?id=eq." + encodeURIComponent(link.id),
+      {
+        method: "PATCH",
+        prefer: "return=minimal",
+        body: {
+          status: "processing",
+          provider_order_id: order.id,
+          provider_checkout_url: order.checkout_url,
+          provider_status: order.status || "created",
+          updated_at: new Date().toISOString(),
+        },
+      }
+    );
+    await paymentEvent(link.id, "checkout_created", { order_id: order.id }, order.id);
+
+    return res.json({
+      success: true,
+      checkout_url: order.checkout_url,
+      order_id: order.id,
+      reused: false,
+    });
+  } catch (error) {
+    console.error("❌ /api/payments/link checkout:", error.message || error);
+    return res.status(error.code === "PAYMENTS_DB_NOT_CONFIGURED" ? 503 : 500).json({
+      error: error.message || "No fue posible iniciar el pago",
+      code: error.code || null,
+    });
+  }
+});
+
+app.post("/api/payments/webhooks/mercadopago", async (req, res) => {
+  try {
+    if (!MERCADOPAGO_WEBHOOK_SECRET) {
+      return res.status(503).json({ error: "Webhook de Mercado Pago no configurado" });
+    }
+    if (!validateMercadoPagoWebhook(req)) {
+      return res.status(401).json({ error: "Firma de webhook inválida" });
+    }
+
+    const orderId = req.query?.["data.id"] || req.body?.data?.id;
+    if (!orderId) return res.status(400).json({ error: "Falta data.id" });
+
+    await syncMercadoPagoOrder(orderId, req.body || {});
+    return res.status(200).json({ ok: true });
+  } catch (error) {
+    console.error("❌ Mercado Pago webhook:", error.message || error);
+    return res.status(500).json({ error: "No fue posible procesar la notificación" });
+  }
+});
+
+
 // -------------------------------------------------------------
 // 3) TTS – /api/tts (ElevenLabs)
 // -------------------------------------------------------------
@@ -734,7 +1426,7 @@ app.post("/api/tts", async (req, res) => {
 // -------------------------------------------------------------
 app.get("/", (req, res) => {
   res.send(
-    "🚀 MIRA backend funcionando correctamente (chat con OpenRouter + correos por Resend + /api/tts para voz ElevenLabs + Innova Admin)."
+    "🚀 MIRA backend funcionando correctamente (OpenRouter + Resend + TTS + Innova Admin + Innova Pay)."
   );
 });
 

@@ -238,7 +238,7 @@
     const t = totals();
     root.innerHTML = `<section class="ceo-panel"><div class="ceo-panel-body pqw2-shell">
       <div class="pqw2-head"><div><h3>Cotización del proyecto</h3><p>Planilla nativa del expediente. Todos los subtotales se calculan automáticamente; el neto es la suma exacta de las partidas y el IVA se redondea a peso entero.</p></div>
-        <div class="pqw2-actions"><button data-add><i class="ri-add-line"></i>Agregar fila</button><button data-csv><i class="ri-file-excel-2-line"></i>CSV</button><button data-preview><i class="ri-eye-line"></i>Vista previa</button><button class="ai" data-ai><i class="ri-sparkling-2-line"></i>Analizar IA</button><button class="primary" data-save><i class="ri-save-3-line"></i>Guardar</button></div>
+        <div class="pqw2-actions"><button data-add><i class="ri-add-line"></i>Agregar fila</button><button data-csv><i class="ri-file-excel-2-line"></i>CSV</button><button data-preview><i class="ri-eye-line"></i>Vista previa</button><button data-payment-link><i class="ri-bank-card-line"></i>Generar cobro</button><button class="ai" data-ai><i class="ri-sparkling-2-line"></i>Analizar IA</button><button class="primary" data-save><i class="ri-save-3-line"></i>Guardar</button></div>
       </div>
       <div class="pqw2-metrics"><div class="pqw2-metric"><span>Partidas</span><strong data-count>${state.items.length}</strong></div><div class="pqw2-metric"><span>Subtotal neto</span><strong data-net>${money(t.net)}</strong></div><div class="pqw2-metric"><span>IVA ${esc(state.vatRate)}%</span><strong data-vat>${money(t.vat)}</strong></div><div class="pqw2-metric total"><span>Total con IVA</span><strong data-total>${money(t.total)}</strong></div></div>
       <div class="pqw2-party-grid">
@@ -292,12 +292,32 @@
     refreshTotals(); scheduleSave();
   }
 
-  function onClick(event) {
+  async function onClick(event) {
     const add = event.target.closest('[data-add]'); if (add) { state.items.push(blankItem()); renderWorkspace(); scheduleSave(); return; }
     const dup = event.target.closest('[data-duplicate]'); if (dup) { const i = Number(dup.dataset.duplicate); state.items.splice(i + 1, 0, { ...state.items[i], id: uid() }); renderWorkspace(); scheduleSave(); return; }
     const del = event.target.closest('[data-delete]'); if (del) { const i = Number(del.dataset.delete); state.items.splice(i, 1); if (!state.items.length) state.items.push(blankItem()); renderWorkspace(); scheduleSave(); return; }
     if (event.target.closest('[data-save]')) saveQuote(true);
     if (event.target.closest('[data-preview]')) openPreview();
+    if (event.target.closest('[data-payment-link]')) {
+      if (!window.InnovaPaymentsAdmin?.openCreateDialog) {
+        toast('El módulo de cobros todavía no está disponible.', 'error');
+        return;
+      }
+      if (!state.quote?.id && !state.saving) await saveQuote(false);
+      const t = totals();
+      window.InnovaPaymentsAdmin.openCreateDialog({
+        project_id: state.projectId,
+        quotation_id: state.quote?.id || null,
+        customer_name: state.recipient.legal_name || '',
+        customer_rut: state.recipient.rut || '',
+        customer_email: state.recipient.email || '',
+        customer_phone: state.recipient.phone || '',
+        description: 'Cotización ' + documentCode() + ' · ' + (state.project?.title || 'Proyecto'),
+        amount: t.total,
+        source: 'quotation'
+      });
+      return;
+    }
     if (event.target.closest('[data-csv]')) exportCsv();
     if (event.target.closest('[data-ai]')) analyzeAI();
   }
