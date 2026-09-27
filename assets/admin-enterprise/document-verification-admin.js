@@ -110,12 +110,7 @@
       if (draft) draft.textContent = 'Emitido · verificable';
 
       const side = codeNode?.parentElement || header.lastElementChild;
-      if (side && !side.querySelector('.ise-doc-seal')) {
-        const seal = document.createElement('div');
-        seal.className = 'ise-doc-seal';
-        seal.innerHTML = '<span>✓</span><span>Documento verificable</span>';
-        side.appendChild(seal);
-      }
+      side?.querySelector('.ise-doc-seal')?.remove();
       return;
     }
 
@@ -133,7 +128,8 @@
     const verificationUrl = `${VERIFY_BASE}${encodeURIComponent(record.verification_code)}`;
     const remoteQr = buildQrImageUrl(verificationUrl, { size: 420, caption: 'Innova Space Education' });
     const qr = await qrAsDataUrl(remoteQr);
-    const footer = node.querySelector('.pqw2-doc-footer');
+    const pqwFooter = node.querySelector('.pqw2-doc-footer');
+    const footer = pqwFooter || node.querySelector('.commercial-footer');
     const fingerprint = String(record.fingerprint || '');
 
     const panel = document.createElement('div');
