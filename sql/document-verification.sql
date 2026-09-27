@@ -78,7 +78,7 @@ begin
   v_project_name := coalesce(v_project_name, 'Proyecto');
 
   v_fingerprint := encode(
-    digest(
+    extensions.digest(
       convert_to(
         jsonb_build_object(
           'document_type', 'quotation',
@@ -243,6 +243,11 @@ $$;
 revoke all on function public.issue_company_document_verification(uuid) from public;
 revoke all on function public.resolve_company_document_verification(text) from public;
 revoke all on function public.verify_company_document(text) from public;
+
+-- La emisión/resolución requiere sesión; revocar anon explícitamente porque
+-- CREATE OR REPLACE conserva ACL previas de la función.
+revoke execute on function public.issue_company_document_verification(uuid) from anon;
+revoke execute on function public.resolve_company_document_verification(text) from anon;
 
 grant execute on function public.issue_company_document_verification(uuid) to authenticated;
 grant execute on function public.resolve_company_document_verification(text) to authenticated;
