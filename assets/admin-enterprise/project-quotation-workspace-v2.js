@@ -7,6 +7,20 @@
 
   const MARKER = 'project_quotation_workspace_v2';
   const LEGACY_MARKERS = ['project_quotation_workspace', MARKER];
+  const EMITTER = Object.freeze({
+    legal_name: 'Innova Space Edu SpA',
+    rut: '78.699.220-0',
+    business_activity: '',
+    phone: '+569-926301822',
+    email: 'contacto@innova-space-edu.cl'
+  });
+  const blankRecipient = () => ({
+    legal_name: '',
+    rut: '',
+    business_activity: '',
+    phone: '',
+    email: ''
+  });
   const OFFICIAL = {
     source: 'Presupuesto_Sala_de_Musica_54.600.480(1).xlsx',
     subtotal: 45882756,
@@ -27,6 +41,7 @@
 
   const state = {
     projectId: null, project: null, quote: null, items: [], comments: '', ai: '', vatRate: 19,
+    recipient: blankRecipient(),
     saving: false, saveTimer: null, seeded: false
   };
 
@@ -114,12 +129,13 @@
       .pqw2-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.pqw2-metric{background:#fff;border:1px solid #dde4f1;border-radius:14px;padding:14px 15px;box-shadow:0 7px 20px rgba(30,44,80,.045)}.pqw2-metric span{display:block;color:#7a86a0;font-size:.69rem;text-transform:uppercase;letter-spacing:.05em;font-weight:700}.pqw2-metric strong{display:block;margin-top:5px;color:#172342;font-size:1.08rem}.pqw2-metric.total{background:#18234c;border-color:#18234c}.pqw2-metric.total span,.pqw2-metric.total strong{color:#fff}
       .pqw2-card{background:#fff;border:1px solid #dde4f1;border-radius:17px;box-shadow:0 10px 28px rgba(29,44,79,.055);overflow:hidden}.pqw2-card-head{padding:14px 16px;border-bottom:1px solid #e7ebf4;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.pqw2-card-head strong{color:#1c2948}.pqw2-card-body{padding:16px}
       .pqw2-summary-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}.pqw2-summary-chip{border:1px solid #e0e6f0;background:#f8f9fc;border-radius:11px;padding:10px 11px}.pqw2-summary-chip span{display:block;color:#74809a;font-size:.68rem;line-height:1.25}.pqw2-summary-chip strong{display:block;margin-top:4px;color:#1c2948;font-size:.85rem}
+      .pqw2-party-grid{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:14px}.pqw2-issuer{display:grid;gap:7px;font-size:.78rem;color:#586681}.pqw2-issuer strong{color:#1c2948}.pqw2-form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 12px}.pqw2-form-field{display:grid;gap:5px}.pqw2-form-field.full{grid-column:1/-1}.pqw2-form-field span{font-size:.66rem;text-transform:uppercase;letter-spacing:.045em;font-weight:800;color:#78849b}.pqw2-form-field input{width:100%;border:1px solid #dce3ee;border-radius:10px;padding:9px 10px;font:500 .78rem Inter,sans-serif;color:#253453;background:#fff;outline:none}.pqw2-form-field input:focus{border-color:#8179ff;box-shadow:0 0 0 3px rgba(81,71,237,.10)}
       .pqw2-table-wrap{overflow:auto;max-width:100%;border:1px solid #e2e7f0;border-radius:12px;max-height:68vh}.pqw2-table{width:100%;border-collapse:separate;border-spacing:0;min-width:2050px;background:#fff}.pqw2-table th{position:sticky;top:0;background:#f5f7fb;z-index:2;color:#66738f;font-size:.66rem;text-transform:uppercase;letter-spacing:.045em;padding:9px 8px;text-align:left;border-bottom:1px solid #dfe5ef}.pqw2-table td{padding:5px;border-bottom:1px solid #edf0f6;vertical-align:top}.pqw2-table input{width:100%;min-width:0;border:1px solid transparent;border-radius:8px;padding:8px 9px;background:transparent;color:#1f2d4c;font:500 .76rem Inter,sans-serif;outline:none}.pqw2-table input:hover{border-color:#e2e6ef;background:#fafbfe}.pqw2-table input:focus{border-color:#8179ff;background:#fff;box-shadow:0 0 0 3px rgba(81,71,237,.10)}.pqw2-subtotal{font-weight:800;text-align:right;color:#1b2847;white-space:nowrap;padding-top:14px!important}.pqw2-row-actions{white-space:nowrap;padding-top:9px!important}.pqw2-icon{width:30px;height:30px;border:0;border-radius:8px;background:#f1f3f8;color:#52617f;cursor:pointer;margin-left:3px}.pqw2-icon.danger{color:#b93852;background:#fff1f4}
       .pqw2-footer-grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:14px}.pqw2-textarea{width:100%;min-height:110px;resize:vertical;border:1px solid #dfe5ef;border-radius:11px;padding:11px;font:500 .82rem Inter,sans-serif;color:#253453}.pqw2-totalbox{border:1px solid #dce2ef;border-radius:13px;padding:12px 14px;background:#f8f9fc;display:grid;gap:8px}.pqw2-totalrow{display:flex;justify-content:space-between;gap:12px;color:#66738c;font-size:.82rem}.pqw2-totalrow strong{color:#1c2948}.pqw2-totalrow.final{padding-top:9px;border-top:1px solid #dfe4ee;font-size:1rem}.pqw2-vat{display:flex;align-items:center;gap:7px}.pqw2-vat input{width:60px;border:1px solid #d9e0ec;border-radius:7px;padding:5px;text-align:right}.pqw2-status{font-size:.72rem;color:#78849d;display:flex;align-items:center;gap:6px}.pqw2-status .dot{width:7px;height:7px;border-radius:50%;background:#9aa5b8}.pqw2-status.saving .dot{background:#e4a038}.pqw2-status.saved .dot{background:#32a56e}.pqw2-status.error .dot{background:#d64c67}
       .pqw2-ai{white-space:pre-wrap;line-height:1.55;font-size:.82rem;color:#34415f;background:#f8f9fd;border:1px solid #e2e6f0;border-radius:12px;padding:13px}
-      .pqw2-modal{position:fixed;inset:0;background:rgba(11,18,38,.58);z-index:9999;display:flex;align-items:center;justify-content:center;padding:18px}.pqw2-modal-card{width:min(1180px,96vw);max-height:94vh;overflow:auto;background:#fff;border-radius:18px;box-shadow:0 28px 80px rgba(0,0,0,.25)}.pqw2-modal-bar{position:sticky;top:0;background:#fff;border-bottom:1px solid #e5e9f1;padding:12px 14px;display:flex;justify-content:space-between;gap:10px;z-index:3}.pqw2-document{padding:38px 42px;color:#18233f}.pqw2-doc-head{display:flex;justify-content:space-between;gap:22px;align-items:flex-start;margin-bottom:22px}.pqw2-doc-brand{display:flex;gap:14px;align-items:center}.pqw2-doc-brand img{width:64px;height:64px;border-radius:12px;object-fit:contain;border:1px solid #e5e9f1}.pqw2-document h1{margin:0;font-size:1.55rem}.pqw2-document .meta{margin-top:5px;color:#6f7c96;font-size:.82rem}.pqw2-document table{width:100%;border-collapse:collapse;font-size:.69rem}.pqw2-document th,.pqw2-document td{border-bottom:1px solid #dde3ed;padding:7px 6px;text-align:left;vertical-align:top}.pqw2-document th{background:#f4f6fa}.pqw2-document td.num,.pqw2-document th.num{text-align:right;white-space:nowrap}.pqw2-doc-section{background:#eef1f8!important;font-weight:800;color:#23304f}.pqw2-doc-totals{margin:22px 0 0 auto;width:min(350px,100%);display:grid;gap:7px}.pqw2-doc-totals>div{display:flex;justify-content:space-between}.pqw2-doc-totals .grand{font-size:1.05rem;font-weight:800;border-top:1px solid #ccd4e2;padding-top:9px}.pqw2-doc-footer{margin-top:34px;padding-top:16px;border-top:1px solid #dce2ec;color:#6e7b91;font-size:.68rem;line-height:1.55}.pqw2-source-link{max-width:260px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-      @media(max-width:1000px){.pqw2-metrics,.pqw2-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.pqw2-footer-grid{grid-template-columns:1fr}}
-      @media(max-width:620px){.pqw2-metrics,.pqw2-summary-grid{grid-template-columns:1fr 1fr}.pqw2-card-body{padding:11px}.pqw2-document{padding:22px 18px}.pqw2-actions{width:100%}.pqw2-actions button{flex:1;justify-content:center}}
+      .pqw2-modal{position:fixed;inset:0;background:rgba(11,18,38,.58);z-index:9999;display:flex;align-items:center;justify-content:center;padding:18px}.pqw2-modal-card{width:min(1180px,96vw);max-height:94vh;overflow:auto;background:#fff;border-radius:18px;box-shadow:0 28px 80px rgba(0,0,0,.25)}.pqw2-modal-bar{position:sticky;top:0;background:#fff;border-bottom:1px solid #e5e9f1;padding:12px 14px;display:flex;justify-content:space-between;gap:10px;z-index:3}.pqw2-document{padding:38px 42px;color:#18233f}.pqw2-doc-head{display:flex;justify-content:space-between;gap:22px;align-items:flex-start;margin-bottom:22px}.pqw2-doc-brand{display:flex;gap:14px;align-items:center}.pqw2-doc-brand img{width:64px;height:64px;border-radius:12px;object-fit:contain;border:1px solid #e5e9f1}.pqw2-document h1{margin:0;font-size:1.55rem}.pqw2-document .meta{margin-top:5px;color:#6f7c96;font-size:.82rem}.pqw2-doc-parties{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0 0 20px}.pqw2-doc-party{border:1px solid #dde3ed;border-radius:10px;padding:10px 12px;font-size:.68rem;line-height:1.5}.pqw2-doc-party .label{font-size:.59rem;text-transform:uppercase;letter-spacing:.08em;font-weight:800;color:#7a869f;margin-bottom:4px}.pqw2-doc-party strong{color:#1d2a48}.pqw2-document table{width:100%;border-collapse:collapse;font-size:.69rem}.pqw2-document th,.pqw2-document td{border-bottom:1px solid #dde3ed;padding:7px 6px;text-align:left;vertical-align:top}.pqw2-document th{background:#f4f6fa}.pqw2-document td.num,.pqw2-document th.num{text-align:right;white-space:nowrap}.pqw2-doc-section{background:#eef1f8!important;font-weight:800;color:#23304f}.pqw2-doc-totals{margin:22px 0 0 auto;width:min(350px,100%);display:grid;gap:7px}.pqw2-doc-totals>div{display:flex;justify-content:space-between}.pqw2-doc-totals .grand{font-size:1.05rem;font-weight:800;border-top:1px solid #ccd4e2;padding-top:9px}.pqw2-doc-footer{margin-top:34px;padding-top:16px;border-top:1px solid #dce2ec;color:#6e7b91;font-size:.68rem;line-height:1.55}.pqw2-source-link{max-width:260px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+      @media(max-width:1000px){.pqw2-metrics,.pqw2-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.pqw2-footer-grid,.pqw2-party-grid{grid-template-columns:1fr}}
+      @media(max-width:620px){.pqw2-metrics,.pqw2-summary-grid{grid-template-columns:1fr 1fr}.pqw2-form-grid,.pqw2-doc-parties{grid-template-columns:1fr}.pqw2-card-body{padding:11px}.pqw2-document{padding:22px 18px}.pqw2-actions{width:100%}.pqw2-actions button{flex:1;justify-content:center}}
     `;
     document.head.appendChild(style);
   }
@@ -162,6 +178,11 @@
     const quotes = q.data || [];
     state.quote = quotes.find((row) => LEGACY_MARKERS.includes(metaFromQuote(row).source)) || null;
     const meta = metaFromQuote(state.quote);
+    const savedRecipient = meta?.recipient && typeof meta.recipient === 'object' ? meta.recipient : {};
+    state.recipient = { ...blankRecipient(), ...savedRecipient };
+    if (!state.recipient.legal_name && state.quote?.client_name && !/^Proyecto:/i.test(String(state.quote.client_name))) {
+      state.recipient.legal_name = String(state.quote.client_name);
+    }
     const existing = Array.isArray(state.quote?.items) ? state.quote.items : [];
     const shouldSeed = isSalaMusica(state.project) && !hasMeaningfulItems(existing);
     if (shouldSeed) {
@@ -220,6 +241,22 @@
         <div class="pqw2-actions"><button data-add><i class="ri-add-line"></i>Agregar fila</button><button data-csv><i class="ri-file-excel-2-line"></i>CSV</button><button data-preview><i class="ri-eye-line"></i>Vista previa</button><button class="ai" data-ai><i class="ri-sparkling-2-line"></i>Analizar IA</button><button class="primary" data-save><i class="ri-save-3-line"></i>Guardar</button></div>
       </div>
       <div class="pqw2-metrics"><div class="pqw2-metric"><span>Partidas</span><strong data-count>${state.items.length}</strong></div><div class="pqw2-metric"><span>Subtotal neto</span><strong data-net>${money(t.net)}</strong></div><div class="pqw2-metric"><span>IVA ${esc(state.vatRate)}%</span><strong data-vat>${money(t.vat)}</strong></div><div class="pqw2-metric total"><span>Total con IVA</span><strong data-total>${money(t.total)}</strong></div></div>
+      <div class="pqw2-party-grid">
+        <div class="pqw2-card"><div class="pqw2-card-head"><strong>Empresa emisora</strong><small>Datos fijos de Innova Space</small></div><div class="pqw2-card-body"><div class="pqw2-issuer">
+          <div><strong>Razón social:</strong> ${esc(EMITTER.legal_name)}</div>
+          <div><strong>RUT:</strong> ${esc(EMITTER.rut)}</div>
+          <div><strong>Giro:</strong> ${esc(EMITTER.business_activity || '—')}</div>
+          <div><strong>Fono:</strong> ${esc(EMITTER.phone)}</div>
+          <div><strong>Correo:</strong> ${esc(EMITTER.email)}</div>
+        </div></div></div>
+        <div class="pqw2-card"><div class="pqw2-card-head"><strong>Empresa receptora</strong><small>Se guarda con la cotización</small></div><div class="pqw2-card-body"><div class="pqw2-form-grid">
+          <label class="pqw2-form-field full"><span>Razón social</span><input data-recipient-field="legal_name" value="${esc(state.recipient.legal_name)}" placeholder="Empresa o institución destinataria"></label>
+          <label class="pqw2-form-field"><span>RUT</span><input data-recipient-field="rut" value="${esc(state.recipient.rut)}" placeholder="76.123.456-7"></label>
+          <label class="pqw2-form-field"><span>Giro</span><input data-recipient-field="business_activity" value="${esc(state.recipient.business_activity)}" placeholder="Giro o actividad"></label>
+          <label class="pqw2-form-field"><span>Fono</span><input data-recipient-field="phone" value="${esc(state.recipient.phone)}" placeholder="+56 9 ..."></label>
+          <label class="pqw2-form-field"><span>Correo</span><input data-recipient-field="email" type="email" value="${esc(state.recipient.email)}" placeholder="correo@empresa.cl"></label>
+        </div></div></div>
+      </div>
       <div class="pqw2-card"><div class="pqw2-card-head"><strong>Resumen por sección</strong><span class="pqw2-status" data-status><span class="dot"></span><span>Listo</span></span></div><div class="pqw2-card-body"><div class="pqw2-summary-grid" data-section-summary>${sectionSummaryHtml()}</div></div></div>
       <div class="pqw2-card"><div class="pqw2-card-head"><strong>Listado completo</strong><small>${state.seeded ? 'Base oficial cargada desde Excel consolidado' : 'Edición directa'}</small></div><div class="pqw2-card-body"><div class="pqw2-table-wrap"><table class="pqw2-table"><thead><tr><th>Sección</th><th>Grupo</th><th>Ítem / material / servicio</th><th>Cantidad</th><th>Unidad</th><th>Precio ref.</th><th>Subtotal</th><th>Proveedor / lugar</th><th>Página web / fuente</th><th>Notas</th><th></th></tr></thead><tbody data-body>${state.items.map(rowHtml).join('')}</tbody></table></div></div></div>
       <div class="pqw2-footer-grid"><div class="pqw2-card"><div class="pqw2-card-head"><strong>Observaciones y antecedentes</strong></div><div class="pqw2-card-body"><textarea class="pqw2-textarea" data-comments>${esc(state.comments)}</textarea>${state.ai ? `<div class="pqw2-ai" style="margin-top:12px">${esc(state.ai)}</div>` : ''}</div></div>
@@ -239,6 +276,12 @@
   }
 
   function onInput(event) {
+    const recipientInput = event.target.closest('[data-recipient-field]');
+    if (recipientInput) {
+      state.recipient[recipientInput.dataset.recipientField] = recipientInput.value;
+      scheduleSave();
+      return;
+    }
     const input = event.target.closest('[data-field]'); if (!input) return;
     const tr = input.closest('[data-row]'); if (!tr) return;
     const index = Number(tr.dataset.row); const row = state.items[index]; if (!row) return;
@@ -282,6 +325,8 @@
         source_workbook: isSalaMusica(state.project) ? OFFICIAL.source : null,
         comments: state.comments,
         ai_analysis: state.ai,
+        issuer: { ...EMITTER },
+        recipient: { ...state.recipient },
         item_count: state.items.length,
         section_totals: Object.fromEntries(sectionTotals()),
         official_reference: isSalaMusica(state.project) ? { subtotal: OFFICIAL.subtotal, vat: OFFICIAL.vat, total: OFFICIAL.total } : null,
@@ -289,7 +334,7 @@
       };
       const payload = {
         project_id: state.projectId,
-        client_name: state.project?.title ? `Proyecto: ${state.project.title}` : 'Cotización interna de proyecto',
+        client_name: String(state.recipient.legal_name || '').trim() || (state.project?.title ? `Proyecto: ${state.project.title}` : 'Cotización interna de proyecto'),
         issue_date: state.quote?.issue_date || today(), status: 'draft',
         items: state.items.map((r) => ({ ...r, subtotal: lineSubtotal(r) })),
         subtotal: t.net, discount: 0, net_amount: t.net, vat_rate: Number(state.vatRate) || 0, vat_amount: t.vat, total_amount: t.total,
@@ -314,7 +359,7 @@
       if (r.section !== lastSection) { lastSection = r.section; rows.push(`<tr><td colspan="7" class="pqw2-doc-section">${esc(r.section || 'Sin sección')}</td></tr>`); }
       rows.push(`<tr><td>${esc(r.group)}</td><td>${esc(r.name)}${r.notes ? `<div style="color:#76829a;margin-top:3px">${esc(r.notes)}</div>` : ''}</td><td>${esc(r.quantity_label)}${r.unit ? ` ${esc(r.unit)}` : ''}</td><td class="num">${esc(r.price_label)}</td><td>${esc(r.supplier)}</td><td class="pqw2-source-link">${esc(r.url)}</td><td class="num">${money(lineSubtotal(r))}</td></tr>`);
     });
-    return `<div class="pqw2-document" data-document data-document-type="quotation" data-document-id="${esc(state.quote?.id || '')}" data-internal-code="${esc(documentCode())}"><div class="pqw2-doc-head"><div class="pqw2-doc-brand"><img src="assets/img/logo1.jpg" alt="Innova Space Education"><div><div style="font-size:.72rem;font-weight:800;color:#6258f3;letter-spacing:.08em">INNOVA SPACE EDUCATION</div><h1>Cotización del proyecto</h1><div class="meta">${esc(state.project?.title || 'Proyecto')} · ${today()}</div></div></div><div style="text-align:right"><div style="font-size:.72rem;color:#7a869f">Borrador</div><strong style="font-size:.78rem">${documentCode()}</strong></div></div><table><thead><tr><th>Grupo</th><th>Ítem / especificación</th><th>Cantidad</th><th class="num">Precio ref.</th><th>Proveedor</th><th>Fuente</th><th class="num">Subtotal</th></tr></thead><tbody>${rows.join('')}</tbody></table><div class="pqw2-doc-totals"><div><span>Neto</span><strong>${money(t.net)}</strong></div><div><span>IVA ${esc(state.vatRate)}%</span><strong>${money(t.vat)}</strong></div><div class="grand"><span>Total</span><strong>${money(t.total)}</strong></div></div>${state.comments ? `<div style="margin-top:22px;font-size:.75rem"><strong>Observaciones</strong><div style="margin-top:5px;color:#68758e">${esc(state.comments)}</div></div>` : ''}<div class="pqw2-doc-footer">Documento generado automáticamente por Innova Space Education a partir del expediente digital del proyecto. El código interno identifica esta emisión dentro del sistema. Documento firmado por la entidad emisora mediante su registro electrónico interno.</div></div>`;
+    return `<div class="pqw2-document" data-document data-document-type="quotation" data-document-id="${esc(state.quote?.id || '')}" data-internal-code="${esc(documentCode())}"><div class="pqw2-doc-head"><div class="pqw2-doc-brand"><img src="assets/img/logo1.jpg" alt="Innova Space Education"><div><div style="font-size:.72rem;font-weight:800;color:#6258f3;letter-spacing:.08em">INNOVA SPACE EDUCATION</div><h1>Cotización del proyecto</h1><div class="meta">${esc(state.project?.title || 'Proyecto')} · ${today()}</div></div></div><div style="text-align:right"><div style="font-size:.72rem;color:#7a869f">Borrador</div><strong style="font-size:.78rem">${documentCode()}</strong></div></div><div class="pqw2-doc-parties"><div class="pqw2-doc-party"><div class="label">Emisor</div><strong>${esc(EMITTER.legal_name)}</strong><br>RUT: ${esc(EMITTER.rut)}<br>Giro: ${esc(EMITTER.business_activity || '—')}<br>Fono: ${esc(EMITTER.phone)}<br>Correo: ${esc(EMITTER.email)}</div><div class="pqw2-doc-party"><div class="label">Destinatario</div><strong>${esc(state.recipient.legal_name || '—')}</strong><br>RUT: ${esc(state.recipient.rut || '—')}<br>Giro: ${esc(state.recipient.business_activity || '—')}<br>Fono: ${esc(state.recipient.phone || '—')}<br>Correo: ${esc(state.recipient.email || '—')}</div></div><table><thead><tr><th>Grupo</th><th>Ítem / especificación</th><th>Cantidad</th><th class="num">Precio ref.</th><th>Proveedor</th><th>Fuente</th><th class="num">Subtotal</th></tr></thead><tbody>${rows.join('')}</tbody></table><div class="pqw2-doc-totals"><div><span>Neto</span><strong>${money(t.net)}</strong></div><div><span>IVA ${esc(state.vatRate)}%</span><strong>${money(t.vat)}</strong></div><div class="grand"><span>Total</span><strong>${money(t.total)}</strong></div></div>${state.comments ? `<div style="margin-top:22px;font-size:.75rem"><strong>Observaciones</strong><div style="margin-top:5px;color:#68758e">${esc(state.comments)}</div></div>` : ''}<div class="pqw2-doc-footer">Documento generado automáticamente por Innova Space Education a partir del expediente digital del proyecto. El código interno identifica esta emisión dentro del sistema. Documento firmado por la entidad emisora mediante su registro electrónico interno.</div></div>`;
   }
 
   function openPreview() {
@@ -330,7 +375,7 @@
 
   function printDocument(node) {
     const win = window.open('', '_blank'); if (!win) return;
-    win.document.write(`<html><head><title>${esc(state.project?.title || 'Cotización')}</title><style>body{font-family:Arial,sans-serif;margin:30px;color:#18233f}img{width:64px;height:64px;object-fit:contain}table{width:100%;border-collapse:collapse;font-size:10px}th,td{border-bottom:1px solid #ddd;padding:6px;text-align:left}.num{text-align:right}.pqw2-doc-head{display:flex;justify-content:space-between}.pqw2-doc-brand{display:flex;gap:12px}.pqw2-doc-section{background:#eef1f8;font-weight:bold}.pqw2-doc-totals{margin:20px 0 0 auto;width:320px}.pqw2-doc-totals>div{display:flex;justify-content:space-between;padding:4px}.grand{border-top:1px solid #bbb;font-weight:bold}.pqw2-doc-footer{margin-top:28px;padding-top:12px;border-top:1px solid #ddd;font-size:9px;color:#666}</style></head><body>${node.innerHTML}</body></html>`); win.document.close(); win.focus(); setTimeout(() => win.print(), 200);
+    win.document.write(`<html><head><title>${esc(state.project?.title || 'Cotización')}</title><style>body{font-family:Arial,sans-serif;margin:30px;color:#18233f}img{width:64px;height:64px;object-fit:contain}table{width:100%;border-collapse:collapse;font-size:10px}th,td{border-bottom:1px solid #ddd;padding:6px;text-align:left}.num{text-align:right}.pqw2-doc-head{display:flex;justify-content:space-between}.pqw2-doc-brand{display:flex;gap:12px}.pqw2-doc-parties{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 16px}.pqw2-doc-party{border:1px solid #ddd;border-radius:8px;padding:9px;font-size:9px;line-height:1.45}.pqw2-doc-party .label{font-size:8px;text-transform:uppercase;font-weight:bold;color:#777;margin-bottom:3px}.pqw2-doc-section{background:#eef1f8;font-weight:bold}.pqw2-doc-totals{margin:20px 0 0 auto;width:320px}.pqw2-doc-totals>div{display:flex;justify-content:space-between;padding:4px}.grand{border-top:1px solid #bbb;font-weight:bold}.pqw2-doc-footer{margin-top:28px;padding-top:12px;border-top:1px solid #ddd;font-size:9px;color:#666}</style></head><body>${node.innerHTML}</body></html>`); win.document.close(); win.focus(); setTimeout(() => win.print(), 200);
   }
 
   async function exportPdf(node) {
@@ -353,7 +398,7 @@
       const { data: sessionData } = await db.auth.getSession(); const token = sessionData?.session?.access_token;
       if (!token) throw new Error('Sesión no disponible para MIRA.');
       const t = totals();
-      const context = { project: { id: state.projectId, title: state.project?.title, budget: state.project?.budget, contracted_amount: state.project?.contracted_amount }, totals: t, vat_rate: state.vatRate, item_count: state.items.length, sections: Object.fromEntries(sectionTotals()), items: state.items.map((r) => ({ section:r.section, group:r.group, name:r.name, quantity:r.quantity_label, price:r.price_label, subtotal:lineSubtotal(r), supplier:r.supplier, url:r.url, notes:r.notes })) };
+      const context = { project: { id: state.projectId, title: state.project?.title, budget: state.project?.budget, contracted_amount: state.project?.contracted_amount }, issuer: EMITTER, recipient: state.recipient, totals: t, vat_rate: state.vatRate, item_count: state.items.length, sections: Object.fromEntries(sectionTotals()), items: state.items.map((r) => ({ section:r.section, group:r.group, name:r.name, quantity:r.quantity_label, price:r.price_label, subtotal:lineSubtotal(r), supplier:r.supplier, url:r.url, notes:r.notes })) };
       const response = await fetch(`${cfg.backendUrl}/api/admin/mira`, { method: 'POST', headers: { 'Content-Type':'application/json', Authorization:`Bearer ${token}` }, body: JSON.stringify({ message: 'Analiza esta cotización del proyecto. Revisa factibilidad, coherencia matemática, partidas sin proveedor o fuente, riesgos de presupuesto, posibles duplicidades y antecedentes faltantes. No inventes precios ni documentos.', context: `COTIZACIÓN PROYECTO\n${JSON.stringify(context).slice(0,45000)}` }) });
       const data = await response.json(); if (!response.ok) throw new Error(data?.error || 'MIRA no respondió.');
       state.ai = data?.answer || data?.message || data?.response || 'Análisis completado.'; renderWorkspace(); scheduleSave();
