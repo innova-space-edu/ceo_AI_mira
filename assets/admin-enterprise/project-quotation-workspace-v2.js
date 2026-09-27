@@ -11,7 +11,7 @@
     legal_name: 'Innova Space Edu SpA',
     rut: '78.220.699-0',
     business_activity: 'Venta de computadores, equipos NCP y terminación de edificios',
-    phone: '+569-926301822',
+    phone: '+569-26301822',
     email: 'contacto@innova-space-edu.cl'
   });
   const blankRecipient = () => ({
