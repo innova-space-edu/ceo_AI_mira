@@ -186,7 +186,7 @@ window.INNOVA_COMPANY_PROFILE = {
 (function loadPublicDocumentVerifier() {
   if (document.querySelector('script[data-innova-document-verifier]')) return;
   const script = document.createElement('script');
-  script.src = 'assets/document-verification-public.js?v=20260917-1';
+  script.src = 'assets/document-verification-public.js?v=20260927-2';
   script.defer = true;
   script.dataset.innovaDocumentVerifier = '1';
   document.head.appendChild(script);
