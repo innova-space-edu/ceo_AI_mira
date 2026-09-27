@@ -30,8 +30,20 @@
     document.head.appendChild(style);
   }
 
+  function canonicalizeVerificationCode(code) {
+    const clean = String(code || '').trim().toUpperCase().replace(/\s+/g, '');
+    const match = clean.match(/^ISE-COT-([A-Z0-9]{8})-([A-Z0-9]{6})-V([A-Z0-9]{2})$/);
+    if (!match) return clean;
+
+    // Fecha y versión son exclusivamente numéricas. Esto corrige confusiones
+    // visuales frecuentes al transcribir 0 desde pantalla/PDF sin tocar el
+    // bloque hexadecimal del documento, donde A-F sí son válidos.
+    const numeric = (value) => value.replace(/[OEQD]/g, '0');
+    return `ISE-COT-${numeric(match[1])}-${match[2]}-V${numeric(match[3])}`;
+  }
+
   async function verify(code) {
-    const clean = String(code || '').trim().toUpperCase();
+    const clean = canonicalizeVerificationCode(code);
     if (!clean) return [];
     const response = await fetch(RPC_URL, {
       method: 'POST',
@@ -89,8 +101,9 @@
     document.addEventListener('keydown', onKey);
 
     const run = async () => {
-      const code = input.value.trim();
+      const code = canonicalizeVerificationCode(input.value);
       if (!code) { result.innerHTML = resultHtml(null); return; }
+      if (input.value !== code) input.value = code;
       result.innerHTML = '<div class="ise-verify-loading">Consultando registro…</div>';
       try {
         const records = await verify(code);
