@@ -51,6 +51,19 @@
   const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const money = (v) => new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }).format(Number(v) || 0);
   const today = () => new Date().toISOString().slice(0, 10);
+  const QUOTATION_PDF_SEQUENCE_FLOOR = 36;
+  const quotationFileDate = () => {
+    const parts = new Intl.DateTimeFormat('es-CL', {
+      timeZone: 'America/Santiago',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    }).formatToParts(new Date()).reduce((acc, part) => {
+      if (part.type !== 'literal') acc[part.type] = part.value;
+      return acc;
+    }, {});
+    return `${parts.day}-${parts.month}-${parts.year}`;
+  };
   const slug = (v) => String(v || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
 
   function parsePrice(value) {
@@ -341,6 +354,7 @@
     try {
       const t = totals();
       const meta = {
+        ...metaFromQuote(state.quote),
         source: MARKER,
         source_workbook: isSalaMusica(state.project) ? OFFICIAL.source : null,
         comments: state.comments,
@@ -367,8 +381,70 @@
       state.quote = result.data; state.seeded = false; setStatus('saved', 'Guardado en el expediente');
       if (notify) toast('Cotización guardada.');
       window.dispatchEvent(new CustomEvent('innova-business-sync'));
-    } catch (error) { setStatus('error', error.message || 'Error al guardar'); if (notify) toast(error.message || 'No se pudo guardar.', 'error'); }
-    finally { state.saving = false; }
+      return state.quote;
+    } catch (error) {
+      setStatus('error', error.message || 'Error al guardar');
+      if (notify) toast(error.message || 'No se pudo guardar.', 'error');
+      return null;
+    } finally { state.saving = false; }
+  }
+
+  async function waitForSave(timeoutMs = 5000) {
+    const started = Date.now();
+    while (state.saving && Date.now() - started < timeoutMs) {
+      await new Promise((resolve) => setTimeout(resolve, 80));
+    }
+    if (state.saving) throw new Error('La cotización todavía se está guardando. Intenta generar el PDF nuevamente.');
+  }
+
+  async function ensurePdfSequence() {
+    clearTimeout(state.saveTimer);
+    await waitForSave();
+
+    const saved = await saveQuote(false);
+    await waitForSave();
+    if (!state.quote?.id && !saved?.id) {
+      throw new Error('Primero se debe guardar la cotización antes de generar el PDF.');
+    }
+
+    const currentMeta = metaFromQuote(state.quote);
+    const existing = Number(currentMeta.pdf_sequence);
+    if (Number.isInteger(existing) && existing > 0) return existing;
+
+    const { data, error } = await db
+      .from('company_quotations')
+      .select('id,notes')
+      .order('created_at', { ascending: true })
+      .limit(1000);
+    if (error) throw error;
+
+    let maxSequence = QUOTATION_PDF_SEQUENCE_FLOOR;
+    (data || []).forEach((row) => {
+      const seq = Number(metaFromQuote(row).pdf_sequence);
+      if (Number.isInteger(seq) && seq > maxSequence) maxSequence = seq;
+    });
+
+    const nextSequence = maxSequence + 1;
+    const nextMeta = {
+      ...metaFromQuote(state.quote),
+      pdf_sequence: nextSequence,
+      pdf_code: `Cot${String(nextSequence).padStart(3, '0')}`,
+      pdf_number_assigned_at: new Date().toISOString()
+    };
+
+    const updated = await db
+      .from('company_quotations')
+      .update({ notes: JSON.stringify(nextMeta) })
+      .eq('id', state.quote.id)
+      .select('*')
+      .single();
+    if (updated.error) throw updated.error;
+    state.quote = updated.data;
+    return nextSequence;
+  }
+
+  function quotationPdfFilename(sequence) {
+    return `Cot${String(sequence).padStart(3, '0')}-${quotationFileDate()}.pdf`;
   }
 
   function documentCode() { return state.quote?.id ? `ISE-COT-${String(state.quote.id).replace(/-/g, '').slice(0, 10).toUpperCase()}` : 'ISE-COT-BORRADOR'; }
@@ -400,8 +476,14 @@
 
   async function exportPdf(node) {
     if (!window.html2pdf) { printDocument(node); return; }
-    const opt = { margin: 8, filename: `cotizacion-${slug(state.project?.title || 'proyecto').replace(/ /g, '-')}.pdf`, image: { type: 'jpeg', quality: .98 }, html2canvas: { scale: 1.4 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }, pagebreak: { mode: ['css', 'legacy'] } };
-    await window.html2pdf().set(opt).from(node).save();
+    try {
+      const sequence = await ensurePdfSequence();
+      const opt = { margin: 8, filename: quotationPdfFilename(sequence), image: { type: 'jpeg', quality: .98 }, html2canvas: { scale: 1.4 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }, pagebreak: { mode: ['css', 'legacy'] } };
+      await window.html2pdf().set(opt).from(node).save();
+      toast(`PDF generado como ${quotationPdfFilename(sequence)}`);
+    } catch (error) {
+      toast(error.message || 'No se pudo generar el PDF.', 'error');
+    }
   }
 
   function exportCsv() {
