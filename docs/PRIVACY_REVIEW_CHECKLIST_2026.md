@@ -13,12 +13,18 @@
 
 ## Bloqueos para aprobar/publicar documentos definitivos
 
-- [ ] Confirmar razón social exacta, RUT, domicilio postal completo y facultades vigentes del representante legal de Innova.
+- [x] Recibidos del titular y agregados al borrador: Innova Space Edu SpA, RUT 78.220.699-0, representante legal Iván Eduardo Morales Sandoval. Pendiente contrastar con antecedentes societarios y vigencia del poder.
+- [ ] Confirmar domicilio postal completo de Innova para identificarlo en la documentación oficial.
 - [ ] Identificar encargados de prevención si existen, y responsable interno de solicitudes e incidentes.
 - [ ] Inventariar flujos reales de datos por módulo y por cliente, incluidos menores, fotos, audios, documentos, calificaciones, PIE/NEE, RUT y metadatos.
 - [ ] Confirmar bases de licitud por finalidad, edad y categoría de dato; documentar autorizaciones para divulgación de imágenes y trabajos.
-- [ ] Completar calendario de conservación por categoría, almacenamiento/backup, borrado y devolución al término del contrato.
-- [ ] Identificar persona jurídica contratante, región, DPA vigente, subencargados y acuerdos de transferencia internacional de Supabase, Vercel, Cloudflare, IA, correo y otros proveedores **efectivamente activos**. No suponer que marcas mencionadas implican tratamientos.
+- [x] Incorporado calendario de eliminación anual escolar propuesto: aviso de al menos 30 días, recordatorio 7 días, cierre por institución y supresión elegible de producción hasta 30 días después; sujeto a aprobación del responsable y excepciones legales.
+- [ ] Determinar plan vigente y retención técnica efectiva de backups, logs, Storage, Auth, cachés y servicios externos. Supabase documenta retención de backups por plan (Pro 7 días, Team 14, Enterprise hasta 30), no se ha comprobado plan de los proyectos.
+- [ ] Aprobar y probar la exportación de datos de usuarios, padres/apoderados y establecimientos, y la protección de registros académicos oficiales.
+- [x] Localizados DPA Supabase Pte. Ltd v1 (01-08-2026), política de responsabilidad compartida, Terms y DPA Cloudflare Inc. v6.4 (03-04-2026) aportado por el titular; enlace a lista de subencargados.
+- [x] Observados en Supabase dos proyectos activos, `sello-tecnologico` y `Edu-AI`, con región primaria `us-west-2` (EE. UU.) al 11-10-2026.
+- [ ] Comprobar la identidad del cliente contractual, aceptación del DPA de cada proveedor y condiciones del servicio específico.
+- [ ] Completar subencargados reales y acuerdos de transferencia internacional de Supabase, Vercel, Cloudflare, IA, correo y otros proveedores **efectivamente activos**. No suponer que marcas mencionadas implican tratamientos.
 - [ ] Definir y obtener autorizaciones escritas específicas de subencargados por contrato institucional (art. 15 bis).
 - [ ] Validar mediante pruebas RLS, roles, compartición de archivos y buckets, páginas públicas, enlaces temporales, MFA, backups y respuesta a incidentes.
 - [ ] Validar qué módulos de IA envían qué datos, regiones, retención y condiciones de entrenamiento.
@@ -34,3 +40,16 @@
 - Entrada en vigor general: 01-12-2026.
 
 El material público evita describir la topología y los detalles internos que podrían facilitar ataques. Los protocolos operativos específicos y las evidencias sensibles deben permanecer privados.
+
+## Fuentes del análisis de proveedores (11-10-2026)
+
+- Supabase DPA (versión 1 de 01-08-2026): https://supabase.com/legal/customer-resources/data-processing-addendum
+- Supabase GDPR y responsabilidad compartida: https://supabase.com/docs/guides/security/gdpr-compliance
+- Supabase Terms: https://supabase.com/terms
+- Supabase backups por plan: https://supabase.com/docs/guides/platform/backups
+- Supabase borrado de Storage mediante API (no SQL solo): https://supabase.com/docs/guides/storage/management/delete-objects
+- Cloudflare DPA, versión 6.4, 03-04-2026: PDF entregado por el cliente para revisión; conservar copia documental en lugar interno autorizado, no versionar datos contractuales de clientes ni publicar el PDF sin validar sus condiciones.
+- Cloudflare lista de subencargados: https://www.cloudflare.com/gdpr/subprocessors/
+- Cloudflare caché/purga: https://developers.cloudflare.com/cache/how-to/purge-cache/purge-everything/
+
+**Observaciones:** el contrato Supabase utiliza autorización general de subencargados (cláusula 6), igual que Cloudflare (cláusula 4.3), mientras que el artículo 15 bis chileno establece autorización específica y por escrito para delegación por el encargado. Revisar jurídicamente el esquema de cadena responsable institucional → Innova → proveedor → subencargados antes de aprobar.
