@@ -40,16 +40,24 @@
 - [x] Titular prevé almacenamiento de respaldos de empresa en servidor interno y disco externo nominal de 1 TB. **No existe constatación técnica de instalación ni copias reales.**
 - [x] Borrador de política pública de respaldos añadido como `continuidad-respaldos.html`, sujeto a aprobación formal.
 - [ ] Confirmar que el servidor interno efectivamente pertenece y es administrado por Innova Space Edu SpA, su país real de alojamiento, personal con acceso y custodia.
-- [ ] Medir uso por proyecto y tamaño completo de PostgreSQL/Auth, archivos de Storage, PDFs, audios, videos, logs y crecimiento de un ciclo escolar; comprobar espacio disponible y salud del disco de 1 TB.
+- [x] Primera medición no destructiva en Supabase de tamaño de bases y metadatos de Storage para ambos proyectos, realizada el 11-10-2026. Los resultados individuales exactos deben conservarse en el informe privado del proyecto, no en políticas públicas.
+- [ ] Validar cifras contra el panel de facturación/Storage, incluir logs, configuraciones, archivos fuera de Storage y crecimiento esperado por ciclo escolar; comprobar espacio disponible y salud del disco de 1 TB.
 - [ ] Diseñar permisos, cifrado en reposo y tránsito, aislamiento de red, custodia y recuperación de claves, MFA y registro de accesos privilegiados.
 - [ ] Implementar exportación programada e incremental donde sea compatible; respaldos independientes de base de datos y objetos Storage, manifiestos y hashes de integridad. No exponer secretos en scripts/repositorios.
 - [ ] Documentar rotación realista de copias según espacio y política de caducidad, incluyendo respaldo de año escolar y excepciones legales. No copiar indiscriminadamente datos fuera de propósito.
 - [ ] Añadir segunda copia cifrada independiente (desconectada o fuera del recinto), especialmente contra pérdida simultánea, ransomware, incendio y robo. Un único disco conectado no es estrategia 3-2-1.
+- [ ] ATENCIÓN: revisar inmediatamente Storage Usage de la organización Supabase Free; suma de metadatos de archivos de ambos proyectos cercana a cuota de 1 GB compartida por organización. Confirmar consumo facturable y método compatible de reducir o migrar Storage sin borrar datos sujetos a custodia.
 - [ ] Acordar RPO/RTO por servicio con responsable institucional, configurar alertas de fallo y ocupación y ejecutar restauración completa aislada con acta; revisar mensualmente en primera fase.
 - [ ] Diseñar registro mínimo de supresiones/tombstones para que los datos eliminados legítimamente no reaparezcan al restaurar respaldos anteriores.
 - [ ] Revisar si las copias internas requieren controles adicionales por datos de menores/sensibles; documentar accesos, ubicación, incidentes y transferencias si existieran sistemas remotos.
 - [ ] Probar el mecanismo de borrado seguro del medio y sus copias y documentar cómo se ejecutará el cierre escolar sin destruir documentos sujetos a conservación obligatoria.
 - [ ] Antes de migrar la base de producción, verificar disponibilidad de red, corte eléctrico, UPS, capacidad, monitoreo, recuperación, endpoint HTTPS y custodia de Supabase Auth/Realtime/Storage/RLS; la migración no está aprobada ni hecha.
+
+## Plantillas para la ejecución documental
+
+- Matriz de retención y aprobación por categoría: `docs/PLANTILLA_MATRIZ_CONSERVACION_2026.md`.
+- Registro de copias y acta de restauración: `docs/PLANTILLA_RESPALDOS_CONTINUIDAD_2026.md`.
+- Toda copia rellenada con datos reales, claves, registros de acceso o nombres de estudiantes debe alojarse en almacenamiento privado de la empresa, nunca en este repositorio público.
 
 ## Norma primaria consultada
 
@@ -66,6 +74,7 @@ El material público evita describir la topología y los detalles internos que p
 - Supabase Terms: https://supabase.com/terms
 - Supabase backups por plan (Free: exportación recomendada mediante Supabase CLI db dump, sin backups automáticos garantizados): https://supabase.com/docs/guides/platform/backups
 - Supabase precios y alcance del plan Free: https://supabase.com/pricing
+- Supabase cuotas compartidas por organización y medición: https://supabase.com/docs/guides/platform/billing-on-supabase ; https://supabase.com/docs/guides/platform/manage-your-usage/storage-size
 - Supabase borrado de Storage mediante API (no SQL solo): https://supabase.com/docs/guides/storage/management/delete-objects
 - Cloudflare DPA, versión 6.4, 03-04-2026: PDF entregado por el cliente para revisión; conservar copia documental en lugar interno autorizado, no versionar datos contractuales de clientes ni publicar el PDF sin validar sus condiciones.
 - Cloudflare lista de subencargados: https://www.cloudflare.com/gdpr/subprocessors/
