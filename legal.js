@@ -148,6 +148,11 @@ document.addEventListener("DOMContentLoaded", () => {
     `;
 
     footer.appendChild(legalWrap);
+    const dataPrivacyLink = document.createElement("a");
+    dataPrivacyLink.href = "legal-datos.html";
+    dataPrivacyLink.textContent = "Política de datos · DPA · Protocolos";
+    dataPrivacyLink.style.cssText = "display:inline-block;margin-top:12px;color:#bdf7ff;text-decoration:underline;font-size:.9rem";
+    footer.appendChild(dataPrivacyLink);
 
     const disclosure = legalWrap.querySelector(".legal-disclosure");
     const panel = legalWrap.querySelector(".legal-panel");
