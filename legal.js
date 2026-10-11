@@ -44,7 +44,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     Innova Space Edu SpA declara desarrollar sus actividades conforme a la normativa
                     vigente aplicable en Chile. La emisión, gestión y respaldo de documentos podrá
                     realizarse por la empresa y/o por su representante legal,
-                    <strong>Ivan Morales Sandoval</strong>, según corresponda a la naturaleza del
+                    <strong>Iván Eduardo Morales Sandoval</strong>, según corresponda a la naturaleza del
                     servicio, documentación tributaria, orden de compra, contrato o acuerdo comercial.
                 </p>
 
@@ -148,6 +148,11 @@ document.addEventListener("DOMContentLoaded", () => {
     `;
 
     footer.appendChild(legalWrap);
+    const dataPrivacyLink = document.createElement("a");
+    dataPrivacyLink.href = "legal-datos.html";
+    dataPrivacyLink.textContent = "Política de datos · DPA · Protocolos";
+    dataPrivacyLink.style.cssText = "display:inline-block;margin-top:12px;color:#bdf7ff;text-decoration:underline;font-size:.9rem";
+    footer.appendChild(dataPrivacyLink);
 
     const disclosure = legalWrap.querySelector(".legal-disclosure");
     const panel = legalWrap.querySelector(".legal-panel");
