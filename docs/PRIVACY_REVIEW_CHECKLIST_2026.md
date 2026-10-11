@@ -70,6 +70,21 @@
 - [ ] Establecer migración de cuentas activas, información en lenguaje claro, revocación efectiva, fechas/versiones y retención de evidencia proporcionada.
 - [ ] Confirmar la correspondencia con la PR de EDUAI [#239](https://github.com/innova-space-edu/eduai-platform/pull/239), pendiente de aprobación y sin despliegue.
 
+## Autorizaciones familiares EDUAI y Sello — plan en PR (11/10/2026)
+
+- [x] Documentado método de cuestionario por menor y plataforma, firma electrónica simple, opciones separadas y verificación institucional independiente.
+- [x] Los enlaces se generan con token aleatorio almacenado como hash y se preparan para compartir por correo o WhatsApp, **sin envío automático** y sin datos de estudiantes en el mensaje.
+- [x] Declarado que ClaveÚnica no está conectada: no ofrecer autenticación estatal sin habilitación normativa; firma avanzada solo con PSC acreditado.
+- [x] Pantallas y rutas iniciales en [EDUAI PR #239](https://github.com/innova-space-edu/eduai-platform/pull/239) y [Sello PR #38](https://github.com/innova-space-edu/sello-tecnologico/pull/38), sin despliegue.
+- [ ] Aplicar y probar migraciones/RLS/servicios con datos sintéticos, crear y resolver invitaciones en entornos separados.
+- [ ] Revisar legalmente cada finalidad opcional y distinguir las actividades obligatorias que no deben depender de consentimiento innecesario.
+- [ ] Validar identidad y representación con un canal independiente, incluyendo cuidado personal y conflictos de representación.
+- [ ] Integrar OTP u otro sistema de comprobación segura del destinatario y protección contra enlaces reenviados.
+- [ ] Implementar aplicación efectiva de cada decisión en todas las API, publicación, medios y agentes; probar revocación y despublicación donde corresponda.
+- [ ] Verificar cuentas existentes, adolescentes con capacidad legal propia, comunicación a familias y alternativas de acceso a prestaciones escolares.
+- [ ] Evaluar documentación íntegra de firma, comprobante descargable, política de retención de evidencias, custodia en servidor empresarial y transferencias internacionales.
+- [ ] Realizar revisión legal de ClaveÚnica, PSC acreditado y firma avanzada únicamente si se aprueba un proveedor real y una habilitación normativa.
+
 ## Norma primaria consultada
 
 - Ley 19.628 y reforma Ley 21.719: https://www.bcn.cl/leychile/navegar?idNorma=1209272
