@@ -236,3 +236,11 @@ jobs:
           grep -q 'protocolos-proteccion-datos.html' legal-datos.html
           grep -q 'continuidad-respaldos.html' legal-datos.html
           grep -qi 'sin firmas' acuerdo-tratamiento-datos.html
+
+      - name: Preflight real PDF rendering
+        run: |
+          mkdir -p _site
+          cp legal-datos.css politica-datos.html acuerdo-tratamiento-datos.html protocolos-proteccion-datos.html continuidad-respaldos.html _site/
+          cp -R assets _site/assets
+          bash scripts/build-public-library-pdfs.sh
+          node scripts/test-document-library.mjs --pdfs
