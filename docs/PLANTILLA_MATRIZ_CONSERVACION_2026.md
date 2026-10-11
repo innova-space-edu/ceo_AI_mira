@@ -1,6 +1,6 @@
 # Plantilla — matriz de conservación, devolución y supresión
 
-**Estado:** PLANTILLA VACÍA. No sustituye decisiones de cada responsable institucional. No introducir datos personales de estudiantes ni información sensible real en este repositorio público.
+**Versión descargable:** 1.0 · 11-10-2026. Plantilla vacía para completar en repositorio privado. No publicar datos de estudiantes, contratos ni información sensible.
 
 ## Identificación y autorización
 - Institución responsable: [completar al firmar, en repositorio privado].
