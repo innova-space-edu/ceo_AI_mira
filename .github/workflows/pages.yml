@@ -231,6 +231,11 @@ jobs:
           cp CNAME _site/CNAME
           touch _site/.nojekyll
 
+      - name: Generate public library PDFs
+        run: |
+          bash scripts/build-public-library-pdfs.sh
+          node scripts/test-document-library.mjs --pdfs
+
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site

@@ -221,6 +221,9 @@ jobs:
           grep -q "dashboard-sync-auth.js" .github/workflows/pages.yml
           grep -q "cp -R assets _site/assets" .github/workflows/pages.yml
           node scripts/check-public-docs.mjs
+          node scripts/test-document-library.mjs
+          test -s scripts/build-public-library-pdfs.sh
+          grep -q "bash scripts/build-public-library-pdfs.sh" .github/workflows/pages.yml
           grep -q "archivo-publico.html _site/" .github/workflows/pages.yml
           grep -q "_site/docs/" .github/workflows/pages.yml
           for file in legal-datos.html politica-datos.html acuerdo-tratamiento-datos.html protocolos-proteccion-datos.html continuidad-respaldos.html legal-datos.css; do
