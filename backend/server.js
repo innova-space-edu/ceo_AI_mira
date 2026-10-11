@@ -1421,6 +1421,15 @@ app.post("/api/tts", async (req, res) => {
   }
 });
 
+// API Innova Connect V1: usa JWT del usuario y políticas RLS, nunca service_role.
+require("./innova-connect").registerInnovaConnect(app, {
+  verifyCompanyUser,
+  fetchFn,
+  supabaseUrl: COMPANY_SUPABASE_URL,
+  publishableKey: COMPANY_SUPABASE_PUBLISHABLE_KEY,
+  storageBucket: process.env.COMPANY_STORAGE_BUCKET || "company-files"
+});
+
 // -------------------------------------------------------------
 // 4) HOME TEST
 // -------------------------------------------------------------
