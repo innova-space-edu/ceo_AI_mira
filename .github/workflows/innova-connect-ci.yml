@@ -1,0 +1,30 @@
+name: Innova Connect V1 Tests
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "backend/innova-connect.js"
+      - "backend/server.js"
+      - "backend/tests/innova-connect.test.js"
+      - "integrations/innova-connect/**"
+      - ".github/workflows/innova-connect-ci.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  node-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Syntax and integration tests
+        run: |
+          node --check backend/server.js
+          node --check backend/innova-connect.js
+          node --check integrations/innova-connect/ceo-client.mjs
+          node --test backend/tests/innova-connect.test.js
