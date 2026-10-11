@@ -221,6 +221,11 @@ jobs:
           grep -q "dashboard-sync-auth.js" .github/workflows/pages.yml
           grep -q "cp -R assets _site/assets" .github/workflows/pages.yml
           node scripts/check-public-docs.mjs
+          node scripts/test-document-library.mjs
+          test -s scripts/build-public-library-pdfs.sh
+          python3 -m py_compile scripts/render-public-md.py
+          grep -q 'python3 scripts/render-public-md.py' scripts/build-public-library-pdfs.sh
+          grep -q "bash scripts/build-public-library-pdfs.sh" .github/workflows/pages.yml
           grep -q "archivo-publico.html _site/" .github/workflows/pages.yml
           grep -q "_site/docs/" .github/workflows/pages.yml
           for file in legal-datos.html politica-datos.html acuerdo-tratamiento-datos.html protocolos-proteccion-datos.html continuidad-respaldos.html legal-datos.css; do
@@ -233,3 +238,11 @@ jobs:
           grep -q 'protocolos-proteccion-datos.html' legal-datos.html
           grep -q 'continuidad-respaldos.html' legal-datos.html
           grep -qi 'sin firmas' acuerdo-tratamiento-datos.html
+
+      - name: Preflight real PDF rendering
+        run: |
+          mkdir -p _site
+          cp legal-datos.css politica-datos.html acuerdo-tratamiento-datos.html protocolos-proteccion-datos.html continuidad-respaldos.html _site/
+          cp -R assets _site/assets
+          bash scripts/build-public-library-pdfs.sh
+          node scripts/test-document-library.mjs --pdfs
