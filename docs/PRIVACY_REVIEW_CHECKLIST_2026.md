@@ -35,6 +35,22 @@
 - [ ] Revisar jurídicamente política/DPA/protocolos, aprobar versión, fecha de vigencia y firmar DPA concreto por institución.
 - [ ] Solo tras aprobación, eliminar las advertencias de borrador y fusionar/publicar en el dominio.
 
+## Continuidad y servidor interno — requisitos nuevos (propuesta)
+
+- [x] Titular prevé almacenamiento de respaldos de empresa en servidor interno y disco externo nominal de 1 TB. **No existe constatación técnica de instalación ni copias reales.**
+- [x] Borrador de política pública de respaldos añadido como `continuidad-respaldos.html`, sujeto a aprobación formal.
+- [ ] Confirmar que el servidor interno efectivamente pertenece y es administrado por Innova Space Edu SpA, su país real de alojamiento, personal con acceso y custodia.
+- [ ] Medir uso por proyecto y tamaño completo de PostgreSQL/Auth, archivos de Storage, PDFs, audios, videos, logs y crecimiento de un ciclo escolar; comprobar espacio disponible y salud del disco de 1 TB.
+- [ ] Diseñar permisos, cifrado en reposo y tránsito, aislamiento de red, custodia y recuperación de claves, MFA y registro de accesos privilegiados.
+- [ ] Implementar exportación programada e incremental donde sea compatible; respaldos independientes de base de datos y objetos Storage, manifiestos y hashes de integridad. No exponer secretos en scripts/repositorios.
+- [ ] Documentar rotación realista de copias según espacio y política de caducidad, incluyendo respaldo de año escolar y excepciones legales. No copiar indiscriminadamente datos fuera de propósito.
+- [ ] Añadir segunda copia cifrada independiente (desconectada o fuera del recinto), especialmente contra pérdida simultánea, ransomware, incendio y robo. Un único disco conectado no es estrategia 3-2-1.
+- [ ] Acordar RPO/RTO por servicio con responsable institucional, configurar alertas de fallo y ocupación y ejecutar restauración completa aislada con acta; revisar mensualmente en primera fase.
+- [ ] Diseñar registro mínimo de supresiones/tombstones para que los datos eliminados legítimamente no reaparezcan al restaurar respaldos anteriores.
+- [ ] Revisar si las copias internas requieren controles adicionales por datos de menores/sensibles; documentar accesos, ubicación, incidentes y transferencias si existieran sistemas remotos.
+- [ ] Probar el mecanismo de borrado seguro del medio y sus copias y documentar cómo se ejecutará el cierre escolar sin destruir documentos sujetos a conservación obligatoria.
+- [ ] Antes de migrar la base de producción, verificar disponibilidad de red, corte eléctrico, UPS, capacidad, monitoreo, recuperación, endpoint HTTPS y custodia de Supabase Auth/Realtime/Storage/RLS; la migración no está aprobada ni hecha.
+
 ## Norma primaria consultada
 
 - Ley 19.628 y reforma Ley 21.719: https://www.bcn.cl/leychile/navegar?idNorma=1209272
