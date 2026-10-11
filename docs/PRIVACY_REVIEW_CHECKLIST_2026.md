@@ -59,6 +59,17 @@
 - Registro de copias y acta de restauración: `docs/PLANTILLA_RESPALDOS_CONTINUIDAD_2026.md`.
 - Toda copia rellenada con datos reales, claves, registros de acceso o nombres de estudiantes debe alojarse en almacenamiento privado de la empresa, nunca en este repositorio público.
 
+## Consentimiento e información granular de EDUAI (fase en desarrollo)
+
+- [x] Definidas categorías de tratamiento y diferencia entre aceptación necesaria de condiciones y permisos opcionales por finalidad.
+- [x] Política y DPA corporativos contienen advertencia sobre datos personales o sensibles aportados sin solicitud del modelo; no se configura renuncia de derechos ni exención de responsabilidad.
+- [ ] Migración auditada y desplegada del registro por cuenta y evento de permisos (`eduai_privacy_choices`).
+- [ ] Revisar y probar que todas las API opcionales respetan preferencias registradas, incluida generación, archivos, voz, publicación y analítica.
+- [ ] Completar procedimientos especiales para publicaciones públicas, voz clonada, datos sensibles y menores; casillas de menores no acreditan representación.
+- [ ] Verificar una base jurídica específica por tratamiento y que el rechazo opcional no bloquee funciones básicas.
+- [ ] Establecer migración de cuentas activas, información en lenguaje claro, revocación efectiva, fechas/versiones y retención de evidencia proporcionada.
+- [ ] Confirmar la correspondencia con la PR de EDUAI [#239](https://github.com/innova-space-edu/eduai-platform/pull/239), pendiente de aprobación y sin despliegue.
+
 ## Norma primaria consultada
 
 - Ley 19.628 y reforma Ley 21.719: https://www.bcn.cl/leychile/navegar?idNorma=1209272
