@@ -1,6 +1,6 @@
 # Plantilla — respaldo, recuperación y prueba de integridad
 
-**Estado:** PLANTILLA VACÍA. No publicar IP, hostnames privados, credenciales, rutas internas, nombres de usuario, claves, copias reales, fotografías, ni registros con información personal en GitHub público.
+**Versión descargable:** 1.0 · 11-10-2026. Plantilla vacía; las actas completadas deben permanecer privadas. No publicar IP, direcciones de red, credenciales, copias ni datos reales.
 
 ## Configuración a aprobar
 

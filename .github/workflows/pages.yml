@@ -213,7 +213,8 @@ jobs:
           grep -q 'acuerdo-tratamiento-datos.html' legal-datos.html
           grep -q 'protocolos-proteccion-datos.html' legal-datos.html
           grep -q 'continuidad-respaldos.html' legal-datos.html
-          grep -qi 'borrador\|propuesta' politica-datos.html
+          node scripts/check-public-docs.mjs
+          grep -qi 'informativa v1.0' politica-datos.html
           grep -qi 'SIN FIRMAS\|sin firmas' acuerdo-tratamiento-datos.html
 
       - name: Prepare static site
@@ -224,6 +225,9 @@ jobs:
           cp documentos.html index.html innova-space-track.html innova-measure-ai.html innova-measure-ai.css innova-measure-ai.js legal.css legal.js main.js company-profile.js company-refresh.css mira-voice-controller.js speak.js style.css admin.html admin.css admin.js admin-config.js admin-nav.js admin-shell-fix.css dashboard-sync.js dashboard-sync.css dashboard-sync-auth.js contador.html contador.css contador.js contador-tributario.css contador-tributario-loader.js responsive-admin-suite.css contador-shell-fix.css _site/
           # Publicar en el único despliegue de Pages el centro legal y todos sus anexos web.
           cp legal-datos.html politica-datos.html acuerdo-tratamiento-datos.html protocolos-proteccion-datos.html continuidad-respaldos.html legal-datos.css _site/
+          cp archivo-publico.html _site/
+          mkdir -p _site/docs
+          cp docs/PLANTILLA_MATRIZ_CONSERVACION_2026.md docs/PLANTILLA_RESPALDOS_CONTINUIDAD_2026.md docs/PRIVACY_REVIEW_CHECKLIST_2026.md _site/docs/
           cp CNAME _site/CNAME
           touch _site/.nojekyll
 
