@@ -4,7 +4,7 @@ if command -v google-chrome-stable >/dev/null 2>&1; then CHROME=google-chrome-st
 elif command -v google-chrome >/dev/null 2>&1; then CHROME=google-chrome
 elif command -v chromium >/dev/null 2>&1; then CHROME=chromium
 else echo 'Falta Chrome/Chromium: no se publican PDF incompletos.' >&2; exit 1; fi
-command -v pandoc >/dev/null 2>&1 || { echo 'Falta Pandoc: no se publican PDF incompletos.' >&2; exit 1; }
+command -v python3 >/dev/null 2>&1 || { echo 'Falta Python 3 para procesar las plantillas.' >&2; exit 1; }
 ROOT="$(pwd)"
 SITE="$ROOT/_site"
 OUT="$SITE/assets/documentos/publicos"
@@ -46,11 +46,7 @@ render_pdf "$SITE/protocolos-proteccion-datos.html" "$OUT/protocolos-proteccion-
 render_pdf "$SITE/continuidad-respaldos.html" "$OUT/continuidad-respaldos.pdf"
 render_markdown() {
   local source="$1" name="$2" output="$3" mode="$4"
-  if [[ "$mode" == landscape ]]; then
-    pandoc "$source" --standalone -f gfm -t html5 --metadata "title=$name" --css=../pdf-print.css --css=../pdf-landscape.css -o "$SOURCE/$output.html"
-  else
-    pandoc "$source" --standalone -f gfm -t html5 --metadata "title=$name" --css=../pdf-print.css -o "$SOURCE/$output.html"
-  fi
+  python3 scripts/render-public-md.py "$source" "$SOURCE/$output.html" "$name" "$mode"
   render_pdf "$SOURCE/$output.html" "$OUT/$output.pdf"
 }
 render_markdown "$ROOT/docs/PLANTILLA_MATRIZ_CONSERVACION_2026.md" 'Matriz de conservación' matriz-conservacion landscape

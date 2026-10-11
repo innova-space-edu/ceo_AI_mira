@@ -223,6 +223,8 @@ jobs:
           node scripts/check-public-docs.mjs
           node scripts/test-document-library.mjs
           test -s scripts/build-public-library-pdfs.sh
+          python3 -m py_compile scripts/render-public-md.py
+          grep -q 'python3 scripts/render-public-md.py' scripts/build-public-library-pdfs.sh
           grep -q "bash scripts/build-public-library-pdfs.sh" .github/workflows/pages.yml
           grep -q "archivo-publico.html _site/" .github/workflows/pages.yml
           grep -q "_site/docs/" .github/workflows/pages.yml
