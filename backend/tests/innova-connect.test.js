@@ -85,6 +85,29 @@ test("documentos no encontrados devuelven 404 sin detalles internos", async () =
   assert.deepEqual(res.body, { error: "Documento no encontrado" });
 });
 
+test("lectura de documentos utiliza content real y entrega texto para V8", async () => {
+  const h = harness({ respond: () => jsonResponse([{
+    id: FILE_ID, title: "Acta", content: "<script>alert(1)</script>"
+  }]) });
+  const res = await h.send("documents/:id", { params: { id: FILE_ID } });
+  assert.equal(res.statusCode, 200);
+  assert.equal(res.body.document.content_html, "<script>alert(1)</script>");
+  assert.equal(Object.hasOwn(res.body.document, "content"), false);
+  const select = new URL(h.calls[0].url).searchParams.get("select");
+  assert.match(select, /(?:^|,)content(?:,|$)/);
+  assert.equal(select.includes("content_html"), false);
+});
+
+test("documentos JSON se representan como texto y no objetos React", async () => {
+  const h = harness({ respond: () => jsonResponse([{
+    id: FILE_ID, title: "Acta JSON", content: { sections: ["Resumen"] }
+  }]) });
+  const res = await h.send("documents/:id", { params: { id: FILE_ID } });
+  assert.equal(res.statusCode, 200);
+  assert.equal(typeof res.body.document.content_html, "string");
+  assert.match(res.body.document.content_html, /Resumen/);
+});
+
 test("enlace temporal de Storage requiere permiso de lectura y vence a los 60 s", async () => {
   const h = harness({ respond: (url) => {
     if (url.includes("/rest/v1/company_files")) return jsonResponse([{ id: FILE_ID, storage_path: "user/proyecto/foto.jpg" }]);
