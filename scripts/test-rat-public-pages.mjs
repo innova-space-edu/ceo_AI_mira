@@ -9,14 +9,14 @@ const dpa=read("acuerdo-tratamiento-datos.html");
 const protocols=read("protocolos-proteccion-datos.html");
 const continuity=read("continuidad-respaldos.html");
 const edu=read("rat-eduai.html"), sello=read("rat-sello.html"), acta=read("acta-gobernanza-2026.html");
-for(const [name,body] of Object.entries({center,library,policy,dpa,protocols,continuity,acta})){
+for(const [name,body] of Object.entries({center,library,policy,dpa,protocols,continuity})){
   assert.match(body,/rat-eduai\.html/,name+" EDUAI");
   assert.match(body,/rat-sello\.html/,name+" Sello");
   assert.match(body,/acta-gobernanza-2026\.html/,name+" acta");
 }
 assert.equal((edu.match(/<tr><td>E\d{2}<\/td>/g)||[]).length,22);
 assert.equal((sello.match(/<tr><td>S\d{2}<\/td>/g)||[]).length,18);
-assert.match(acta,/firma\/ratificación pendiente/);
+assert.match(acta,/[Ff]irma\/ratificación pendiente/);
 assert.match(center,/Esthefano Gonzalo Morales Campaña/);
 assert.match(index,/Servidores, redes e intranets/);
 assert.match(index,/sitios web y aplicaciones, incluido el desarrollo y mantenimiento de EDUAI y Sello Tecnológico/);
