@@ -1,6 +1,6 @@
 # Plantilla — respaldo, recuperación y prueba de integridad
 
-**Versión descargable:** 1.0 · 11-10-2026. Plantilla vacía; las actas completadas deben permanecer privadas. No publicar IP, direcciones de red, credenciales, copias ni datos reales.
+**Versión descargable:** 1.2 · 12-10-2026. Plantilla vacía; las actas completadas deben permanecer privadas. No publicar IP, direcciones de red, credenciales, copias ni datos reales.
 
 ## Configuración a aprobar
 
@@ -57,6 +57,12 @@
 - Aprobación del responsable: [registro privado].
 
 ## Estado actual conocido (sin detalles de infraestructura)
-Supabase Free no incluye respaldos automáticos disponibles para sus proyectos, y un volcado de PostgreSQL no incluye los archivos binarios de Storage. El alojamiento principal en `us-west-2` no cambia por disponer de copias de respaldo propias. No considerar esta plantilla evidencia de operación real.
+Para proyectos Supabase Free se debe verificar la cobertura efectiva de copias y restauración; no se presumen respaldos automáticos disponibles, y un volcado de PostgreSQL no incluye los archivos binarios de Storage. El alojamiento principal en `us-west-2` no cambia por disponer de copias de respaldo propias. No considerar esta plantilla evidencia de operación real.
 
 **Referencias:** https://supabase.com/docs/guides/platform/backups ; https://supabase.com/docs/guides/storage/management/delete-objects ; https://www.bcn.cl/leychile/navegar?idNorma=1209272 .
+
+## Tratamientos con reglas independientes
+- **E17 créditos/órdenes:** inventario de órdenes históricas, conciliaciones, contracargos y plazos tributarios/contractuales por validar antes de suprimir, sin almacenar datos completos de tarjetas.
+- **E13 perfiles vocales:** disponibilidad administrativa aún pendiente de controles técnicos y EIPD; respaldos, retención y eliminación deben seguir una regla más restrictiva.
+- **E14 Video Studio:** en mantenimiento, sin procesar jobs ni reanudar proveedores tras restauraciones; los registros previos deben conservarse solo bajo plazos aprobados.
+- **Servidor propio/personal:** un servidor Debian individual no integra por sí mismo la continuidad corporativa; exige inventario, autorización de responsables, seguridad y restauración ensayada.
