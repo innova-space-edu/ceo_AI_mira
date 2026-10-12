@@ -117,12 +117,17 @@ function registerInnovaConnect(app, {
       if (!ID.test(req.params.id || "")) return apiError(res, 400, "ID inválido");
       const data = await supabaseRequest("/rest/v1/company_documents", {
         id: "eq." + req.params.id,
-        select: "id,project_id,title,document_type,status,version,content_html,created_at,updated_at",
+        // El esquema empresarial utiliza content (no content_html).
+        select: "id,project_id,title,document_type,status,version,content,created_at,updated_at",
         limit: "1"
       }, token);
       if (!data.length) return apiError(res, 404, "Documento no encontrado");
-      // content_html es dato NO confiable: cualquier cliente debe sanearlo antes de renderizar.
-      res.json({ document: data[0] });
+      // Mantener contrato con V8: enviar texto seguro, NO HTML renderizable.
+      const { content, ...metadata } = data[0];
+      const content_html = typeof content === "string"
+        ? content
+        : content == null ? "" : JSON.stringify(content, null, 2);
+      res.json({ document: { ...metadata, content_html } });
     }));
 
   app.get("/api/innova-connect/v1/files/:id/link", (req, res) =>
