@@ -44,6 +44,10 @@ render_pdf "$SITE/politica-datos.html" "$OUT/politica-datos.pdf"
 render_pdf "$SITE/acuerdo-tratamiento-datos.html" "$OUT/acuerdo-tratamiento-datos.pdf"
 render_pdf "$SITE/protocolos-proteccion-datos.html" "$OUT/protocolos-proteccion-datos.pdf"
 render_pdf "$SITE/continuidad-respaldos.html" "$OUT/continuidad-respaldos.pdf"
+# Los registros públicos y el acta se convierten a PDF desde las MISMAS páginas web.
+render_pdf "$SITE/rat-eduai.html" "$OUT/rat-eduai.pdf"
+render_pdf "$SITE/rat-sello.html" "$OUT/rat-sello.pdf"
+render_pdf "$SITE/acta-gobernanza-2026.html" "$OUT/acta-gobernanza-2026.pdf"
 render_markdown() {
   local source="$1" name="$2" output="$3" mode="$4"
   python3 scripts/render-public-md.py "$source" "$SOURCE/$output.html" "$name" "$mode"
@@ -53,4 +57,4 @@ render_markdown "$ROOT/docs/PLANTILLA_MATRIZ_CONSERVACION_2026.md" 'Matriz de co
 render_markdown "$ROOT/docs/PLANTILLA_RESPALDOS_CONTINUIDAD_2026.md" 'Respaldo y restauración' plantilla-respaldos portrait
 render_markdown "$ROOT/docs/PRIVACY_REVIEW_CHECKLIST_2026.md" 'Estado público de implementación' estado-implementacion portrait
 rm -rf "$SOURCE" "$SITE/pdf-print.css" "$SITE/pdf-landscape.css"
-echo 'Los 7 PDF públicos se generaron y verificaron.'
+echo 'Los 10 PDF públicos se generaron y verificaron.'
