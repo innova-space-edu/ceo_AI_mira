@@ -1,0 +1,28 @@
+import fs from "node:fs";
+import assert from "node:assert/strict";
+const read = file => fs.readFileSync(file,"utf8");
+const index=read("index.html");
+const center=read("legal-datos.html");
+const library=read("documentos.html");
+const policy=read("politica-datos.html");
+const dpa=read("acuerdo-tratamiento-datos.html");
+const protocols=read("protocolos-proteccion-datos.html");
+const continuity=read("continuidad-respaldos.html");
+const edu=read("rat-eduai.html"), sello=read("rat-sello.html"), acta=read("acta-gobernanza-2026.html");
+for(const [name,body] of Object.entries({center,library,policy,dpa,protocols,continuity})){
+  assert.match(body,/rat-eduai\.html/,name+" EDUAI");
+  assert.match(body,/rat-sello\.html/,name+" Sello");
+  assert.match(body,/acta-gobernanza-2026\.html/,name+" acta");
+}
+assert.equal((edu.match(/<tr><td>E\d{2}<\/td>/g)||[]).length,22);
+assert.equal((sello.match(/<tr><td>S\d{2}<\/td>/g)||[]).length,18);
+assert.match(acta,/[Ff]irma\/ratificación pendiente/);
+assert.match(center,/Esthefano Gonzalo Morales Campaña/);
+assert.match(index,/Servidores, redes e intranets/);
+assert.match(index,/sitios web y aplicaciones, incluido el desarrollo y mantenimiento de EDUAI y Sello Tecnológico/);
+assert.match(index,/<a href="documentos\.html"[\s\S]{0,300}Documentos de empresa/);
+const topNav=index.match(/<ul class="nav-links" id="navLinks">([\s\S]+?)<\/ul>/)?.[1]||"";
+assert.doesNotMatch(topNav,/documentos\.html/,"No duplicar Documentos en menú superior");
+assert.doesNotMatch(center.match(/<header>([\s\S]*?)<\/header>/)?.[1]||"",/>Documentos</,"No duplicar botón arriba del centro");
+assert.match(library,/Diez documentos PDF existentes/);
+console.log("OK: 22 actividades EDUAI, 18 Sello, acta y sincronización legal/servicios; botón inferior conservado.");

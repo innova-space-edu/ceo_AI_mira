@@ -10,9 +10,11 @@ if (introVideoCompat && !document.getElementById("intro-video")) {
 window.INNOVA_COMPANY_PROFILE = {
   company: "Innova Space Education SpA",
   summary:
-    "Empresa chilena de soluciones integrales que combina tecnología, inteligencia artificial, desarrollo de software, seguridad, plataformas de gestión y trabajos de remodelación, reparación y mejoramiento de espacios para instituciones públicas y privadas.",
+    "Empresa chilena que crea, aloja, administra y mantiene sitios y plataformas web, incluyendo EDUAI y Sello Tecnológico; implementa servidores, intranets, automatización, modelos de IA e investigación aplicada, seguridad y obras de remodelación para instituciones y empresas.",
   services: [
-    "Desarrollo de páginas web, plataformas y sistemas de gestión",
+    "Creación, hosting, actualización y mantenimiento de sitios web, EDUAI, Sello Tecnológico y otras plataformas",
+    "Implementación y administración de servidores, intranets, redes, almacenamiento y respaldos",
+    "Investigación y desarrollo de modelos de IA, simulaciones y proyectos científicos",
     "Inteligencia artificial, automatización y asistentes virtuales",
     "Sistemas de seguridad, control de acceso, monitoreo y auditoría",
     "Remodelación, reparación, habilitación y mejoramiento de espacios institucionales",
@@ -112,7 +114,7 @@ window.INNOVA_COMPANY_PROFILE = {
     }
 
     if (t.includes("empresa") || t.includes("qué hacen") || t.includes("que hacen")) {
-      return "Innova Space Education SpA desarrolla soluciones integrales para instituciones públicas y privadas: software y páginas web, inteligencia artificial, plataformas de gestión, sistemas de seguridad y control de acceso, además de remodelación, reparación y mejoramiento de espacios.";
+      return "Innova Space Education SpA desarrolla soluciones integrales para instituciones públicas y privadas: creación y mantenimiento de páginas y plataformas web como EDUAI y Sello Tecnológico, servidores e intranets, investigación y modelos de IA, seguridad y control de acceso, remodelaciones y mejoramiento de espacios.";
     }
 
     if (t.includes("proyecto") || t.includes("portafolio")) {
@@ -136,7 +138,7 @@ window.INNOVA_COMPANY_PROFILE = {
     }
 
     if (t.includes("web") || t.includes("plataforma") || t.includes("sistema")) {
-      return "Creamos páginas web, plataformas institucionales, sistemas administrativos, inventarios, reservas, paneles de control, soluciones con bases de datos e integraciones con APIs y servicios en la nube.";
+      return "Creamos y mantenemos sitios y plataformas web, incluyendo EDUAI y Sello Tecnológico; trabajamos con alojamiento, administración de servidores e intranets, servicios en la nube, bases de datos, seguridad e integraciones de APIs.";
     }
 
     if (t.includes("contacto") || t.includes("cotiza")) {
