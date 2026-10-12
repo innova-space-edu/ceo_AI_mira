@@ -1,5 +1,5 @@
 # Estado público de implementación — privacidad
-**Versión:** 1.1 · 12 de octubre de 2026 · Innova Space Edu SpA
+**Versión:** 1.2 · 12 de octubre de 2026 · Innova Space Edu SpA
 
 Documento de seguimiento público; no es certificado de cumplimiento, contrato firmado ni informe de seguridad. Los expedientes técnicos y matrices completas se custodian con acceso restringido.
 
@@ -9,7 +9,7 @@ Documento de seguimiento público; no es certificado de cumplimiento, contrato f
 - [x] Protocolos, derechos, menores, uso de IA e incidentes.
 - [x] Resúmenes públicos diferenciados [RAT EDUAI](../rat-eduai.html) y [RAT Sello Tecnológico](../rat-sello.html).
 - [x] [Acta de gobernanza y designación](../acta-gobernanza-2026.html) con estado de ratificación pendiente.
-- [x] Biblioteca corporativa con diez documentos PDF existentes y tres páginas de registro web.
+- [x] Biblioteca corporativa con 13 PDF: tres originales históricos sin sobrescribir y diez PDF generados desde documentos públicos, incluidos RAT EDUAI, RAT Sello y acta en borrador. Los tres también conservan páginas web.
 - [x] Criterios de conservación, devolución y respaldos publicados como propuestas sujetas a contratos y pruebas.
 - [x] Aviso de transición operativa desde el 15 de noviembre de 2026 para cuentas anteriores, diferente de la vigencia general de Ley 21.719 desde 1 de diciembre de 2026.
 
@@ -33,3 +33,17 @@ Documento de seguimiento público; no es certificado de cumplimiento, contrato f
 Innova Space Edu SpA presta servicios de creación, despliegue, alojamiento y mantenimiento de sitios y plataformas web, desarrollo de EDUAI y Sello Tecnológico, servidores e intranets, modelos de IA, investigación, seguridad y remodelación. La finalidad y el rol jurídico se documentan por actividad y contrato.
 
 **Contacto:** contacto@innova-space-edu.cl
+
+## Estado funcional actualizado de EDUAI (12-10-2026)
+- [x] Video Studio en mantenimiento (sin lanzamiento de generación de video); rutas de nuevos trabajos y procesador bloqueadas en producción.
+- [x] Recargas y video premium deshabilitados en la configuración de Supabase (ambos indicadores en `false`). Las órdenes históricas no prueban cobros efectivos y se conservan para trazabilidad.
+- [ ] Revisar los registros E17 de pagos, créditos y facturación, regularización de órdenes pendientes o rechazadas, documentación PSP (Mercado Pago cuando corresponda) y regla R14 de conservación.
+- [ ] Fusionar, desplegar y verificar controles E13 de clonación vocal administrativa exclusiva; el PR #245 por sí solo no acredita control implementado. No afecta transcripción ni síntesis de voz genérica.
+- [ ] Pruebas de extremo a extremo de autorizaciones familiares, representación legal y registro de actas/versiones en EDUAI y Sello.
+- [ ] Resolver resultado fallido de auditoría de dependencias EDUAI separado del build que completó con éxito.
+- [ ] Pruebas directas de endpoints desplegados de video/pagos (rechazo a usuarios autenticados y tráfico sin autorización).
+
+## Proveedor y hosting: distinción entre capacidad y operación
+- EDUAI y Sello son servicios desarrollados por Innova. Los módulos planificados, en mantenimiento o sujetos a permisos no se declaran operativos.
+- Integraciones contractuales pendientes: DPA y transferencias de Supabase, Vercel, Cloudflare y proveedores de IA según la operación; documentación del PSP solo si procede.
+- Servidores, intranets, modelos de IA, investigación, ciberseguridad y remodelación figuran como capacidades y proyectos ofrecidos. No presumir que equipamiento o intranets personales sean hospedaje corporativo contratado.

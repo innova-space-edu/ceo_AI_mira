@@ -1,6 +1,6 @@
 # Plantilla — matriz de conservación, devolución y supresión
 
-**Versión descargable:** 1.0 · 11-10-2026. Plantilla vacía para completar en repositorio privado. No publicar datos de estudiantes, contratos ni información sensible.
+**Versión descargable:** 1.2 · 12-10-2026. Plantilla vacía para completar en repositorio privado. No publicar datos de estudiantes, contratos ni información sensible.
 
 ## Identificación y autorización
 - Institución responsable: [completar al firmar, en repositorio privado].
@@ -16,7 +16,11 @@
 | Plataforma y módulo | Categoría de datos | Titulares | Finalidad y base de licitud | Sistema de producción | Plazo / evento de cierre | Exportación / custodio | Excepción de conservación | Copias y vencimiento | Método y evidencia de supresión |
 |---|---|---|---|---|---|---|---|---|---|
 | EDUAI · documentos | [sin datos reales] | [categoría] | [fundamento] | [por validar] | [definir por institución] | [formato/custodio] | [fundamento, plazo y aprobación] | [medio y fecha] | [acta y verificación] |
+| EDUAI · E17 órdenes y pagos históricos | Identificadores de órdenes, estados, wallet, movimientos | compradores, administradores | auditoría, regularización, eventuales obligaciones tributarias; base por validar | Supabase; Mercado Pago condicional | R14: plazo legal/contractual por aprobar | [solo personal financiero autorizado] | [legales y contables verificadas] | [backups por inventariar] | [acta, eliminación o conservación probada] |
+| EDUAI · E13 voz administrativa | Muestras y perfiles de voz | personal administrativo expresamente autorizado | finalidad y legitimación por aprobar | Supabase y pasarela bajo controles por desplegar | [definir retención corta y EIPD] | [custodio restringido] | [solo base legal acreditada] | [cifrado y supresión verificados] | [evidencia privada] |
 | Sello · evidencias | [sin datos reales] | [categoría] | [fundamento] | [por validar] | [definir por institución] | [formato/custodio] | [fundamento, plazo y aprobación] | [medio y fecha] | [acta y verificación] |
+
+**Video Studio E14 permanece en mantenimiento:** no contabilizar nuevas generaciones como tratamiento activo; conservar únicamente los historiales necesarios hasta resolver su conservación o eliminación aprobada.
 
 **Categorías adicionales que deben evaluarse por separado:** cuentas e identificadores necesarios para continuidad; RUT; datos académicos oficiales; rúbricas y respuestas; proyectos; fotografías/video/audio; mensajes; bitácoras; logs y auditoría; soportes e incidentes; datos PIE/NEE/salud y otra información sensible; documentos corporativos o tributarios de Innova.
 

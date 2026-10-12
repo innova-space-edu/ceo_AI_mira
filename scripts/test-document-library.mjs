@@ -5,11 +5,12 @@ const pdfs=[
  base+"01_Programa_Integridad_Compliance_InnovaSpace_2026.pdf",
  base+"02_Manual_Politicas_Terminos_Condiciones_InnovaSpace_2026.pdf",
  base+"03_Respaldo_Difusion_Programa_Integridad_InnovaSpace_2026.pdf",
- ...["politica-datos","acuerdo-tratamiento-datos","protocolos-proteccion-datos","continuidad-respaldos","matriz-conservacion","plantilla-respaldos","estado-implementacion"].map(x=>base+"publicos/"+x+".pdf")
+ ...["politica-datos","acuerdo-tratamiento-datos","protocolos-proteccion-datos","continuidad-respaldos","matriz-conservacion","plantilla-respaldos","estado-implementacion"].map(x=>base+"publicos/"+x+".pdf"),
+ ...["rat-eduai","rat-sello","acta-gobernanza-2026"].map(x=>base+"publicos/"+x+".pdf")
 ];
 const cards=[...html.matchAll(/<article class="document-card" data-pdf="([^"]+)" data-title="([^"]+)"[^>]*>([\s\S]*?)<\/article>/g)];
 const errors=[];
-if(cards.length!==pdfs.length)errors.push("Se esperaban 10 tarjetas; hay "+cards.length);
+if(cards.length!==pdfs.length)errors.push("Se esperaban 13 tarjetas; hay "+cards.length);
 for(const name of pdfs){
   const match=cards.find(x=>x[1]===name);
   if(!match)errors.push("No existe tarjeta: "+name);
@@ -23,4 +24,4 @@ for(const name of pdfs){
 for(const key of ['id="previewOpen"','id="pdfPreview"','id="previewDownload"','id="documentSearch"'])if(!html.includes(key))errors.push("Interacción faltante: "+key);
 if(html.includes("document-placeholder"))errors.push("La biblioteca mantiene tarjetas vacías");
 if(errors.length){console.error(errors.join("\n"));process.exit(1)}
-console.log("10 tarjetas PDF con vista previa, apertura y descarga verificadas.");
+console.log("13 tarjetas PDF con vista previa, apertura y descarga verificadas.");
