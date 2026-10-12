@@ -23,6 +23,9 @@ assert.match(index,/sitios web y aplicaciones, incluido el desarrollo y mantenim
 assert.match(index,/<a href="documentos\.html"[\s\S]{0,300}Documentos de empresa/);
 const topNav=index.match(/<ul class="nav-links" id="navLinks">([\s\S]+?)<\/ul>/)?.[1]||"";
 assert.doesNotMatch(topNav,/documentos\.html/,"No duplicar Documentos en menú superior");
+assert.doesNotMatch(topNav,/Protección de datos|legal-datos\.html/,"No mostrar Protección de datos en barra superior");
 assert.doesNotMatch(center.match(/<header>([\s\S]*?)<\/header>/)?.[1]||"",/>Documentos</,"No duplicar botón arriba del centro");
-assert.match(library,/Diez documentos PDF existentes/);
+assert.match(library,/Trece documentos PDF/);
+for(const name of ["rat-eduai","rat-sello","acta-gobernanza-2026"])assert.match(library,new RegExp(`publicos/${name}\\.pdf`));
+assert.match(edu,/Video Studio.*mantenimiento|video.*mantenimiento/i,"EDUAI E14 mantenimiento");
 console.log("OK: 22 actividades EDUAI, 18 Sello, acta y sincronización legal/servicios; botón inferior conservado.");
