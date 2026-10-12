@@ -1,6 +1,6 @@
 # Innova Connect V1 — Innova CEO ↔ Intranet Dell
 
-Estado: **implementación en PR, aún no desplegada ni instalada en Dell**.
+Estado: **API aún en PR, pendiente de despliegue Render**. La intranet Dell V8 fue instalada por el operador; debe validar el backend antes de vincular usuarios.
 
 ## Propósito
 El backend de Innova CEO expone una API de **solo lectura** para consultar proyectos,
@@ -14,7 +14,7 @@ se ofrecen únicamente mediante enlaces firmados de 60 segundos.
 | /api/innova-connect/v1/projects | Lista de proyectos (metadatos) |
 | /api/innova-connect/v1/documents | Lista de documentos |
 | /api/innova-connect/v1/files | Lista de archivos |
-| /api/innova-connect/v1/documents/:id | Documento editable, incluido content_html |
+| /api/innova-connect/v1/documents/:id | Documento en solo lectura: `content` normalizado a `content_html` como texto para la UI V8 |
 | /api/innova-connect/v1/files/:id/link | Enlace firmado para lectura, expiración 60 s |
 
 Listados admiten query limit=1..100 (25 por defecto), offset=0..10000 y
@@ -74,11 +74,11 @@ La compatibilidad de instalación depende del plan y las capacidades
 actuales de ChatGPT. El MVP no modifica esta superficie.
 
 ## Alcance fuera de V1
-- V7 del Dell **no verificada**.
+- La instalación y funcionamiento de V7/V8 en Dell fueron verificados por el operador, pero no desde este repositorio.
 - Sin migración/sincronización de datos ni almacenamiento de archivos en Dell.
 - Sin despliegue de Render/Vercel/GitHub Pages.
 - Sin nuevas tablas ni cambios RLS en Supabase.
-- Sin instalación en Dell (requiere acceso operativo al equipo).
+- El módulo de intranet V8 está instalado en Dell; no hay acceso SSH directo desde este repositorio.
 - Migrar EDUAI y Sello Tecnológico requiere **copias separadas** de Postgres,
   Auth, Storage, Edge Functions y configuraciones antes de cambio de DNS o
   de endpoints. Mantener producción actual hasta prueba de restauración.
