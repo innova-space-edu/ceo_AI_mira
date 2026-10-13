@@ -35,5 +35,6 @@ jobs:
           node --check backend/innova-server-bridge.js
           node --check server-access.js
           node --check integracion-dell/ceo-bridge-client.mjs
+          node --check integracion-dell/mcp-skills.mjs
           node --check integrations/innova-connect/ceo-client.mjs
-          node --test backend/tests/innova-connect.test.js backend/tests/innova-server-bridge.test.js
+          node --test backend/tests/innova-connect.test.js backend/tests/innova-server-bridge.test.js integracion-dell/mcp-skills.test.mjs
