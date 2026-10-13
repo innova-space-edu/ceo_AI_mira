@@ -1,8 +1,8 @@
 {
   "version": "12.0-draft",
   "kind": "innova-server-dell-skills",
-  "identity": "Innova CEO Supabase Auth, superadmin AAL2",
-  "permission_model": "ChatGPT always asks for each tool call; CEO approves high-risk mutations separately; Dell enforces local allowlists",
+  "identity": "Cloudflare Access JWT firmado + allowlist estricta de correos + política Dell",
+  "permission_model": "ChatGPT always asks; signed Cloudflare Access identity must approve high-risk mutations per action; Dell enforces local allowlists and independent session authentication",
   "integration": "Skills describe workflows; wiring into the live MCP requires explicit server installation after authentication.",
   "skills": [
     {
