@@ -38,7 +38,9 @@ function hasVerifiedAal2(token, userId) {
 function validateOperation(body) {
   if (!body || typeof body !== "object" || Array.isArray(body)) return null;
   if (!ACTIONS.has(body.action) || typeof body.target !== "string" ||
-      !NAME.test(body.target) || typeof body.payload_sha256 !== "string" ||
+      !NAME.test(body.target) || body.target.startsWith("/") ||
+      body.target.split("/").some(segment => segment === ".." || segment === "." || segment === "") ||
+      typeof body.payload_sha256 !== "string" ||
       !SHA.test(body.payload_sha256) || typeof body.request_nonce !== "string" ||
       !NONCE.test(body.request_nonce) || typeof body.summary !== "string" ||
       body.summary.trim().length < 8 || body.summary.length > 500) return null;
