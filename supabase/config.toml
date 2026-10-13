@@ -1,0 +1,3 @@
+[functions.innova-server-bridge]
+verify_jwt = false
+# Worker token validated in function; user JWT validated using Supabase Auth.getUser.
