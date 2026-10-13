@@ -19,6 +19,7 @@ create table if not exists public.innova_server_approvals (
   expires_at timestamptz not null,
   approved_at timestamptz,
   approved_by uuid,
+  approved_email text,
   consumed_at timestamptz
 );
 create index if not exists innova_server_approvals_requested_idx
