@@ -61,7 +61,7 @@ function createCloudflareVerifier({ teamDomain, audience, emails, fetchFn, clock
         p.type !== "app" ||
         !Number.isFinite(p.iat) || p.iat > now + skew ||
         !Number.isFinite(p.exp) || p.exp <= now ||
-        !Number.isFinite(p.nbf) || p.nbf > now + skew ||
+        (p.nbf !== undefined && (!Number.isFinite(p.nbf) || p.nbf > now + skew)) ||
         p.exp <= p.iat || p.exp - p.iat > 60 * 60 + skew) throw Error("jwt_claims_invalidos");
     const email = String(p.email || "").trim().toLowerCase();
     if (!EMAIL.test(email) || !config.allowed.has(email)) throw Error("correo_no_autorizado");
