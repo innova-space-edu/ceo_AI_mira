@@ -47,7 +47,7 @@ export async function registrarSkillsMCP(server, z) {
       skill: skill_id, action, target, summary,
       payload_sha256: operationDigest({ action, target, parameters: {} }),
       steps: ["validar_politica_local", "solicitar_autorizacion_en_ceo",
-        "verificar_mfa_aal2", "consumir_ticket_unico", "revalidar_y_ejecutar"],
+        "verificar_access_jwt_firmado_y_correo_autorizado", "consumir_ticket_unico", "revalidar_y_ejecutar"],
       approved: false
     });
   });
