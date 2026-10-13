@@ -1,0 +1,31 @@
+name: CEO Secure Bridge checks
+on:
+  pull_request:
+    paths:
+      - "innova-server-seguridad.html"
+      - "assets/admin-enterprise/innova-server-security.js"
+      - "sql/innova-server-secure-bridge.sql"
+      - "supabase/functions/innova-server-bridge/**"
+      - "supabase/config.toml"
+      - "scripts/test-innova-server-bridge.mjs"
+      - ".github/workflows/secure-bridge.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Validate frontend JavaScript
+        run: node --check assets/admin-enterprise/innova-server-security.js
+      - name: Static security regression checks
+        run: node scripts/test-innova-server-bridge.mjs
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Type-check Edge function
+        run: deno check supabase/functions/innova-server-bridge/index.ts
