@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="es"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<title>Innova CEO · Seguridad del servidor</title>
+<style>
+:root{font:16px system-ui;color-scheme:dark}
+body{margin:0;padding:clamp(16px,3vw,36px);background:#0a1120;color:#eaf0fb}
+main{max-width:1100px;margin:auto}h1{margin:8px 0 0}p,small{color:#b7c7dc}
+a{color:#9fc4ff}header,.toolbar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.panel{margin:16px 0;padding:22px;border:1px solid #344763;background:#19263c;border-radius:16px}
+label{display:block;margin:14px 0}label input,label select{display:block;margin:6px 0;width:100%;max-width:470px;box-sizing:border-box}
+input,select,button{font:inherit;padding:10px 12px;border:1px solid #486389;border-radius:8px;background:#263954;color:#fff}
+button{cursor:pointer;background:#2466dc}button.secondary{background:#29384d}button:disabled{opacity:.5;cursor:default}
+.hidden{display:none!important}#status{min-height:27px;padding:10px 0}#status.error{color:#ffb3a9}
+table{border-collapse:collapse;width:100%;font-size:14px}td,th{text-align:left;border-bottom:1px solid #38495f;padding:12px 6px;word-break:break-word}
+.tablewrap{overflow-x:auto}
+@media(max-width:700px){.tablewrap{white-space:nowrap}}
+</style>
+</head><body><main>
+<header><div><small>INNOVA SPACE EDUCATION</small><h1>Centro de seguridad · Innova Server</h1></div><a href="admin.html">Volver a CEO</a></header>
+<p>Solicitudes y aprobaciones para el agente Dell. Las acciones requieren políticas locales y una autorización válida, no shell libre.</p>
+<div id="status" role="status" aria-live="polite">Comprobando credenciales…</div>
+<div id="private" class="hidden">
+<section class="panel"><h2>Microsoft Authenticator</h2><p>Para aprobar, introduce un código nuevo de la cuenta Innova CEO en Microsoft Authenticator (tipo «Otra cuenta»).</p>
+<div id="enrollment" class="hidden">
+  <img id="qr" width="190" height="190" alt="Código QR privado para registrar factor MFA">
+  <p>Escanea este QR con Microsoft Authenticator. No compartas el QR ni el secreto.</p>
+</div>
+<label>Código de seis dígitos <input id="otp" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}"></label>
+<button id="enroll" class="secondary">Vincular Microsoft Authenticator</button>
+<button id="verify-enrollment" class="secondary hidden">Confirmar nueva cuenta</button>
+</section>
+<section class="panel"><h2>Crear solicitud</h2>
+<label>Tipo de operación<select id="operation">
+<option value="docker_operacion">Docker</option>
+<option value="systemd_operacion">Debian / systemd</option>
+<option value="desplegar_servicio">Despliegue previamente autorizado</option>
+</select></label>
+<label>Contenedor o servicio<input id="target" placeholder="intranet-portal" maxlength="90"></label>
+<label>Acción<select id="verb"><option value="restart">Reiniciar</option><option value="start">Iniciar</option><option value="stop">Detener</option></select></label>
+<label>Proyecto (solo para despliegues)<input id="project" placeholder="intranet" maxlength="90"></label>
+<button id="request">Crear solicitud</button>
+</section>
+<section class="panel"><div class="toolbar"><h2>Solicitudes recientes</h2><button id="refresh" class="secondary">Actualizar</button></div>
+<div class="tablewrap"><table><thead><tr><th>Fecha</th><th>Solicitud</th><th>Estado</th><th>Aprobación</th></tr></thead><tbody id="rows"></tbody></table></div>
+</section></div></main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js"></script>
+<script src="admin-config.js"></script>
+<script src="assets/admin-enterprise/admin-supabase-singleton.js"></script>
+<script src="assets/admin-enterprise/innova-server-security.js"></script>
+</body></html>
