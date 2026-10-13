@@ -51,3 +51,21 @@ end;
 $$;
 revoke all on function public.innova_server_claim_next() from public, anon, authenticated;
 grant execute on function public.innova_server_claim_next() to service_role;
+
+-- Every state transition is audited in the same database transaction.
+-- If the audit write fails, the state transition must fail too.
+create or replace function public.innova_server_audit_transition()
+returns trigger language plpgsql security definer set search_path = ''
+as $$
+begin
+  insert into public.innova_server_audit (request_id,event,actor_id)
+  values (new.id, new.status,
+    case when new.status in ('approved','rejected') then new.approved_by else new.requester_id end);
+  return new;
+end;
+$$;
+revoke all on function public.innova_server_audit_transition() from public, anon, authenticated;
+drop trigger if exists trg_innova_server_audit_transition on public.innova_server_requests;
+create trigger trg_innova_server_audit_transition
+after insert or update of status on public.innova_server_requests
+for each row execute function public.innova_server_audit_transition();
