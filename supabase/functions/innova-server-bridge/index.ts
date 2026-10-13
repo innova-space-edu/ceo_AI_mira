@@ -70,10 +70,6 @@ function freshTotp(claims: Record<string, unknown>) {
     return e.method === "totp" && Number.isFinite(age) && age >= -30 && age <= 120;
   });
 }
-async function audit(id: string | null, event: string, userId: string | null) {
-  const { error } = await db.from("innova_server_audit").insert({ request_id: id, event, actor_id: userId });
-  if (error) throw new Error("audit_unavailable");
-}
 Deno.serve(async (req: Request) => {
   const origin = req.headers.get("origin") || "";
   if (origin && !ALLOWED_ORIGINS.has(origin)) return response({ error: "origin_denied" }, 403);
@@ -108,7 +104,6 @@ Deno.serve(async (req: Request) => {
         .insert({ source: isWorker ? "mcp" : "ceo", operation: op, requester_id: admin?.id || null })
         .select("id,status,expires_at").single();
       if (error) throw error;
-      await audit(created.id, "requested", admin?.id || null);
       return response({ request: created }, 201, origin);
     }
     if ((kind === "approve" || kind === "reject") && admin) {
@@ -127,14 +122,12 @@ Deno.serve(async (req: Request) => {
         .select("id,status").maybeSingle();
       if (error) throw error;
       if (!changed) return response({ error: "request_expired_or_changed" }, 409, origin);
-      await audit(id, kind, admin.id);
       return response({ request: changed }, 200, origin);
     }
     if (kind === "poll" && isWorker) {
       const { data: rows, error } = await db.rpc("innova_server_claim_next");
       if (error) throw error;
       const item = rows?.[0] || null;
-      if (item) await audit(item.id, "claimed", null);
       return response({ request: item ? { id: item.id, operation: item.operation,
         approved_by: item.approved_by, approved_at: item.approved_at, expires_at: item.expires_at } : null }, 200, origin);
     }
@@ -148,7 +141,6 @@ Deno.serve(async (req: Request) => {
         .eq("id", id).eq("status", "claimed").select("id,status").maybeSingle();
       if (error) throw error;
       if (!changed) return response({ error: "already_processed" }, 409, origin);
-      await audit(id, data.ok ? "completed" : "failed", null);
       return response({ request: changed }, 200, origin);
     }
     return response({ error: "invalid_kind" }, 400, origin);
