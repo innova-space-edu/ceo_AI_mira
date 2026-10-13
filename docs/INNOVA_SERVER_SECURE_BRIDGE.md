@@ -9,3 +9,6 @@ Se conserva Innova Admin Agent V11.4, la intranet y el MCP actual. No se retiran
 La aprobación requiere perfil superadmin activo, JWT validado por Supabase y código TOTP nuevo: aal2 más AMR totp de menos de dos minutos. La solicitud expira, se reclama de forma atómica y no se repite automáticamente.
 
 La ejecución del Dell deberá validar por segunda vez la operación contra policy.json, comprobar ID único, caducidad y aprobación, y auditar su resultado. No entregar docker.sock, shell root ni claves al navegador o al modelo.
+
+## Bloqueo actual de Supabase CEO
+El conector Supabase enlazado solo enumera Edu-AI y sello-tecnologico. El proyecto CEO configurado en admin-config.js (alogqktilzgylzomzwem) no pertenece a la conexión disponible. Antes de aplicar SQL o desplegar la Edge Function, conectar en ChatGPT la organización/cuenta Supabase que administra CEO y comprobar el esquema company_users.
