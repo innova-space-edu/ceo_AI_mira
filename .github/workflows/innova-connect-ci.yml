@@ -5,6 +5,14 @@ on:
     branches: [main]
     paths:
       - "backend/innova-connect.js"
+      - "backend/innova-server-bridge.js"
+      - "backend/tests/innova-server-bridge.test.js"
+      - "backend/cloudflare-access.js"
+      - "backend/cloudflare-portal.html"
+      - "backend/cloudflare-portal.js"
+      - "backend/tests/cloudflare-access.test.js"
+      - "integracion-dell/**"
+      - "supabase/migrations/20261013_innova_server_approvals.sql"
       - "backend/server.js"
       - "backend/tests/innova-connect.test.js"
       - "integrations/innova-connect/**"
@@ -26,5 +34,10 @@ jobs:
         run: |
           node --check backend/server.js
           node --check backend/innova-connect.js
+          node --check backend/innova-server-bridge.js
+          node --check backend/cloudflare-access.js
+          node --check backend/cloudflare-portal.js
+          node --check integracion-dell/ceo-bridge-client.mjs
+          node --check integracion-dell/mcp-skills.mjs
           node --check integrations/innova-connect/ceo-client.mjs
-          node --test backend/tests/innova-connect.test.js
+          node --test backend/tests/innova-connect.test.js backend/tests/cloudflare-access.test.js backend/tests/innova-server-bridge.test.js integracion-dell/mcp-skills.test.mjs

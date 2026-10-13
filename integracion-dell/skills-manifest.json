@@ -1,0 +1,129 @@
+{
+  "version": "12.0-draft",
+  "kind": "innova-server-dell-skills",
+  "identity": "Cloudflare Access JWT firmado + allowlist estricta de correos + política Dell",
+  "permission_model": "ChatGPT always asks; signed Cloudflare Access identity must approve high-risk mutations per action; Dell enforces local allowlists and independent session authentication",
+  "integration": "Skills describe workflows; wiring into the live MCP requires explicit server installation after authentication.",
+  "skills": [
+    {
+      "id": "diagnostico-servidor",
+      "name": "Diagnóstico Debian",
+      "description": "Estado de CPU, memoria, discos y servicios mediante consultas permitidas; sin shell root.",
+      "tools": [
+        "estado_servidor",
+        "admin_consultar"
+      ],
+      "approval": "chatgpt"
+    },
+    {
+      "id": "gestion-documental",
+      "name": "Documentos y archivos",
+      "description": "Listar, leer, clasificar y exportar archivos autorizados; validar rutas y hashes.",
+      "tools": [
+        "listar_archivos_trabajo",
+        "leer_archivo_trabajo",
+        "escribir_archivo_trabajo"
+      ],
+      "approval": "ceo_on_write"
+    },
+    {
+      "id": "desarrollo-software",
+      "name": "Desarrollo seguro",
+      "description": "Editar código en workspace, ejecutar pruebas y proponer un único PR por cambio.",
+      "tools": [
+        "ejecutar_comando_aislado",
+        "escribir_archivo_trabajo"
+      ],
+      "approval": "ceo_on_write"
+    },
+    {
+      "id": "ejecucion-aislada",
+      "name": "Ejecución aislada",
+      "description": "Ejecutar node/npm/python/git sin secretos ni acceso a Docker o al host.",
+      "tools": [
+        "ejecutar_comando_aislado"
+      ],
+      "approval": "ceo"
+    },
+    {
+      "id": "despliegue-aplicaciones",
+      "name": "Despliegues controlados",
+      "description": "Prevalidar Compose, comprobar hash y desplegar únicamente servicios permitidos.",
+      "tools": [
+        "admin_preparar_operacion",
+        "admin_confirmar_operacion"
+      ],
+      "approval": "ceo"
+    },
+    {
+      "id": "administracion-docker",
+      "name": "Administración Docker",
+      "description": "Estado, logs, reinicio de contenedores de la lista aprobada.",
+      "tools": [
+        "admin_consultar",
+        "admin_preparar_operacion",
+        "admin_confirmar_operacion"
+      ],
+      "approval": "ceo"
+    },
+    {
+      "id": "administracion-systemd",
+      "name": "Administración systemd",
+      "description": "Consultar y controlar únicamente unidades declaradas en política del agente.",
+      "tools": [
+        "admin_consultar",
+        "admin_preparar_operacion",
+        "admin_confirmar_operacion"
+      ],
+      "approval": "ceo"
+    },
+    {
+      "id": "bases-de-datos",
+      "name": "Tratamiento de datos",
+      "description": "Consultar tablas asignadas, planificar migraciones, verificar respaldo y controlar accesos.",
+      "tools": [
+        "admin_consultar",
+        "admin_preparar_operacion"
+      ],
+      "approval": "ceo_on_write"
+    },
+    {
+      "id": "respaldo-recuperacion",
+      "name": "Respaldo y recuperación",
+      "description": "Verificar integridad, retención y restauración con pruebas antes de afectar datos.",
+      "tools": [
+        "admin_preparar_operacion",
+        "admin_confirmar_operacion"
+      ],
+      "approval": "ceo"
+    },
+    {
+      "id": "seguridad-permisos",
+      "name": "Seguridad y permisos",
+      "description": "Auditar accesos, secretos, configuración Tailscale y política de mínimo privilegio.",
+      "tools": [
+        "seguridad_estado",
+        "admin_consultar"
+      ],
+      "approval": "ceo_on_change"
+    },
+    {
+      "id": "integracion-cloud",
+      "name": "Integración nube",
+      "description": "Planificar sincronización de GitHub, Supabase, Vercel y Cloudflare sin duplicar secretos.",
+      "tools": [
+        "admin_consultar"
+      ],
+      "approval": "ceo_on_change"
+    },
+    {
+      "id": "observabilidad",
+      "name": "Observabilidad e incidentes",
+      "description": "Examinar logs, tasas de error, recursos, alertas y recomendar acciones con reversión.",
+      "tools": [
+        "admin_consultar"
+      ],
+      "approval": "chatgpt"
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="es">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<title>Innova Server · Aprobaciones Cloudflare Access</title>
+<style>
+:root{font:16px/1.5 system-ui,sans-serif;color-scheme:dark;background:#0b1220;color:#e7edf6}
+*{box-sizing:border-box}body{margin:0}header{border-bottom:1px solid #30425b;background:#132039;padding:20px clamp(16px,4vw,60px)}
+h1{font-size:clamp(22px,4vw,32px);margin:0}h2{font-size:19px}p{color:#b7c8dd}
+main{max-width:1040px;margin:auto;padding:24px 18px}section,article{border:1px solid #354761;background:#16253c;border-radius:12px;margin-bottom:16px;padding:18px}
+article{background:#101b2e}.details{overflow-wrap:anywhere;color:#b9cade;font-size:13px}
+.note{border-left:3px solid #6ba6f7;padding-left:12px}
+strong{color:#fff}button{background:#2778e8;border:0;border-radius:8px;color:#fff;padding:10px 15px;font:inherit;cursor:pointer;margin-right:9px}
+button.deny{background:#6c3645}button:disabled{opacity:.5;cursor:not-allowed}
+.actions{margin-top:14px}.error{color:#ffb1af}.success{color:#b2f2c6}
+</style>
+</head><body>
+<header><h1>INNOVA SERVER · Autorizaciones</h1>
+<p>Ingreso protegido por Cloudflare Access y código enviado a tu correo autorizado</p></header>
+<main><section><h2>Solicitudes del servidor Dell</h2>
+<p class="note">Cada solicitud contiene una acción, un destino y un hash SHA-256. Verifica que corresponda a lo que pediste en ChatGPT. Las aprobaciones son individuales, no reutilizables y vencen en 10 minutos.</p>
+<button id="refresh" type="button">Actualizar solicitudes</button>
+<p id="status" aria-live="polite">Consultando...</p></section><div id="requests"></div></main>
+<script src="/api/innova-server/v1/portal.js"></script>
+</body></html>
