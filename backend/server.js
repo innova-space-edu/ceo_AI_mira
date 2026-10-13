@@ -1421,6 +1421,15 @@ app.post("/api/tts", async (req, res) => {
   }
 });
 
+// Autorizaciones CEO para Innova Server Dell; solo habilitadas si existen claves privadas.
+require("./innova-server-bridge").registerInnovaServerBridge(app, {
+  verifyCompanyUser,
+  fetchFn,
+  supabaseUrl: COMPANY_SUPABASE_URL,
+  serviceRoleKey: COMPANY_SUPABASE_SERVICE_ROLE_KEY,
+  bridgeKey: process.env.INNOVA_SERVER_BRIDGE_KEY || ""
+});
+
 // API Innova Connect V1: usa JWT del usuario y políticas RLS, nunca service_role.
 require("./innova-connect").registerInnovaConnect(app, {
   verifyCompanyUser,
