@@ -17,7 +17,7 @@ function response(data: unknown, status = 200, origin = "") {
     headers["access-control-allow-methods"] = "POST,OPTIONS";
     headers["access-control-allow-headers"] = "authorization,apikey,content-type,x-innova-worker-token";
   }
-  return new Response(JSON.stringify(data), { status, headers });
+  return new Response(status === 204 ? null : JSON.stringify(data), { status, headers });
 }
 function safeEqual(a: string, b: string) {
   const x = new TextEncoder().encode(a), y = new TextEncoder().encode(b);
