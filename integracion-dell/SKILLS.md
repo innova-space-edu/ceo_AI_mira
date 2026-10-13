@@ -1,6 +1,6 @@
 # Skills operativas de Innova Server Dell
 
-Esta guía complementa skills-manifest.json. Ninguna skill concede privilegios por sí misma. La autenticación de ChatGPT se establece en "Preguntar siempre"; el acceso administrativo lo autoriza CEO con AAL2 y el Dell aplica sus permisos locales.
+Esta guía complementa skills-manifest.json. Ninguna skill concede privilegios por sí misma. La autenticación de ChatGPT se establece en "Preguntar siempre"; el acceso administrativo se aprueba desde una página detrás de Cloudflare Access, que verifica criptográficamente la identidad y exige correo autorizado y el Dell aplica sus permisos locales.
 
 ## 1. Diagnóstico de servidor
 Verificar conectividad MCP y estado autenticado; consultar versiones, recursos y servicios sin ejecutar comandos arbitrarios. Si no existe el permiso para leer el anfitrión, informar la limitación y no inferir estados desde PostgreSQL.
@@ -41,7 +41,7 @@ Correlacionar métricas/logs/salud del servicio, clasificar impactos y proponer 
 ## Condición general de ejecución
 1. ChatGPT solicita permiso.
 2. El Dell valida capacidad y destino permitidos.
-3. El Dell calcula el hash SHA-256 del plan canónico y lo envía a CEO.
-4. Un superadmin activo, autenticado con AAL2, revisa y aprueba el plan.
+3. El Dell calcula el hash SHA-256 del plan canónico y lo envía al backend de aprobaciones de CEO.
+4. Un superadmin activo, autenticado mediante Cloudflare Access, revisa y aprueba el plan.
 5. El Dell verifica que la respuesta corresponde al hash original, consume el permiso una vez y comprueba nuevamente política local.
 6. Ejecuta solo la operación original y registra resultado. Ante cualquier divergencia: **denegar**.
