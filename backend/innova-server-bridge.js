@@ -1,8 +1,10 @@
 "use strict";
 const crypto = require("node:crypto");
+const path = require("node:path");
+const { createCloudflareVerifier } = require("./cloudflare-access");
 
 // Puente CEO -> Dell. Nunca recibe claves TOTP ni ejecuta comandos.
-// Dell solicita con clave máquina; CEO autoriza con JWT Supabase AAL2;
+// Dell solicita con clave máquina; Cloudflare Access firma la identidad del aprobador;
 // Dell consume autorización única y ejecuta SOLO según su política local.
 const ACTIONS = new Set([
   "workspace.write", "workspace.delete", "sandbox.execute",
@@ -25,16 +27,6 @@ function bearer(req) {
   const match = /^Bearer\s+([^\s]+)$/i.exec(String(value));
   return match ? match[1] : "";
 }
-function hasVerifiedAal2(token, userId) {
-  try {
-    const parts = token.split(".");
-    if (parts.length !== 3) return false;
-    const data = JSON.parse(Buffer.from(parts[1], "base64url").toString("utf8"));
-    // JWT está ya verificado previamente en Supabase Auth /auth/v1/user.
-    return data.aal === "aal2" && data.sub === userId &&
-      Number.isFinite(data.exp) && data.exp > Math.floor(Date.now() / 1000);
-  } catch { return false; }
-}
 function validateOperation(body) {
   if (!body || typeof body !== "object" || Array.isArray(body)) return null;
   if (!ACTIONS.has(body.action) || typeof body.target !== "string" ||
@@ -50,12 +42,21 @@ function validateOperation(body) {
 }
 
 function registerInnovaServerBridge(app, deps) {
-  const { verifyCompanyUser, fetchFn, supabaseUrl, serviceRoleKey, bridgeKey } = deps;
+  const { fetchFn, supabaseUrl, serviceRoleKey, bridgeKey, cloudflareTeamDomain,
+    cloudflareAudience, cloudflareEmails, portalOrigin } = deps;
+  const verifier = deps.verifyCloudflareAccess
+    ? { enabled: true, verify: deps.verifyCloudflareAccess }
+    : createCloudflareVerifier({
+        teamDomain: cloudflareTeamDomain, audience: cloudflareAudience,
+        emails: cloudflareEmails, fetchFn
+      });
+  const expectedOrigin = String(portalOrigin || "").replace(/\/$/, "");
+  const portalReady = verifier.enabled && /^https:\/\/[a-z0-9.-]+$/i.test(expectedOrigin);
   const base = String(supabaseUrl || "").replace(/\/$/, "");
   if (!base.startsWith("https://")) throw new Error("Supabase requiere HTTPS");
   const prefix = "/api/innova-server/v1";
   const configured = () => typeof bridgeKey === "string" && bridgeKey.length >= 32 &&
-      typeof serviceRoleKey === "string" && serviceRoleKey.length > 20;
+      typeof serviceRoleKey === "string" && serviceRoleKey.length > 20 && portalReady;
 
   app.use(prefix, (_req, res, next) => {
     res.setHeader("Cache-Control", "no-store");
@@ -74,15 +75,32 @@ function registerInnovaServerBridge(app, deps) {
     }
     return true;
   }
-  async function ceo(req, res) {
+  async function access(req, res) {
     if (!ready(res)) return null;
-    const auth = await verifyCompanyUser(req, ["superadmin"]);
-    if (!auth.ok) { error(res, auth.status || 403, auth.error || "No autorizado"); return null; }
-    if (!hasVerifiedAal2(auth.token, auth.user.id)) {
-      error(res, 403, "Se requiere verificación MFA AAL2 en Innova CEO"); return null;
+    try {
+      return await verifier.verify(req.headers["cf-access-jwt-assertion"]);
+    } catch {
+      error(res, 403, "Se requiere identidad Cloudflare Access válida y autorizada");
+      return null;
     }
-    return auth;
   }
+  function sameOrigin(req, res) {
+    if (req.headers.origin !== expectedOrigin) {
+      error(res, 403, "Origen del portal no autorizado");
+      return false;
+    }
+    return true;
+  }
+  // El portal funciona solo en la aplicación Cloudflare Access configurada.
+  // No se sirve desde GitHub Pages ni comparte sesiones Supabase.
+  app.get(prefix + "/portal", (req, res) => handle(res, async () => {
+    if (!await access(req, res)) return;
+    res.sendFile(path.join(__dirname, "cloudflare-portal.html"));
+  }));
+  app.get(prefix + "/portal.js", (req, res) => handle(res, async () => {
+    if (!await access(req, res)) return;
+    res.type("application/javascript").sendFile(path.join(__dirname, "cloudflare-portal.js"));
+  }));
   async function db(method, params, body) {
     const url = new URL(base + "/rest/v1/innova_server_approvals");
     for (const [key, value] of Object.entries(params || {})) url.searchParams.set(key, value);
@@ -123,9 +141,9 @@ function registerInnovaServerBridge(app, deps) {
     res.status(201).json({ request: rows[0] });
   }));
   app.get(prefix + "/requests", (req, res) => handle(res, async () => {
-    if (!await ceo(req, res)) return;
+    if (!await access(req, res)) return;
     const rows = await db("GET", {
-      select: "id,action,target,summary,payload_sha256,status,requested_at,expires_at,approved_at,approved_by,consumed_at",
+      select: "id,action,target,summary,payload_sha256,status,requested_at,expires_at,approved_at,approved_email,consumed_at",
       order: "requested_at.desc", limit: "50"
     });
     res.json({ requests: rows });
@@ -142,8 +160,8 @@ function registerInnovaServerBridge(app, deps) {
     res.json({ request: rows[0] });
   }));
   app.post(prefix + "/requests/:id/decision", (req, res) => handle(res, async () => {
-    const auth = await ceo(req, res);
-    if (!auth) return;
+    const auth = await access(req, res);
+    if (!auth || !sameOrigin(req, res)) return;
     if (!UUID.test(req.params.id) || !["approve", "reject"].includes(req.body?.decision) ||
         !SHA.test(req.body?.payload_sha256 || ""))
       return error(res, 400, "Decisión inválida");
@@ -153,8 +171,8 @@ function registerInnovaServerBridge(app, deps) {
       id: "eq." + req.params.id, status: "eq.pending",
       expires_at: "gt." + now,
       payload_sha256: "eq." + req.body.payload_sha256,
-      select: "id,status,approved_at,approved_by"
-    }, { status, approved_by: auth.user.id, approved_at: now });
+      select: "id,status,approved_at,approved_email"
+    }, { status, approved_email: auth.email, approved_at: now });
     if (!rows[0]) return error(res, 409, "Solicitud vencida, modificada o ya resuelta");
     res.json({ request: rows[0] });
   }));
@@ -172,4 +190,4 @@ function registerInnovaServerBridge(app, deps) {
     res.json({ authorized: true, request: rows[0] });
   }));
 }
-module.exports = { registerInnovaServerBridge, safeEqual, hasVerifiedAal2, validateOperation };
+module.exports = { registerInnovaServerBridge, safeEqual, validateOperation };
