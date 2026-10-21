@@ -22,7 +22,7 @@ document.addEventListener("DOMContentLoaded", () => {
     legalWrap.className = "footer-legal";
 
     legalWrap.innerHTML = `
-        <details class="legal-disclosure">
+        <details class="legal-disclosure" id="condiciones-servicios">
             <summary class="legal-toggle-btn">
                 <i class="ri-file-list-3-line"></i>
                 Condiciones de trabajo y aceptación de proyectos
@@ -166,6 +166,12 @@ document.addEventListener("DOMContentLoaded", () => {
             requestAnimationFrame(() => { panel.scrollTop = 0; });
         }
     });
+    // El enlace de las cotizaciones abre directamente las condiciones públicas.
+    const revealConditions = () => {
+        if (window.location.hash === "#condiciones-servicios" && disclosure) disclosure.open = true;
+    };
+    window.addEventListener("hashchange", revealConditions);
+    revealConditions();
 });
 
 // Categoría "Aplicaciones web" dentro del portafolio.
