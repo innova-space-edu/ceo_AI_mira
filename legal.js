@@ -156,19 +156,61 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const disclosure = legalWrap.querySelector(".legal-disclosure");
     const panel = legalWrap.querySelector(".legal-panel");
+    const summary = disclosure?.querySelector(".legal-toggle-btn");
+    let placeholder = null;
+
+    // No mantener la ventana modal dentro del pie de página. El footer y otros
+    // contenedores crean contextos de apilamiento y dejan la ventana detrás de
+    // secciones, especialmente al entrar desde un enlace #condiciones-servicios.
+    const showLegalModal = () => {
+        if (!disclosure || !panel) return;
+        if (!placeholder) {
+            placeholder = document.createComment("Ubicación original de condiciones de servicio");
+            disclosure.before(placeholder);
+        }
+        if (disclosure.parentElement !== document.body) document.body.appendChild(disclosure);
+        disclosure.setAttribute("role", "dialog");
+        disclosure.setAttribute("aria-modal", "true");
+        disclosure.setAttribute("aria-label", "Términos y condiciones del servicio");
+        summary?.setAttribute("aria-label", "Cerrar términos y condiciones del servicio");
+        document.body.classList.add("legal-modal-open");
+        panel.scrollTop = 0;
+        requestAnimationFrame(() => { if (disclosure.open) panel.scrollTop = 0; });
+    };
+
+    const hideLegalModal = () => {
+        document.body.classList.remove("legal-modal-open");
+        disclosure?.removeAttribute("role");
+        disclosure?.removeAttribute("aria-modal");
+        disclosure?.removeAttribute("aria-label");
+        summary?.removeAttribute("aria-label");
+        if (placeholder?.parentNode) placeholder.replaceWith(disclosure);
+        placeholder = null;
+    };
+
     disclosure?.addEventListener("toggle", () => {
-        const isOpen = disclosure.open;
-        document.body.classList.toggle("legal-modal-open", isOpen);
-        if (isOpen && panel) {
-            // Cada apertura comienza desde el encabezado; evita que el panel
-            // reaparezca visualmente "cortado" por conservar un scroll anterior.
-            panel.scrollTop = 0;
-            requestAnimationFrame(() => { panel.scrollTop = 0; });
+        if (disclosure.open) showLegalModal();
+        else hideLegalModal();
+    });
+
+    // El fondo y la tecla Escape cierran la ventana, sin bloquear el scroll
+    // del documento al finalizar.
+    disclosure?.addEventListener("click", (event) => {
+        if (disclosure.open && event.target === disclosure) disclosure.open = false;
+    });
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && disclosure?.open) {
+            event.preventDefault();
+            disclosure.open = false;
+            summary?.focus({ preventScroll: true });
         }
     });
-    // El enlace de las cotizaciones abre directamente las condiciones públicas.
+
     const revealConditions = () => {
-        if (window.location.hash === "#condiciones-servicios" && disclosure) disclosure.open = true;
+        if (window.location.hash === "#condiciones-servicios" && disclosure) {
+            if (disclosure.open) showLegalModal();
+            else disclosure.open = true;
+        }
     };
     window.addEventListener("hashchange", revealConditions);
     revealConditions();
