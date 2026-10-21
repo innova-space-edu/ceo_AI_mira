@@ -10,6 +10,20 @@
     padding-top: 14px;
 }
 
+/* El modal abierto se traslada directamente a <body>, fuera del footer.
+   Así cubre TODO el viewport sin quedar debajo de secciones o navbar. */
+body > .legal-disclosure[open] {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 12000;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    pointer-events: auto;
+}
+
 .legal-disclosure summary {
     list-style: none;
 }
@@ -169,6 +183,16 @@ body.legal-modal-open #mira-widget {
     color: #ffffff;
 }
 
+/* En modo modal, el botón de cierre permanece visible sobre la ventana. */
+body > .legal-disclosure[open] > .legal-toggle-btn {
+    font-size: 0;
+}
+body > .legal-disclosure[open] > .legal-toggle-btn i,
+body > .legal-disclosure[open] > .legal-toggle-btn::after {
+    font-size: 0.86rem;
+}
+
+
 .legal-disclosure[open] > .legal-panel {
     position: fixed;
     left: 50%;
@@ -179,6 +203,9 @@ body.legal-modal-open #mira-widget {
     max-height: 82dvh;
     margin: 0;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+    min-height: 0;
     padding: clamp(18px, 3vw, 34px);
     transform: translate(-50%, -50%);
     border-radius: 26px;
