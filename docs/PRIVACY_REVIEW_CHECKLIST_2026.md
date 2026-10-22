@@ -19,6 +19,15 @@ Documento de seguimiento público; no es certificado de cumplimiento, contrato f
 - En ambos casos existen matrices internas por tabla, categoría, proveedor, conservación y medidas con validaciones abiertas. No se publican hallazgos técnicos explotables ni datos de titulares.
 - Esthefano Gonzalo Morales Campaña ha sido propuesto como delegado responsable interno; su aceptación y la ratificación societaria siguen pendientes.
 
+## Identidad corporativa y líneas de trabajo — contraste documental 22-10-2026
+
+- [x] Se identificó el perfil empresarial declarado y los cargos de **Esthefano Gonzalo Morales Campaña (fundador y CEO)** e **Iván Eduardo Morales Sandoval (administrador y representante legal informado)**. Fuente: [perfil corporativo público](../perfil-corporativo.html) y [ficha con trazabilidad](FICHA_CORPORATIVA_INNOVA_2026.md).
+- [x] Se separaron **servicios anunciados**, **proyectos con repositorios** y **líneas de I+D experimentales** (ScientificBrain, MaleCNS, visualización científica, SUU 3D); la existencia de un repositorio no acredita resultados científicos externos ni servicios contratados.
+- [x] Los PDF históricos de mayo de 2026 permanecen sin reescritura ni simulación de firmas y corresponden a identificación anterior de proveedor persona natural.
+- [ ] Obtener estatutos vigentes, poderes y certificado registral que acrediten oficialmente las facultades del representante legal.
+- [ ] Corroborar RUT, domicilio, giro y actividades económicas actuales ante SII.
+- [ ] Formalizar por firmas y documentación societaria la adopción de políticas, cargos o facultades que efectivamente requieran un acto interno.
+
 ## Acciones pendientes de verificación y cierre
 - [ ] Ratificación y firma del acta por autoridad competente y delegado.
 - [ ] Formalización de los DPA por institución y de los subencargos/transferencias internacionales que correspondan.

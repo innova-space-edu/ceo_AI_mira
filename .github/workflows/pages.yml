@@ -227,9 +227,9 @@ jobs:
           # Publicar en el único despliegue de Pages el centro legal y todos sus anexos web.
           cp legal-datos.html politica-datos.html acuerdo-tratamiento-datos.html protocolos-proteccion-datos.html continuidad-respaldos.html legal-datos.css _site/
           cp archivo-publico.html _site/
-          cp rat-eduai.html rat-sello.html acta-gobernanza-2026.html _site/
+          cp rat-eduai.html rat-sello.html acta-gobernanza-2026.html perfil-corporativo.html _site/
           mkdir -p _site/docs
-          cp docs/PLANTILLA_MATRIZ_CONSERVACION_2026.md docs/PLANTILLA_RESPALDOS_CONTINUIDAD_2026.md docs/PRIVACY_REVIEW_CHECKLIST_2026.md _site/docs/
+          cp docs/PLANTILLA_MATRIZ_CONSERVACION_2026.md docs/PLANTILLA_RESPALDOS_CONTINUIDAD_2026.md docs/PRIVACY_REVIEW_CHECKLIST_2026.md docs/FICHA_CORPORATIVA_INNOVA_2026.md _site/docs/
           cp CNAME _site/CNAME
           touch _site/.nojekyll
 
